@@ -30,11 +30,17 @@ The **PHOSPHOROS Dashboard** is a fully integrated, production-ready interface f
 
 ### Key Features
 
-✨ **6 Modular Panels:**
+✨ **12 Modular Panels:**
 - 🏠 **Home**: Live overview with real-time service status and statistics
 - 🔑 **Seed & Wallet**: BIP39 mnemonic import with multi-chain address generation
 - 📊 **Resonance & Spectro**: Real-time 5D resonance analysis with spectral signatures
 - 🔍 **Cluster Explorer**: Automatic cluster discovery and analysis
+- 🗺️ **Search Space Explorer**: Manual navigation through seed/address space with multiple view modes
+- 🕸️ **Network Topology Explorer**: Interactive network visualization with community detection
+- 🧬 **Infogenetic Database Browser**: Advanced querying, filtering, and spectral signature search
+- 🚨 **Anomaly Investigation**: Deep forensic analysis with timeline and related entity discovery
+- 🔬 **Forensic Workflows**: Guided step-by-step investigation processes (Sybil, Money Laundering, Profiling)
+- 🔒 **Stealth/Privacy**: Traffic mimicry and steganography controls
 - 📝 **System Log**: Filterable logs with severity levels
 - ⚙️ **Settings & Tasks**: Configuration and system reports
 
@@ -303,6 +309,11 @@ cargo doc --workspace --all-features --no-deps
 8. **Network Analysis**: Understand blockchain network topology and critical nodes
 9. **🆕 Real-Time Monitoring**: Live dashboard for continuous blockchain surveillance
 10. **🆕 Enterprise Reporting**: Automated report generation for compliance and analysis
+11. **🆕 Interactive Search Space Explorer**: Manually navigate and explore seed/address space
+12. **🆕 Network Topology Explorer**: Visual network investigation with community detection
+13. **🆕 Infogenetic Database Browser**: Advanced querying and filtering of spectral data
+14. **🆕 Anomaly Investigation Panel**: Deep-dive forensic analysis of detected anomalies
+15. **🆕 Guided Forensic Workflows**: Step-by-step investigation processes
 
 ## ⚠️ Security Notice
 

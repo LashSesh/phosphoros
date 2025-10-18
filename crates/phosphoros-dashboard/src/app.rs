@@ -103,6 +103,78 @@ impl PhosphorosApp {
                     .collect();
                 self.state.panels.cluster.clusters = clusters;
                 
+                // Update anomaly investigation panel
+                use crate::panels::{AnomalyInfo, AnomalyType, AnomalySeverity};
+                let anomalies: Vec<AnomalyInfo> = self.state.service_manager.data_pool.read()
+                    .anomalies.iter()
+                    .map(|a| {
+                        let severity = if a.score > 0.9 {
+                            AnomalySeverity::Critical
+                        } else if a.score > 0.7 {
+                            AnomalySeverity::High
+                        } else if a.score > 0.5 {
+                            AnomalySeverity::Medium
+                        } else {
+                            AnomalySeverity::Low
+                        };
+                        
+                        // TODO: Implement proper anomaly type detection based on reason/features
+                        // For now using Other as a placeholder until ML classification is implemented
+                        let anomaly_type = if a.reason.contains("Extreme") {
+                            AnomalyType::VolumeAnomaly
+                        } else {
+                            AnomalyType::Other
+                        };
+                        
+                        AnomalyInfo {
+                            id: a.id.to_string(),
+                            anomaly_type,
+                            severity,
+                            affected_entities: vec![a.entity_id.to_string()],
+                            detected_at: a.timestamp,
+                            score: a.score,
+                            description: a.reason.clone(),
+                        }
+                    })
+                    .collect();
+                self.state.panels.anomaly.anomalies = anomalies;
+                
+                // Update infogenetic browser with entities
+                use crate::panels::InfogeneticEntry;
+                // TODO: Make this limit configurable via panel settings
+                const MAX_DISPLAY_ENTRIES: usize = 100;
+                let entries: Vec<InfogeneticEntry> = self.state.service_manager.data_pool.read()
+                    .entities.values()
+                    .take(MAX_DISPLAY_ENTRIES)
+                    .map(|e| {
+                        // Extract spectral signature from features (ψ, ρ, ω)
+                        let (psi, rho, omega) = if e.features.len() >= 3 {
+                            (e.features[0], e.features[1], e.features[2])
+                        } else {
+                            (0.0, 0.0, 0.0)
+                        };
+                        
+                        // Calculate resonance using spectral signature invariant formula: D = ψ·ρ·ω
+                        let resonance = psi * rho * omega;
+                        
+                        // TODO: Extract actual chain type from entity metadata or connections
+                        let chain = "Unknown".to_string();
+                        
+                        InfogeneticEntry {
+                            id: e.id.to_string(),
+                            address: e.address.clone(),
+                            signature: (psi, rho, omega),
+                            resonance,
+                            cluster_id: None,
+                            chain,
+                            discovered_at: e.timestamp,
+                            metadata: std::collections::HashMap::new(),
+                        }
+                    })
+                    .collect();
+                self.state.panels.infogenetic.results = entries;
+                self.state.panels.infogenetic.total_results = self.state.service_manager.data_pool.read().entities.len();
+                
                 Task::none()
             }
             Message::System(_) => Task::none(),
@@ -176,6 +248,11 @@ impl PhosphorosApp {
             PanelId::SeedManagement => self.seed_view(),
             PanelId::Resonance => self.resonance_view(),
             PanelId::ClusterExplorer => self.cluster_view(),
+            PanelId::SearchSpaceExplorer => self.search_space_view(),
+            PanelId::NetworkExplorer => self.network_explorer_view(),
+            PanelId::InfogeneticBrowser => self.infogenetic_browser_view(),
+            PanelId::AnomalyInvestigation => self.anomaly_investigation_view(),
+            PanelId::ForensicWorkflows => self.forensic_workflows_view(),
             PanelId::Stealth => self.stealth_view(),
             PanelId::SystemLog => self.log_view(),
             PanelId::Settings => self.settings_view(),
@@ -622,6 +699,501 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
+    fn search_space_view(&self) -> Element<Message> {
+        let title = text(PanelId::SearchSpaceExplorer.name()).size(28);
+        
+        let state = &self.state.panels.search_space;
+        
+        // Navigation controls
+        let mode_buttons = row![
+            button(text("Manual")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetNavigationMode(crate::panels::NavigationMode::Manual)))),
+            horizontal_space().width(5),
+            button(text("Sequential")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetNavigationMode(crate::panels::NavigationMode::Sequential)))),
+            horizontal_space().width(5),
+            button(text("Random Walk")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetNavigationMode(crate::panels::NavigationMode::RandomWalk)))),
+            horizontal_space().width(5),
+            button(text("Directed")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetNavigationMode(crate::panels::NavigationMode::DirectedSearch)))),
+        ];
+        
+        let view_buttons = row![
+            button(text("Tree")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetViewMode(crate::panels::ViewMode::Tree)))),
+            horizontal_space().width(5),
+            button(text("Graph")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetViewMode(crate::panels::ViewMode::Graph)))),
+            horizontal_space().width(5),
+            button(text("List")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetViewMode(crate::panels::ViewMode::List)))),
+            horizontal_space().width(5),
+            button(text("5D Projection")).padding(8)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::SetViewMode(crate::panels::ViewMode::Projection5D)))),
+        ];
+        
+        // Current position display
+        let position_text = if state.current_position.is_empty() {
+            "Position: [Root]".to_string()
+        } else {
+            format!("Position: {:?}", state.current_position)
+        };
+        
+        // Navigation buttons
+        let nav_buttons = row![
+            button(text("◀ Back")).padding(10)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::StepBackward))),
+            horizontal_space().width(10),
+            button(text("Forward ▶")).padding(10)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::StepForward))),
+            horizontal_space().width(10),
+            button(text("🎯 Jump to High Resonance")).padding(10)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::JumpToHighResonance))),
+            horizontal_space().width(10),
+            button(text("Clear History")).padding(10)
+                .on_press(Message::Panel(PanelMessage::SearchSpace(SearchSpaceMessage::ClearHistory))),
+        ];
+        
+        // History display
+        let mut history_list = column![].spacing(5);
+        for (idx, pos) in state.history.iter().enumerate().rev().take(10) {
+            history_list = history_list.push(
+                text(format!("#{}: {} words, resonance: {:.4}", 
+                    idx + 1, 
+                    pos.words.join(" "),
+                    pos.resonance
+                )).size(12)
+            );
+        }
+        
+        // Visible nodes display
+        let mut nodes_list = column![].spacing(5);
+        for node in state.visible_nodes.iter().take(20) {
+            nodes_list = nodes_list.push(
+                crate::widgets::card(
+                    column![
+                        text(format!("Word: {}", node.word)).size(14),
+                        text(format!("Resonance: {:.4}", node.resonance)).size(12),
+                        text(format!("Distance: {:.2}", node.distance)).size(12),
+                    ]
+                )
+            );
+            nodes_list = nodes_list.push(vertical_space().height(5));
+        }
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            crate::widgets::card(
+                column![
+                    text("Navigation Mode").size(18),
+                    vertical_space().height(10),
+                    mode_buttons,
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("View Mode").size(18),
+                    vertical_space().height(10),
+                    view_buttons,
+                ]
+            ),
+            vertical_space().height(15),
+            text(position_text).size(16),
+            vertical_space().height(10),
+            nav_buttons,
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Exploration History (Last 10)").size(18),
+                    vertical_space().height(10),
+                    history_list,
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Visible Nodes").size(18),
+                    vertical_space().height(10),
+                    scrollable(nodes_list).height(300),
+                ]
+            ),
+        ];
+        
+        scrollable(content).into()
+    }
+
+    fn network_explorer_view(&self) -> Element<Message> {
+        let title = text(PanelId::NetworkExplorer.name()).size(28);
+        
+        let state = &self.state.panels.network;
+        
+        // Layout controls
+        let layout_buttons = row![
+            button(text("Force-Directed")).padding(8)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::SetLayoutMode(crate::panels::LayoutMode::ForceDirected)))),
+            horizontal_space().width(5),
+            button(text("Hierarchical")).padding(8)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::SetLayoutMode(crate::panels::LayoutMode::Hierarchical)))),
+            horizontal_space().width(5),
+            button(text("Circular")).padding(8)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::SetLayoutMode(crate::panels::LayoutMode::Circular)))),
+        ];
+        
+        // Analysis tools
+        let analysis_buttons = row![
+            button(text("Detect Communities")).padding(10)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::DetectCommunities))),
+            horizontal_space().width(10),
+            button(text("Highlight Critical Nodes")).padding(10)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::HighlightCriticalNodes))),
+            horizontal_space().width(10),
+            button(text("Export Network")).padding(10)
+                .on_press(Message::Panel(PanelMessage::NetworkExplorer(NetworkExplorerMessage::ExportNetwork))),
+        ];
+        
+        // Network info
+        let network_info = if let Some(ref network_id) = state.network_id {
+            format!("Loaded Network: {}", network_id)
+        } else {
+            "No network loaded".to_string()
+        };
+        
+        // Communities display
+        let mut communities_list = column![].spacing(5);
+        for community in state.communities.iter().take(10) {
+            communities_list = communities_list.push(
+                crate::widgets::card(
+                    column![
+                        text(format!("Community {}", community.id)).size(14),
+                        text(format!("Size: {} nodes", community.size)).size(12),
+                        text(format!("Density: {:.3}", community.density)).size(12),
+                        text(format!("Avg Resonance: {:.3}", community.avg_resonance)).size(12),
+                    ]
+                )
+            );
+            communities_list = communities_list.push(vertical_space().height(5));
+        }
+        
+        // Critical nodes display
+        let mut critical_nodes_list = column![].spacing(5);
+        for node in state.critical_nodes.iter().take(10) {
+            critical_nodes_list = critical_nodes_list.push(
+                crate::widgets::card(
+                    column![
+                        text(format!("Node: {}", node.label)).size(14),
+                        text(format!("Type: {}", node.node_type)).size(12),
+                        text(format!("Degree Centrality: {:.3}", node.degree_centrality)).size(12),
+                        text(format!("Betweenness: {:.3}", node.betweenness_centrality)).size(12),
+                    ]
+                )
+            );
+            critical_nodes_list = critical_nodes_list.push(vertical_space().height(5));
+        }
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            text(network_info).size(16),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Layout Mode").size(18),
+                    vertical_space().height(10),
+                    layout_buttons,
+                ]
+            ),
+            vertical_space().height(15),
+            analysis_buttons,
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Communities").size(18),
+                    vertical_space().height(10),
+                    scrollable(communities_list).height(200),
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Critical Nodes").size(18),
+                    vertical_space().height(10),
+                    scrollable(critical_nodes_list).height(200),
+                ]
+            ),
+        ];
+        
+        scrollable(content).into()
+    }
+
+    fn infogenetic_browser_view(&self) -> Element<Message> {
+        let title = text(PanelId::InfogeneticBrowser.name()).size(28);
+        
+        let state = &self.state.panels.infogenetic;
+        
+        // Search input
+        let search_input = text_input(
+            "Search addresses, signatures, clusters...",
+            &state.query,
+        )
+        .on_input(|s| Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::QueryChanged(s))))
+        .padding(12);
+        
+        let search_btn = button(text("🔍 Search")).padding(10)
+            .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::Search)));
+        
+        // Query type selector
+        let query_type_buttons = row![
+            button(text("Address")).padding(8)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SetQueryType(crate::panels::QueryType::Address)))),
+            horizontal_space().width(5),
+            button(text("Spectral Sig")).padding(8)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SetQueryType(crate::panels::QueryType::SpectralSignature)))),
+            horizontal_space().width(5),
+            button(text("Cluster")).padding(8)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SetQueryType(crate::panels::QueryType::Cluster)))),
+            horizontal_space().width(5),
+            button(text("Full Text")).padding(8)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SetQueryType(crate::panels::QueryType::FullText)))),
+        ];
+        
+        // Results display
+        let results_info = text(format!("Found {} results (showing page {} of {})", 
+            state.total_results,
+            state.page + 1,
+            (state.total_results + state.items_per_page - 1) / state.items_per_page
+        )).size(14);
+        
+        let mut results_list = column![].spacing(8);
+        for (idx, entry) in state.results.iter().enumerate() {
+            results_list = results_list.push(
+                crate::widgets::card(
+                    column![
+                        text(format!("Address: {}", entry.address)).size(14),
+                        text(format!("Chain: {}", entry.chain)).size(12),
+                        text(format!("Signature: (ψ={:.3}, ρ={:.3}, ω={:.3})", 
+                            entry.signature.0, entry.signature.1, entry.signature.2)).size(12),
+                        text(format!("Resonance: {:.4}", entry.resonance)).size(12),
+                        text(format!("Discovered: {}", entry.discovered_at.format("%Y-%m-%d %H:%M"))).size(11),
+                    ]
+                )
+            );
+        }
+        
+        // Pagination controls
+        let page_controls = row![
+            button(text("◀ Previous")).padding(10)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::GoToPage(state.page.saturating_sub(1))))),
+            horizontal_space().width(10),
+            text(format!("Page {}", state.page + 1)).size(14),
+            horizontal_space().width(10),
+            button(text("Next ▶")).padding(10)
+                .on_press(Message::Panel(PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::GoToPage(state.page + 1)))),
+        ];
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            row![
+                search_input,
+                horizontal_space().width(10),
+                search_btn,
+            ],
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Query Type").size(18),
+                    vertical_space().height(10),
+                    query_type_buttons,
+                ]
+            ),
+            vertical_space().height(15),
+            results_info,
+            vertical_space().height(10),
+            scrollable(results_list).height(400),
+            vertical_space().height(10),
+            page_controls,
+        ];
+        
+        scrollable(content).into()
+    }
+
+    fn anomaly_investigation_view(&self) -> Element<Message> {
+        let title = text(PanelId::AnomalyInvestigation.name()).size(28);
+        
+        let state = &self.state.panels.anomaly;
+        
+        // Anomalies list
+        let mut anomalies_list = column![].spacing(8);
+        for (idx, anomaly) in state.anomalies.iter().enumerate() {
+            let severity_icon = match anomaly.severity {
+                crate::panels::AnomalySeverity::Low => "🟢",
+                crate::panels::AnomalySeverity::Medium => "🟡",
+                crate::panels::AnomalySeverity::High => "🟠",
+                crate::panels::AnomalySeverity::Critical => "🔴",
+            };
+            
+            let type_text = match anomaly.anomaly_type {
+                crate::panels::AnomalyType::SybilAttack => "Sybil Attack",
+                crate::panels::AnomalyType::MoneyLaundering => "Money Laundering",
+                crate::panels::AnomalyType::VolumeAnomaly => "Volume Anomaly",
+                crate::panels::AnomalyType::TemporalAnomaly => "Temporal Anomaly",
+                crate::panels::AnomalyType::StructuralAnomaly => "Structural Anomaly",
+                crate::panels::AnomalyType::Other => "Other",
+            };
+            
+            anomalies_list = anomalies_list.push(
+                button(
+                    crate::widgets::card(
+                        column![
+                            text(format!("{} {} - Score: {:.2}", severity_icon, type_text, anomaly.score)).size(14),
+                            text(format!("Affected: {} entities", anomaly.affected_entities.len())).size(12),
+                            text(format!("{}", anomaly.description)).size(12),
+                            text(format!("Detected: {}", anomaly.detected_at.format("%Y-%m-%d %H:%M"))).size(11),
+                        ]
+                    )
+                )
+                .on_press(Message::Panel(PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::SelectAnomaly(Some(idx)))))
+                .padding(0)
+            );
+        }
+        
+        // Investigation tools
+        let investigation_tools = row![
+            button(text("Find Related Entities")).padding(10)
+                .on_press(Message::Panel(PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::FindRelatedEntities))),
+            horizontal_space().width(10),
+            button(text("Load Timeline")).padding(10)
+                .on_press(Message::Panel(PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::LoadTimeline))),
+            horizontal_space().width(10),
+            button(text("Find Similar Cases")).padding(10)
+                .on_press(Message::Panel(PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::FindSimilarCases))),
+        ];
+        
+        // Timeline display if selected
+        let mut timeline_display = column![].spacing(5);
+        if state.selected.is_some() {
+            for entry in state.timeline.iter().take(10) {
+                timeline_display = timeline_display.push(
+                    text(format!("{}: {}", 
+                        entry.timestamp.format("%H:%M:%S"),
+                        entry.event
+                    )).size(12)
+                );
+            }
+        }
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            crate::widgets::card(
+                column![
+                    text(format!("Detected Anomalies: {}", state.anomalies.len())).size(18),
+                    vertical_space().height(10),
+                    scrollable(anomalies_list).height(300),
+                ]
+            ),
+            vertical_space().height(15),
+            investigation_tools,
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Timeline").size(18),
+                    vertical_space().height(10),
+                    if state.selected.is_some() {
+                        scrollable(timeline_display).height(200)
+                    } else {
+                        scrollable(text("Select an anomaly to view timeline").size(12)).height(200)
+                    },
+                ]
+            ),
+        ];
+        
+        scrollable(content).into()
+    }
+
+    fn forensic_workflows_view(&self) -> Element<Message> {
+        let title = text(PanelId::ForensicWorkflows.name()).size(28);
+        
+        let state = &self.state.panels.forensic;
+        
+        // Available workflows
+        let mut workflows_list = column![].spacing(10);
+        for workflow in state.workflows.iter() {
+            workflows_list = workflows_list.push(
+                button(
+                    crate::widgets::card(
+                        column![
+                            text(&workflow.name).size(16),
+                            vertical_space().height(5),
+                            text(&workflow.description).size(12),
+                            text(format!("Steps: {} | Duration: {}", workflow.steps.len(), workflow.estimated_duration)).size(11),
+                        ]
+                    )
+                )
+                .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow(workflow.id.clone()))))
+                .padding(0)
+            );
+        }
+        
+        // Active workflow display
+        let active_workflow_display = if let Some(ref active) = state.active_workflow {
+            let mut steps_list = column![].spacing(5);
+            for (idx, step) in active.steps.iter().enumerate() {
+                let status_icon = if step.completed {
+                    "✅"
+                } else if idx == active.current_step {
+                    "▶"
+                } else {
+                    "⏳"
+                };
+                
+                steps_list = steps_list.push(
+                    text(format!("{} Step {}: {}", status_icon, step.number, step.title)).size(14)
+                );
+            }
+            
+            column![
+                text(format!("Active Workflow (Step {}/{})", active.current_step + 1, active.steps.len())).size(18),
+                vertical_space().height(10),
+                steps_list,
+                vertical_space().height(15),
+                row![
+                    button(text("◀ Previous")).padding(10)
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::PreviousStep))),
+                    horizontal_space().width(10),
+                    button(text("Complete Step ✓")).padding(10)
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::CompleteStep))),
+                    horizontal_space().width(10),
+                    button(text("Cancel")).padding(10)
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::CancelWorkflow))),
+                ],
+            ]
+        } else {
+            column![
+                text("No active workflow").size(16),
+            ]
+        };
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            crate::widgets::card(
+                column![
+                    text("Available Workflows").size(18),
+                    vertical_space().height(10),
+                    scrollable(workflows_list).height(250),
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(active_workflow_display),
+        ];
+        
+        scrollable(content).into()
+    }
+
     fn stat_card<'a>(&self, label: &'a str, value: &'a str) -> Element<'a, Message> {
         crate::widgets::card(
             column![
@@ -760,6 +1332,201 @@ impl PhosphorosApp {
                     self.add_log(LogLevel::Info, "Stealth", &format!("Task {} completed successfully", task_id));
                 } else {
                     self.add_log(LogLevel::Warning, "Stealth", &format!("Task {} failed", task_id));
+                }
+            }
+            // Search Space Explorer handlers
+            PanelMessage::SearchSpace(SearchSpaceMessage::SetNavigationMode(mode)) => {
+                self.state.panels.search_space.mode = mode;
+                self.add_log(LogLevel::Info, "SearchSpace", &format!("Navigation mode changed to {:?}", mode));
+            }
+            PanelMessage::SearchSpace(SearchSpaceMessage::SetViewMode(view_mode)) => {
+                self.state.panels.search_space.view_mode = view_mode;
+                self.add_log(LogLevel::Info, "SearchSpace", &format!("View mode changed to {:?}", view_mode));
+            }
+            PanelMessage::SearchSpace(SearchSpaceMessage::StepForward) => {
+                self.add_log(LogLevel::Info, "SearchSpace", "Stepping forward in search space");
+                
+                // TODO: Replace with actual BIP39 wordlist integration and real search space navigation
+                // This is demonstration data only - connect to cryptogenetik-core for production use
+                use crate::panels::SearchNode;
+                let sample_words = vec!["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse"];
+                let mut nodes = Vec::new();
+                
+                // BIP39 wordlist has 2048 words per word slot
+                const BIP39_WORDLIST_SIZE: usize = 2048;
+                
+                for (idx, word) in sample_words.iter().enumerate() {
+                    // Generate sample resonance values for demonstration
+                    // TODO: Calculate real resonance using HolisticMatrix engine
+                    let resonance = ((idx as f64 * 0.07) % 1.0).max(0.1);
+                    
+                    nodes.push(SearchNode {
+                        id: format!("node_{}", idx),
+                        word: word.to_string(),
+                        index: idx,
+                        resonance,
+                        distance: idx as f64 * 0.5,
+                        children_count: BIP39_WORDLIST_SIZE,
+                    });
+                }
+                self.state.panels.search_space.visible_nodes = nodes;
+            }
+            PanelMessage::SearchSpace(SearchSpaceMessage::StepBackward) => {
+                if !self.state.panels.search_space.history.is_empty() {
+                    self.state.panels.search_space.history.pop();
+                    self.add_log(LogLevel::Info, "SearchSpace", "Stepped backward");
+                }
+            }
+            PanelMessage::SearchSpace(SearchSpaceMessage::ClearHistory) => {
+                self.state.panels.search_space.history.clear();
+                self.add_log(LogLevel::Info, "SearchSpace", "History cleared");
+            }
+            PanelMessage::SearchSpace(SearchSpaceMessage::JumpToHighResonance) => {
+                self.add_log(LogLevel::Info, "SearchSpace", "Jumping to high resonance region");
+                
+                // TODO: Implement real high-resonance detection using ResonanceEngine
+                // For now, demonstrate with different sample data
+                use crate::panels::SearchPosition;
+                let high_resonance_words = vec!["quantum", "nebula", "zenith"];
+                let position = SearchPosition {
+                    indices: vec![1234, 567, 890],
+                    words: high_resonance_words.into_iter().map(String::from).collect(),
+                    resonance: 0.95,
+                    visited_at: chrono::Utc::now(),
+                };
+                self.state.panels.search_space.history.push(position);
+            }
+            // Network Explorer handlers
+            PanelMessage::NetworkExplorer(NetworkExplorerMessage::SetLayoutMode(layout)) => {
+                self.state.panels.network.layout_mode = layout;
+                self.add_log(LogLevel::Info, "NetworkExplorer", &format!("Layout mode changed to {:?}", layout));
+            }
+            PanelMessage::NetworkExplorer(NetworkExplorerMessage::DetectCommunities) => {
+                self.add_log(LogLevel::Info, "NetworkExplorer", "Detecting communities...");
+                
+                // TODO: Implement real community detection using Louvain or Label Propagation algorithms
+                // This is demonstration data - replace with actual network analysis from satellite engine
+                use crate::panels::CommunityInfo;
+                let communities = vec![
+                    CommunityInfo {
+                        id: "community_1".to_string(),
+                        size: 12,
+                        density: 0.73,
+                        avg_resonance: 0.68,
+                    },
+                    CommunityInfo {
+                        id: "community_2".to_string(),
+                        size: 8,
+                        density: 0.85,
+                        avg_resonance: 0.82,
+                    },
+                    CommunityInfo {
+                        id: "community_3".to_string(),
+                        size: 5,
+                        density: 0.92,
+                        avg_resonance: 0.71,
+                    },
+                ];
+                self.state.panels.network.communities = communities;
+            }
+            PanelMessage::NetworkExplorer(NetworkExplorerMessage::HighlightCriticalNodes) => {
+                self.add_log(LogLevel::Info, "NetworkExplorer", "Highlighting critical nodes...");
+                
+                // TODO: Implement real centrality calculations using petgraph algorithms
+                // Degree centrality: fraction of nodes connected to this node
+                // Betweenness centrality: fraction of shortest paths passing through this node
+                // This is demonstration data - replace with actual graph analysis
+                use crate::panels::NodeInfo;
+                let critical_nodes = vec![
+                    NodeInfo {
+                        id: "node_001".to_string(),
+                        label: "0xabcd...1234".to_string(),
+                        node_type: "Validator".to_string(),
+                        degree_centrality: 0.89,
+                        betweenness_centrality: 0.76,
+                        resonance: 0.84,
+                    },
+                    NodeInfo {
+                        id: "node_002".to_string(),
+                        label: "0x5678...9abc".to_string(),
+                        node_type: "Bridge".to_string(),
+                        degree_centrality: 0.72,
+                        betweenness_centrality: 0.91,
+                        resonance: 0.68,
+                    },
+                    NodeInfo {
+                        id: "node_003".to_string(),
+                        label: "0xdef0...5432".to_string(),
+                        node_type: "Hub".to_string(),
+                        degree_centrality: 0.95,
+                        betweenness_centrality: 0.64,
+                        resonance: 0.77,
+                    },
+                ];
+                self.state.panels.network.critical_nodes = critical_nodes;
+            }
+            PanelMessage::NetworkExplorer(NetworkExplorerMessage::ExportNetwork) => {
+                self.add_log(LogLevel::Info, "NetworkExplorer", "Exporting network data");
+                // TODO: Implement network export
+            }
+            // Infogenetic Browser handlers
+            PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::QueryChanged(query)) => {
+                self.state.panels.infogenetic.query = query;
+            }
+            PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SetQueryType(query_type)) => {
+                self.state.panels.infogenetic.query_type = query_type;
+                self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Query type changed to {:?}", query_type));
+            }
+            PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::Search) => {
+                self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Searching: {}", self.state.panels.infogenetic.query));
+                // TODO: Implement search logic
+            }
+            PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::GoToPage(page)) => {
+                self.state.panels.infogenetic.page = page;
+            }
+            PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::SelectEntry(entry)) => {
+                self.state.panels.infogenetic.selected_entry = entry;
+            }
+            // Anomaly Investigation handlers
+            PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::SelectAnomaly(anomaly)) => {
+                self.state.panels.anomaly.selected = anomaly;
+                if let Some(idx) = anomaly {
+                    if let Some(a) = self.state.panels.anomaly.anomalies.get(idx) {
+                        self.add_log(LogLevel::Info, "AnomalyInvestigation", &format!("Selected anomaly: {}", a.id));
+                    }
+                }
+            }
+            PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::FindRelatedEntities) => {
+                self.add_log(LogLevel::Info, "AnomalyInvestigation", "Finding related entities...");
+                // TODO: Implement related entity search
+            }
+            PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::LoadTimeline) => {
+                self.add_log(LogLevel::Info, "AnomalyInvestigation", "Loading timeline...");
+                // TODO: Implement timeline loading
+            }
+            PanelMessage::AnomalyInvestigation(AnomalyInvestigationMessage::FindSimilarCases) => {
+                self.add_log(LogLevel::Info, "AnomalyInvestigation", "Finding similar cases...");
+                // TODO: Implement similar case search
+            }
+            // Forensic Workflows handlers
+            PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow(id)) => {
+                self.add_log(LogLevel::Info, "ForensicWorkflows", &format!("Starting workflow: {}", id));
+                // TODO: Implement workflow start logic
+            }
+            PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::CancelWorkflow) => {
+                self.state.panels.forensic.active_workflow = None;
+                self.add_log(LogLevel::Info, "ForensicWorkflows", "Workflow cancelled");
+            }
+            PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::CompleteStep) => {
+                self.add_log(LogLevel::Info, "ForensicWorkflows", "Completing current step");
+                // TODO: Implement step completion logic
+            }
+            PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::PreviousStep) => {
+                if let Some(ref mut active) = self.state.panels.forensic.active_workflow {
+                    if active.current_step > 0 {
+                        active.current_step -= 1;
+                        self.add_log(LogLevel::Info, "ForensicWorkflows", "Moved to previous step");
+                    }
                 }
             }
             _ => {}
