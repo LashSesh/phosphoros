@@ -61,7 +61,7 @@ if engine.config().stealth.enabled {
 
 ### Case 1: Basic Forensic Analysis with Mimicry
 
-For standard blockchain analysis where you want to avoid detection:
+For standard blockchain analysis where you want to reduce detectability:
 
 ```rust
 use phosphoros_stealthnet::{StealthMode, StealthRequest, StealthProxy};
@@ -69,12 +69,12 @@ use phosphoros_stealthnet::{StealthMode, StealthRequest, StealthProxy};
 // Create stealth proxy with mimicry mode
 let proxy = StealthProxy::new(StealthMode::Mimicry);
 
-// Build forensic request
+// Build request for authorized analysis (ensure proper authorization)
 let request = StealthRequest::builder()
-    .url("https://blockchain-explorer.com/api/address/analyze")
+    .url("https://authorized-api.example.com/api/address/analyze")
     .method("POST")
     .header("Content-Type", "application/json")
-    .body_string(r#"{"address": "0xABC123..."}"#)
+    .body_string(r#"{"address": "example_address_placeholder"}"#)
     .stealth_mode(StealthMode::Mimicry)
     .timing_jitter(500)
     .build()?;
@@ -87,7 +87,7 @@ let stealth_request = proxy.transform(request)?;
 
 ### Case 2: High-Security Investigation with Steganography
 
-For sensitive investigations requiring maximum concealment:
+For sensitive investigations requiring maximum concealment (with proper authorization):
 
 ```rust
 use phosphoros_stealthnet::{
@@ -99,10 +99,10 @@ use phosphoros_stealthnet::{
 // Create stealth proxy with steganography mode
 let mut proxy = StealthProxy::new(StealthMode::Steganography);
 
-// Encode sensitive payload
+// Encode authorized investigation data
 let encoder = ZeroWidthEncoder::new();
-let sensitive_data = b"target_wallet_cluster_analysis";
-let hidden_payload = encoder.encode(sensitive_data)?;
+let authorized_data = b"authorized_investigation_payload";
+let hidden_payload = encoder.encode(authorized_data)?;
 
 // Shape payload to look like legitimate API traffic
 let mut shaper = PayloadShaper::new();

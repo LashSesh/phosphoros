@@ -17,12 +17,13 @@ fn main() {
     println!("=== PHOSPHOROS Stealthnet Basic Example ===\n");
 
     // 1. Create a simple stealth request
+    // NOTE: This is demonstration code only - use appropriate values in production
     println!("1. Creating a basic stealth request:");
     let request = StealthRequest::builder()
-        .url("https://api.example.com/blockchain/scan")
+        .url("https://blockchain-api.invalid/scan")  // Example domain - not a real API
         .method("POST")
         .header("Content-Type", "application/json")
-        .payload(b"wallet_address_to_analyze")
+        .payload(b"example_payload_data")  // Example data for demonstration
         .stealth_mode(StealthMode::Open)
         .build()
         .unwrap();
@@ -150,12 +151,12 @@ fn main() {
 
     // Create a stealth request
     let request = StealthRequest::builder()
-        .url("https://blockchain-api.example.com/analyze")
+        .url("https://blockchain-api.invalid/analyze")  // Example domain only
         .method("POST")
-        .payload(b"forensic_data")
+        .payload(b"demonstration_data")  // Example data for demonstration
         .stealth_mode(StealthMode::Mimicry)
         .timing_jitter(250)
-        .metadata("task_id", "forensic-001")
+        .metadata("task_id", "demo-task-001")
         .build()
         .unwrap();
 
