@@ -1,6 +1,30 @@
 [package]
 name = "cryptogenetik-core"
-version = "0.1.0"
-edition = "2024"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Search and optimization core for PHOSPHOROS cryptogenetik"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+keywords = ["search", "optimization", "5d-genetics"]
+categories = ["algorithms"]
 
 [dependencies]
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2.0"
+rand = "0.8"
+sha2 = "0.10"
+
+# Core dependency
+phosphoros-core = { path = "../phosphoros-core" }
+
+# Optional BIP39 integration
+phosphoros-bip39 = { path = "../phosphoros-bip39", optional = true }
+
+# Optional parallel processing
+rayon = { version = "1.8", optional = true }
+
+[features]
+default = []
+bip39-integration = ["phosphoros-bip39"]
+parallel = ["rayon"]

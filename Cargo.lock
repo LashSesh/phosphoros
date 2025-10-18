@@ -667,7 +667,16 @@ dependencies = [
 
 [[package]]
 name = "cryptogenetik-core"
-version = "0.1.0"
+version = "1.0.0"
+dependencies = [
+ "phosphoros-bip39",
+ "phosphoros-core",
+ "rand 0.8.5",
+ "rayon",
+ "serde",
+ "sha2",
+ "thiserror 2.0.17",
+]
 
 [[package]]
 name = "ctr"
