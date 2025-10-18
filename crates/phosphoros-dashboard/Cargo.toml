@@ -1,0 +1,43 @@
+[package]
+name = "phosphoros-dashboard"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Living Lab Dashboard for PHOSPHOROS - Autonomous Infogenetic System"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+
+[dependencies]
+# GUI Framework
+iced = { version = "0.13", features = ["tokio", "canvas", "advanced"] }
+
+# PHOSPHOROS Integration
+phosphoros-core = { path = "../phosphoros-core", version = "1.0.0" }
+phosphoros-bip39 = { path = "../phosphoros-bip39", version = "1.0.0", features = ["btc", "evm"] }
+phosphoros-satellite = { path = "../phosphoros-satellite", version = "0.1.0" }
+cryptogenetik-core = { path = "../cryptogenetik-core", version = "1.0.0" }
+
+# Async Runtime
+tokio = { version = "1.45", features = ["full"] }
+futures = "0.3"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error Handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilities
+chrono = "0.4"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+parking_lot = "0.12"
+dirs = "5.0"
+
+[features]
+default = []
