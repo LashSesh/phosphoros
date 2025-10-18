@@ -4,6 +4,60 @@
 **This Delta Blueprint bridges the latest PHOSPHOROS monorepo architecture with advanced resonance/optimization features and holistic infogenetic logic.**  
 *Pass this block unmodified to your AI Agent for a 100% reproducible, context-complete, stepwise system evolution.*
 
+### System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        PHOSPHOROS SYSTEM                                 │
+│                     5D-Spectral Cryptogenetik                           │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        │                           │                           │
+        ▼                           ▼                           ▼
+┌───────────────┐          ┌────────────────┐         ┌────────────────┐
+│ phosphoros-   │          │ cryptogenetik- │         │ phosphoros-    │
+│ core          │◄─────────┤ core           │◄────────┤ bip39          │
+│               │          │                │         │                │
+│ • 5D Geometry │          │ • Search       │         │ • BIP39        │
+│ • Resonance   │          │ • Operators    │         │ • Multichain   │
+│ • Spectral    │          │ • Hooks        │         │ • HD Paths     │
+└───────┬───────┘          └────────┬───────┘         └────────────────┘
+        │                           │
+        │  ResonanceEngine Trait    │  TritonPipeline
+        │                           │
+        ▼                           ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│                     HolisticMatrix Architecture                        │
+│  ┌────────────┐  ┌────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │Kosmokrator │  │Chronokrator│  │  Pfauenthron │  │    Torus     │ │
+│  │  (PoR)     │  │  (Time)    │  │  ┌────────┐  │  │  Topology    │ │
+│  └────────────┘  └────────────┘  │  │O.P.H.A.N│  │  │  (S¹ × S¹)   │ │
+│                                   │  │ Array  │  │  │              │ │
+│  SpectralSignature (ψ,ρ,ω)       │  ├────────┤  │  └──────────────┘ │
+│  D = ψ·ρ·ω (INVARIANT)            │  │Mandorla│  │                   │
+│                                   │  │ Field  │  │                   │
+│                                   │  ├────────┤  │                   │
+│                                   │  │Monolith│  │                   │
+│                                   │  └────────┘  │                   │
+│                                   └──────────────┘                   │
+└───────────────────────────────────────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        │                           │                           │
+        ▼                           ▼                           ▼
+┌───────────────┐          ┌────────────────┐         ┌────────────────┐
+│ phosphoros-   │          │ phosphoros-    │         │ ouroboros_dna  │
+│ cli           │          │ gateway        │         │                │
+│ (tools)       │          │ (API)          │         │ (visual)       │
+└───────────────┘          └────────────────┘         └────────────────┘
+
+Legend:
+  ◄────  : Dependency
+  │      : Data/Control Flow
+  ▼      : Hierarchical Layer
+```
+
 ---
 
 ## 1. CORE ARCHITECTURE: Component Matrix
@@ -982,6 +1036,99 @@ If you're an AI agent tasked with working on PHOSPHOROS:
 7. **Test everything** - Maintain 100% test pass rate
 8. **Document changes** - Update relevant docs
 9. **Follow guidelines** in Section 5 (Agent Execution Instructions)
+
+### Complete Usage Example
+
+Here's a complete example showing how all components work together:
+
+```rust
+use phosphoros_core::{HolisticMatrix, ResonanceEngine, Point5D};
+use cryptogenetik_core::{PhosphorosCore, OperatorSet, HookSet};
+use phosphoros_bip39::{Mnemonic, Language};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 1. Create a BIP39 mnemonic
+    let mnemonic = Mnemonic::generate(128, Language::English)?;
+    println!("Generated mnemonic: {}", mnemonic.phrase());
+    
+    // 2. Convert to words for analysis
+    let words: Vec<String> = mnemonic.phrase()
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect();
+    
+    // 3. Create a holistic resonance engine
+    let mut engine = HolisticMatrix::default_config();
+    
+    // 4. Create search core with the engine
+    let mut core = PhosphorosCore::default_config(engine);
+    
+    // 5. Explore the keyspace with resonance analysis
+    let result = core.explore(words.clone(), 1000, 12345)?;
+    
+    println!("\nResonance Analysis:");
+    println!("  Best resonance: {:.6}", result.best_resonance);
+    println!("  Pruning factor: {:.2}%", result.pruning_factor * 100.0);
+    println!("  Steps taken: {}", result.steps_taken);
+    
+    // 6. Derive keys for multiple chains (with features enabled)
+    #[cfg(feature = "btc")]
+    {
+        use phosphoros_bip39::{derive_key, DerivationPath, PathType};
+        
+        // Bitcoin derivation (BIP84 - Native SegWit)
+        let btc_path = DerivationPath::new(PathType::Bip84, 0, 0, 0, 0);
+        let btc_key = derive_key(&mnemonic.to_seed(""), &btc_path)?;
+        println!("\nBitcoin address: {}", btc_key.address);
+    }
+    
+    #[cfg(feature = "evm")]
+    {
+        use phosphoros_bip39::{derive_key, DerivationPath, PathType};
+        
+        // Ethereum derivation (BIP44)
+        let eth_path = DerivationPath::new(PathType::Bip44, 60, 0, 0, 0);
+        let eth_key = derive_key(&mnemonic.to_seed(""), &eth_path)?;
+        println!("Ethereum address: {}", eth_key.address);
+    }
+    
+    // 7. Manual resonance engine usage
+    let perception = [0.5, 0.5, 0.5, 0.5, 0.5];
+    let intention = [0.6, 0.6, 0.6, 0.6, 0.6];
+    let gradient = [1.0, 0.0, 0.0, 0.0, 0.0];
+    
+    let mut engine = HolisticMatrix::default_config();
+    let eval = engine.evaluate(1.0, perception, intention, gradient, 0.5);
+    
+    match eval {
+        phosphoros_core::Evaluation::Output { vector, score } => {
+            println!("\nResonance Output:");
+            println!("  Vector: {:?}", vector);
+            println!("  Score: {:.6}", score);
+        }
+        phosphoros_core::Evaluation::Gated { reason } => {
+            println!("\nResonance Gated: {:?}", reason);
+        }
+    }
+    
+    // 8. Inspect engine state
+    let state = engine.state();
+    println!("\nEngine State:");
+    println!("  Time: {:.2}", state.time);
+    println!("  Kosmokrator coherence: {:.6}", state.kosmokrator_coherence);
+    println!("  Outputs generated: {}", state.output_count);
+    println!("  Monolith triggered: {}", state.monolith_triggered);
+    
+    Ok(())
+}
+```
+
+This example demonstrates:
+- BIP39 mnemonic generation
+- Resonance-based seedspace exploration
+- Multichain key derivation
+- Direct resonance engine usage
+- State inspection and introspection
 
 ## APPENDIX B: Performance Characteristics
 
