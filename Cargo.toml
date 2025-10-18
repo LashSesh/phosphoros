@@ -1,3 +1,3 @@
 [workspace]
-members = ["crates/cryptogenetik-core", "crates/phosphoros-bip39", "crates/phosphoros-cli","crates/phosphoros-core", "crates/phosphoros-dashboard", "crates/phosphoros-gateway", "crates/phosphoros-satellite","ouroboros_dna", "phosphoros-kryptogenetik"]
+members = ["crates/cryptogenetik-core", "crates/phosphoros-bip39", "crates/phosphoros-cli","crates/phosphoros-core", "crates/phosphoros-dashboard", "crates/phosphoros-gateway", "crates/phosphoros-satellite", "crates/phosphoros-stealthnet","ouroboros_dna", "phosphoros-kryptogenetik"]
 resolver = "2"

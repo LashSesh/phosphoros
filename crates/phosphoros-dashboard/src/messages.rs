@@ -40,6 +40,9 @@ pub enum PanelMessage {
     /// Cluster explorer messages
     Cluster(ClusterMessage),
 
+    /// Stealth/Privacy messages
+    Stealth(StealthMessage),
+
     /// Log panel messages
     Log(LogMessage),
 
@@ -158,6 +161,46 @@ pub enum LogMessage {
         level: LogLevel,
         /// Message
         message: String,
+    },
+}
+
+/// Stealth/Privacy panel messages
+#[derive(Debug, Clone)]
+pub enum StealthMessage {
+    /// Toggle stealth mode enabled/disabled
+    ToggleEnabled,
+    /// Set stealth mode
+    SetMode(crate::panels::StealthMode),
+    /// Set preferred API type
+    SetPreferredApi(Option<crate::panels::ApiType>),
+    /// Toggle proxy rotation
+    ToggleProxy,
+    /// Add proxy configuration
+    AddProxy {
+        /// Proxy host
+        host: String,
+        /// Proxy port
+        port: u16,
+    },
+    /// Remove proxy
+    RemoveProxy(usize),
+    /// Toggle request logging
+    ToggleLogging,
+    /// Toggle temporal jitter
+    ToggleJitter,
+    /// Update jitter settings
+    UpdateJitter {
+        /// Minimum jitter (ms)
+        min_ms: u64,
+        /// Maximum jitter (ms)
+        max_ms: u64,
+    },
+    /// Stealth task completed
+    TaskCompleted {
+        /// Task ID
+        task_id: String,
+        /// Success status
+        success: bool,
     },
 }
 

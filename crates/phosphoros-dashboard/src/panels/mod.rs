@@ -14,6 +14,8 @@ pub enum PanelId {
     Resonance,
     /// Cluster Explorer & Forensik
     ClusterExplorer,
+    /// Stealth/Privacy Controls
+    Stealth,
     /// System Log / Notifications
     SystemLog,
     /// Settings & Tasks
@@ -28,6 +30,7 @@ impl PanelId {
             PanelId::SeedManagement => "Seed & Wallet",
             PanelId::Resonance => "Resonance & Spectro",
             PanelId::ClusterExplorer => "Cluster Explorer",
+            PanelId::Stealth => "Stealth/Privacy",
             PanelId::SystemLog => "System Log",
             PanelId::Settings => "Settings & Tasks",
         }
@@ -40,6 +43,7 @@ impl PanelId {
             PanelId::SeedManagement => "🔑",
             PanelId::Resonance => "📊",
             PanelId::ClusterExplorer => "🔍",
+            PanelId::Stealth => "🔒",
             PanelId::SystemLog => "📝",
             PanelId::Settings => "⚙️",
         }
@@ -52,6 +56,7 @@ impl PanelId {
             PanelId::SeedManagement,
             PanelId::Resonance,
             PanelId::ClusterExplorer,
+            PanelId::Stealth,
             PanelId::SystemLog,
             PanelId::Settings,
         ]
@@ -69,6 +74,8 @@ pub struct PanelState {
     pub resonance: ResonanceState,
     /// Cluster explorer state
     pub cluster: ClusterState,
+    /// Stealth/Privacy state
+    pub stealth: StealthState,
     /// System log state
     pub log: LogState,
     /// Settings state
@@ -171,6 +178,100 @@ pub struct LogState {
     pub filter: String,
     /// Auto-scroll enabled
     pub auto_scroll: bool,
+}
+
+/// Stealth/Privacy panel state
+#[derive(Debug)]
+pub struct StealthState {
+    /// Whether stealth mode is enabled
+    pub enabled: bool,
+    /// Current stealth mode
+    pub mode: StealthMode,
+    /// Preferred API type for mimicry
+    pub preferred_api: Option<ApiType>,
+    /// Number of active stealth tasks
+    pub active_tasks: usize,
+    /// Number of proxies configured
+    pub proxy_count: usize,
+    /// Proxy rotation enabled
+    pub proxy_enabled: bool,
+    /// Enable request logging
+    pub logging_enabled: bool,
+    /// Temporal jitter enabled
+    pub jitter_enabled: bool,
+    /// Minimum jitter (ms)
+    pub min_jitter_ms: u64,
+    /// Maximum jitter (ms)
+    pub max_jitter_ms: u64,
+    /// Stealth task history (last 100 entries)
+    pub task_history: Vec<StealthTaskInfo>,
+}
+
+/// Stealth mode enumeration for UI
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StealthMode {
+    /// No stealth
+    Open,
+    /// Traffic mimicry
+    Mimicry,
+    /// Steganography
+    Steganography,
+    /// Adaptive mode
+    Adaptive,
+}
+
+impl Default for StealthMode {
+    fn default() -> Self {
+        Self::Open
+    }
+}
+
+/// API type for mimicry
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ApiType {
+    /// OpenAI
+    OpenAI,
+    /// Slack
+    Slack,
+    /// Telegram
+    Telegram,
+    /// Discord
+    Discord,
+    /// Generic
+    Generic,
+}
+
+/// Information about a stealth task
+#[derive(Debug, Clone)]
+pub struct StealthTaskInfo {
+    /// Task ID
+    pub id: String,
+    /// Task type
+    pub task_type: String,
+    /// Stealth mode used
+    pub mode: StealthMode,
+    /// Timestamp
+    pub timestamp: chrono::DateTime<chrono::Utc>,
+    /// Success status
+    pub success: bool,
+}
+
+impl Default for StealthState {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            mode: StealthMode::default(),
+            preferred_api: None,
+            active_tasks: 0,
+            proxy_count: 0,
+            proxy_enabled: false,
+            logging_enabled: true,
+            jitter_enabled: true,
+            min_jitter_ms: 100,
+            max_jitter_ms: 1000,
+            task_history: Vec::new(),
+        }
+    }
 }
 
 /// Settings state

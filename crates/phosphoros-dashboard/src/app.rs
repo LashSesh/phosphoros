@@ -3,7 +3,7 @@
 
 use crate::config::Config;
 use crate::messages::*;
-use crate::panels::{PanelId, ClusterInfo};
+use crate::panels::{PanelId, ClusterInfo, StealthMode, ApiType};
 use crate::state::{AppState, LogEntry, LogLevel, Notification, NotificationKind};
 use crate::theme::PhosphorosTheme;
 use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
@@ -176,6 +176,7 @@ impl PhosphorosApp {
             PanelId::SeedManagement => self.seed_view(),
             PanelId::Resonance => self.resonance_view(),
             PanelId::ClusterExplorer => self.cluster_view(),
+            PanelId::Stealth => self.stealth_view(),
             PanelId::SystemLog => self.log_view(),
             PanelId::Settings => self.settings_view(),
         };
@@ -449,6 +450,126 @@ impl PhosphorosApp {
         content.into()
     }
 
+    fn stealth_view(&self) -> Element<Message> {
+        let title = text(PanelId::Stealth.name()).size(28);
+        
+        let stealth_state = &self.state.panels.stealth;
+        
+        // Stealth mode toggle
+        let enabled_row = row![
+            text("Enable Stealth Mode").size(16),
+            horizontal_space().width(10),
+            toggler(stealth_state.enabled)
+                .on_toggle(|_| Message::Panel(PanelMessage::Stealth(StealthMessage::ToggleEnabled))),
+        ];
+        
+        // Mode selection
+        let mode_label = text("Stealth Mode:").size(14);
+        let mode_value = text(match stealth_state.mode {
+            StealthMode::Open => "Open (No concealment)",
+            StealthMode::Mimicry => "Mimicry (API traffic disguise)",
+            StealthMode::Steganography => "Steganography (Hidden payloads)",
+            StealthMode::Adaptive => "Adaptive (Context-aware)",
+        }).size(14);
+        
+        let mode_buttons = row![
+            button(text("Open")).padding(8)
+                .on_press(Message::Panel(PanelMessage::Stealth(StealthMessage::SetMode(StealthMode::Open)))),
+            horizontal_space().width(5),
+            button(text("Mimicry")).padding(8)
+                .on_press(Message::Panel(PanelMessage::Stealth(StealthMessage::SetMode(StealthMode::Mimicry)))),
+            horizontal_space().width(5),
+            button(text("Steganography")).padding(8)
+                .on_press(Message::Panel(PanelMessage::Stealth(StealthMessage::SetMode(StealthMode::Steganography)))),
+            horizontal_space().width(5),
+            button(text("Adaptive")).padding(8)
+                .on_press(Message::Panel(PanelMessage::Stealth(StealthMessage::SetMode(StealthMode::Adaptive)))),
+        ];
+        
+        // Stats
+        let stats = crate::widgets::card(
+            column![
+                text("Stealth Statistics").size(18),
+                vertical_space().height(10),
+                text(format!("Active Tasks: {}", stealth_state.active_tasks)).size(14),
+                text(format!("Proxies Configured: {}", stealth_state.proxy_count)).size(14),
+                text(format!("Logging: {}", if stealth_state.logging_enabled { "Enabled" } else { "Disabled" })).size(14),
+            ]
+        );
+        
+        // Proxy settings
+        let proxy_row = row![
+            text("Proxy Rotation").size(14),
+            horizontal_space().width(10),
+            toggler(stealth_state.proxy_enabled)
+                .on_toggle(|_| Message::Panel(PanelMessage::Stealth(StealthMessage::ToggleProxy))),
+        ];
+        
+        // Jitter settings
+        let jitter_row = row![
+            text("Temporal Jitter").size(14),
+            horizontal_space().width(10),
+            toggler(stealth_state.jitter_enabled)
+                .on_toggle(|_| Message::Panel(PanelMessage::Stealth(StealthMessage::ToggleJitter))),
+        ];
+        
+        let jitter_info = text(format!(
+            "Jitter range: {} - {} ms",
+            stealth_state.min_jitter_ms,
+            stealth_state.max_jitter_ms
+        )).size(12);
+        
+        // Compliance notice
+        let compliance_notice = crate::widgets::card(
+            column![
+                text("⚠️ Compliance Notice").size(16),
+                vertical_space().height(5),
+                text("Stealth networking is intended ONLY for:").size(12),
+                text("• Legitimate forensic analysis").size(11),
+                text("• Scientific research").size(11),
+                text("• Defense and security with authorization").size(11),
+                text("• Compliance-approved use cases").size(11),
+                vertical_space().height(5),
+                text("Misuse may violate laws and regulations.").size(11),
+            ]
+        );
+        
+        let content = column![
+            title,
+            vertical_space().height(20),
+            enabled_row,
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Mode Configuration").size(18),
+                    vertical_space().height(10),
+                    mode_label,
+                    mode_value,
+                    vertical_space().height(10),
+                    mode_buttons,
+                ]
+            ),
+            vertical_space().height(15),
+            stats,
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Advanced Settings").size(18),
+                    vertical_space().height(10),
+                    proxy_row,
+                    vertical_space().height(10),
+                    jitter_row,
+                    vertical_space().height(5),
+                    jitter_info,
+                ]
+            ),
+            vertical_space().height(15),
+            compliance_notice,
+        ];
+        
+        scrollable(content).into()
+    }
+
     fn settings_view(&self) -> Element<Message> {
         let title = text(PanelId::Settings.name()).size(28);
 
@@ -613,6 +734,33 @@ impl PhosphorosApp {
                 self.state.dark_mode = !self.state.dark_mode;
                 self.theme = PhosphorosTheme::new(self.state.dark_mode);
                 self.add_log(LogLevel::Info, "Settings", &format!("Theme: {}", if self.state.dark_mode { "Dark" } else { "Light" }));
+            }
+            PanelMessage::Stealth(StealthMessage::ToggleEnabled) => {
+                self.state.panels.stealth.enabled = !self.state.panels.stealth.enabled;
+                self.add_log(LogLevel::Info, "Stealth", &format!("Stealth mode: {}", if self.state.panels.stealth.enabled { "Enabled" } else { "Disabled" }));
+            }
+            PanelMessage::Stealth(StealthMessage::SetMode(mode)) => {
+                self.state.panels.stealth.mode = mode;
+                self.add_log(LogLevel::Info, "Stealth", &format!("Mode set to: {:?}", mode));
+            }
+            PanelMessage::Stealth(StealthMessage::ToggleProxy) => {
+                self.state.panels.stealth.proxy_enabled = !self.state.panels.stealth.proxy_enabled;
+                self.add_log(LogLevel::Info, "Stealth", &format!("Proxy rotation: {}", if self.state.panels.stealth.proxy_enabled { "Enabled" } else { "Disabled" }));
+            }
+            PanelMessage::Stealth(StealthMessage::ToggleJitter) => {
+                self.state.panels.stealth.jitter_enabled = !self.state.panels.stealth.jitter_enabled;
+                self.add_log(LogLevel::Info, "Stealth", &format!("Temporal jitter: {}", if self.state.panels.stealth.jitter_enabled { "Enabled" } else { "Disabled" }));
+            }
+            PanelMessage::Stealth(StealthMessage::ToggleLogging) => {
+                self.state.panels.stealth.logging_enabled = !self.state.panels.stealth.logging_enabled;
+                self.add_log(LogLevel::Info, "Stealth", &format!("Request logging: {}", if self.state.panels.stealth.logging_enabled { "Enabled" } else { "Disabled" }));
+            }
+            PanelMessage::Stealth(StealthMessage::TaskCompleted { task_id, success }) => {
+                if success {
+                    self.add_log(LogLevel::Info, "Stealth", &format!("Task {} completed successfully", task_id));
+                } else {
+                    self.add_log(LogLevel::Warning, "Stealth", &format!("Task {} failed", task_id));
+                }
             }
             _ => {}
         }
