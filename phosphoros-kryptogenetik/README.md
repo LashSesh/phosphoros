@@ -4,7 +4,7 @@
 > Integration von Triton, Metatron-IUL und Gabriel Cells
 
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
+[![License]
 [![Production Ready](https://img.shields.io/badge/status-production--ready-green.svg)]()
 
 ---
