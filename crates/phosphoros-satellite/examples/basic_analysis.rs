@@ -136,7 +136,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let point5d = obs.to_point5d()?;
         let spectral = obs.to_spectral_signature()?;
         
-        println!("Entity #{} ({})", i+1, &obs.address[..12]);
+        println!("Entity #{} ({})", i+1, 
+                 obs.address.chars().take(12).collect::<String>());
         println!("  Point5D: [{:.3}, {:.3}, {:.3}, {:.3}, {:.3}]",
                  point5d.coords[0], point5d.coords[1], point5d.coords[2],
                  point5d.coords[3], point5d.coords[4]);
