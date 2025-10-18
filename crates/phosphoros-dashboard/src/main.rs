@@ -20,7 +20,7 @@ mod theme;
 mod widgets;
 
 use app::PhosphorosApp;
-use iced::{window, Settings, Size};
+use iced::Settings;
 use tracing_subscriber::EnvFilter;
 
 fn main() -> iced::Result {
@@ -33,23 +33,12 @@ fn main() -> iced::Result {
 
     tracing::info!("Starting PHOSPHOROS Dashboard...");
 
-    // Configure window
-    let window_settings = window::Settings {
-        size: Size::new(1600.0, 900.0),
-        min_size: Some(Size::new(1280.0, 720.0)),
-        ..Default::default()
-    };
-
-    // Run application
+    // Run application with proper initialization
     iced::application(
         "PHOSPHOROS - Living Lab Dashboard",
         PhosphorosApp::update,
         PhosphorosApp::view,
     )
-    .settings(Settings {
-        window: window_settings,
-        ..Default::default()
-    })
     .subscription(PhosphorosApp::subscription)
     .theme(PhosphorosApp::theme)
     .run_with(PhosphorosApp::new)

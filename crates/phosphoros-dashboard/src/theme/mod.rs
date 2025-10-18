@@ -4,6 +4,7 @@ use iced::widget::container;
 use iced::{application, color, Border, Color, Theme};
 
 /// PHOSPHOROS custom theme
+#[derive(Debug)]
 pub struct PhosphorosTheme {
     dark_mode: bool,
 }

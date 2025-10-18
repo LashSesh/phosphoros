@@ -1,10 +1,7 @@
 //! Custom widgets for PHOSPHOROS dashboard
 
 /// Re-export commonly used iced widgets
-pub use iced::widget::{
-    button, checkbox, column, container, horizontal_space, pick_list, progress_bar, radio, row,
-    scrollable, slider, text, text_input, toggler, vertical_space, Space,
-};
+pub use iced::widget::*;
 
 /// Create a card widget
 pub fn card<'a, Message>(content: impl Into<iced::Element<'a, Message>>) -> iced::Element<'a, Message>
