@@ -7,6 +7,8 @@
 
 **PHOSPHOROS** is a sophisticated system for topological mapping of cryptographic seed spaces using 5D-spectral analysis and holistic resonance engines.
 
+📖 **[Read the Delta Blueprint](DELTA_BLUEPRINT.md)** for complete architecture documentation and AI agent integration guide.
+
 ## 🌟 Overview
 
 PHOSPHOROS integrates advanced mathematical concepts including:
@@ -206,9 +208,11 @@ cargo doc --workspace --all-features --no-deps
 
 ## 📖 Documentation
 
+- **Delta Blueprint**: [DELTA_BLUEPRINT.md](DELTA_BLUEPRINT.md) - Complete architecture guide for AI agents and developers
 - **API Docs**: `cargo doc --workspace --all-features --open`
 - **Examples**: See `examples/` directories in each crate
 - **Architecture**: See individual crate READMEs
+- **Implementation Summary**: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
 
 ## 🎯 Use Cases
 
