@@ -239,7 +239,11 @@ mod tests {
         state.normalize();
         let coherence = kosmo.coherence(&state);
         // Coherence should be 1/sqrt(n) for normalized equal amplitudes
-        assert!(coherence > 0.3, "Expected coherence > 0.3, got {}", coherence);
+        assert!(
+            coherence > 0.3,
+            "Expected coherence > 0.3, got {}",
+            coherence
+        );
         // First call should pass with our lowered threshold
         let result = kosmo.check_por(&state);
         assert!(result, "PoR check should pass with aligned phases");

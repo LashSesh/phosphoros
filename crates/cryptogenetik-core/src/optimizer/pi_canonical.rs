@@ -33,7 +33,7 @@ impl PICanonical {
     pub fn apply(&self, v: [f64; 5]) -> [f64; 5] {
         // Normalize to canonical form
         let norm = v.iter().map(|&x| x * x).sum::<f64>().sqrt();
-        
+
         if norm < 1e-12 {
             return v;
         }
@@ -57,7 +57,7 @@ mod tests {
         let pi = PICanonical::new(PIConfig::default());
         let v = [2.0, 2.0, 2.0, 2.0, 2.0];
         let result = pi.apply(v);
-        
+
         // Result should be normalized
         let norm: f64 = result.iter().map(|&x| x * x).sum::<f64>().sqrt();
         assert!((norm - 1.0).abs() < 1e-6);
@@ -68,7 +68,7 @@ mod tests {
         let pi = PICanonical::new(PIConfig::default());
         let v = [1.0, 0.0, 0.0, 0.0, 0.0];
         assert!(pi.is_canonical(&v));
-        
+
         let v2 = [2.0, 2.0, 2.0, 2.0, 2.0];
         assert!(!pi.is_canonical(&v2));
     }

@@ -44,11 +44,7 @@ impl Chronokrator {
 
     /// Calculate total dynamics: D_total(t) = (∏ D_i(t)) · Ω(t)
     pub fn total_dynamics(&mut self, t: f64) -> f64 {
-        let product: f64 = self
-            .channels
-            .iter_mut()
-            .map(|ch| ch.evaluate(t))
-            .product();
+        let product: f64 = self.channels.iter_mut().map(|ch| ch.evaluate(t)).product();
 
         let dtotal = product * self.omega_global;
         self.dtotal_history.push(dtotal);
@@ -67,20 +63,11 @@ impl Chronokrator {
             return;
         }
 
-        let recent: Vec<f64> = self
-            .dtotal_history
-            .iter()
-            .rev()
-            .take(10)
-            .copied()
-            .collect();
+        let recent: Vec<f64> = self.dtotal_history.iter().rev().take(10).copied().collect();
 
         let mean = recent.iter().sum::<f64>() / recent.len() as f64;
-        let variance = recent
-            .iter()
-            .map(|&x| (x - mean).powi(2))
-            .sum::<f64>()
-            / recent.len() as f64;
+        let variance =
+            recent.iter().map(|&x| (x - mean).powi(2)).sum::<f64>() / recent.len() as f64;
 
         // Θ(t) = mean + 0.5·sqrt(variance)
         self.theta_threshold = mean + 0.5 * variance.sqrt();

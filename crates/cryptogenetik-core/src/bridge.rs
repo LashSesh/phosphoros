@@ -33,12 +33,7 @@ impl<E: ResonanceEngine> PhosphorosCore<E> {
     }
 
     /// Explore keyspace with seed words
-    pub fn explore(
-        &mut self,
-        seed_words: Vec<String>,
-        steps: usize,
-        seed: u64,
-    ) -> Result<Outcome> {
+    pub fn explore(&mut self, seed_words: Vec<String>, steps: usize, seed: u64) -> Result<Outcome> {
         self.explore_with_callback(seed_words, steps, seed, None)
     }
 
@@ -50,7 +45,8 @@ impl<E: ResonanceEngine> PhosphorosCore<E> {
         seed: u64,
         callback: Option<ProgressCallback>,
     ) -> Result<Outcome> {
-        let mut pipeline = TritonPipeline::new(&mut self.engine, self.hooks.clone(), self.operators.clone());
+        let mut pipeline =
+            TritonPipeline::new(&mut self.engine, self.hooks.clone(), self.operators.clone());
 
         if let Some(cb) = callback {
             pipeline.set_progress_callback(cb);
@@ -108,7 +104,7 @@ mod tests {
     fn test_explore() {
         let engine = HolisticMatrix::default_config();
         let mut core = PhosphorosCore::default_config(engine);
-        
+
         let words = vec!["test".to_string(), "words".to_string()];
         let result = core.explore(words, 100, 42);
         assert!(result.is_ok());

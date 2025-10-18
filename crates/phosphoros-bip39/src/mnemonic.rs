@@ -13,10 +13,7 @@ pub struct Mnemonic {
 
 impl Mnemonic {
     /// Create a new mnemonic from words
-    pub fn from_words(
-        words: &[String],
-        language: WordlistLanguage,
-    ) -> Result<Self, Error> {
+    pub fn from_words(words: &[String], language: WordlistLanguage) -> Result<Self, Error> {
         let phrase = words.join(" ");
         let inner = Bip39Mnemonic::parse_in(language.to_bip39_language(), &phrase)
             .map_err(|e| Error::InvalidMnemonic(e.to_string()))?;
