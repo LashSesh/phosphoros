@@ -1,0 +1,24 @@
+[package]
+name = "phosphoros-core"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Core 5D geometry and resonance engine for PHOSPHOROS"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+keywords = ["5d-geometry", "resonance", "spectral", "holistic"]
+categories = ["mathematics", "algorithms"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2.0"
+
+# Optional dependencies
+nalgebra = { version = "0.32", optional = true }
+ndarray = { version = "0.15", optional = true }
+rayon = { version = "1.8", optional = true }
+
+[features]
+default = []
+advanced-linalg = ["nalgebra", "ndarray"]
+parallel = ["rayon"]
