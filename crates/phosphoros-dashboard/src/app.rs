@@ -3,14 +3,16 @@
 
 use crate::config::Config;
 use crate::messages::*;
-use crate::panels::PanelId;
+use crate::panels::{PanelId, ClusterInfo};
 use crate::state::{AppState, LogEntry, LogLevel, Notification, NotificationKind};
 use crate::theme::PhosphorosTheme;
 use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
+use crate::tasks::{TaskManager, TaskMessage};
 use chrono::Utc;
 use iced::widget::{button, column, container, row, scrollable, text, text_input, toggler, progress_bar, horizontal_rule, horizontal_space, vertical_space};
 use iced::{Element, Length, Subscription, Task, Theme};
 use std::time::Duration;
+use std::sync::Arc;
 
 /// Main application
 #[derive(Debug)]
@@ -22,6 +24,10 @@ pub struct PhosphorosApp {
     // Integration components (not Debug, so we store them separately)
     resonance_integration: Option<ResonanceIntegration>,
     analysis_integration: Option<AnalysisIntegration>,
+    // Task manager for async operations
+    task_manager: Option<TaskManager>,
+    // Background task handles
+    background_tasks_spawned: bool,
 }
 
 impl PhosphorosApp {
@@ -37,6 +43,8 @@ impl PhosphorosApp {
             notification_counter: 0,
             resonance_integration: Some(ResonanceIntegration::new()),
             analysis_integration: Some(AnalysisIntegration::new()),
+            task_manager: Some(TaskManager::new()),
+            background_tasks_spawned: false,
         };
 
         app.add_log(LogLevel::Info, "System", "PHOSPHOROS Dashboard initialized");
@@ -50,11 +58,52 @@ impl PhosphorosApp {
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
+        // Spawn background tasks on first update if not already spawned
+        if !self.background_tasks_spawned && self.task_manager.is_some() {
+            self.spawn_background_tasks();
+            self.background_tasks_spawned = true;
+        }
+        
+        // Process task messages - collect them first to avoid borrow issues
+        let task_messages: Vec<TaskMessage> = if let Some(ref task_manager) = self.task_manager {
+            let mut messages = Vec::new();
+            while let Some(task_msg) = task_manager.try_recv() {
+                messages.push(task_msg);
+            }
+            messages
+        } else {
+            Vec::new()
+        };
+        
+        // Handle collected messages
+        for task_msg in task_messages {
+            self.handle_task_message(task_msg);
+        }
+        
         match message {
             Message::Panel(panel_msg) => self.handle_panel_message(panel_msg),
             Message::Service(_) => Task::none(),
             Message::UI(_) => Task::none(),
-            Message::System(SystemMessage::Tick) => Task::none(),
+            Message::System(SystemMessage::Tick) => {
+                // Update home panel stats
+                let stats = self.state.service_manager.stats_summary();
+                self.state.panels.home.seeds_count = self.state.panels.seed_management.seeds.len();
+                self.state.panels.home.clusters_count = stats.clusters_found;
+                
+                // Update cluster panel
+                let clusters: Vec<ClusterInfo> = self.state.service_manager.data_pool.read()
+                    .clusters.values()
+                    .map(|c| ClusterInfo {
+                        id: c.id.clone(),
+                        members: c.members.len(),
+                        resonance: c.resonance,
+                        discovered_at: c.timestamp,
+                    })
+                    .collect();
+                self.state.panels.cluster.clusters = clusters;
+                
+                Task::none()
+            }
             Message::System(_) => Task::none(),
             Message::Notification(_) => Task::none(),
         }
@@ -140,8 +189,11 @@ impl PhosphorosApp {
     fn home_view(&self) -> Element<Message> {
         let title = text(PanelId::Home.name()).size(28);
         
+        // Get live statistics
+        let stats = self.state.service_manager.stats_summary();
+        
         // Create stat cards inline to avoid lifetime issues
-        let stats = row![
+        let stats_row = row![
             crate::widgets::card(
                 column![
                     text("Seeds").size(14),
@@ -154,15 +206,15 @@ impl PhosphorosApp {
                 column![
                     text("Clusters").size(14),
                     vertical_space().height(8),
-                    text(self.state.panels.home.clusters_count.to_string()).size(32),
+                    text(stats.clusters_found.to_string()).size(32),
                 ]
             ),
             horizontal_space().width(16),
             crate::widgets::card(
                 column![
-                    text("Coverage").size(14),
+                    text("Entities").size(14),
                     vertical_space().height(8),
-                    text(format!("{:.1}%", self.state.panels.home.coverage)).size(32),
+                    text(stats.entities_in_pool.to_string()).size(32),
                 ]
             ),
         ];
@@ -171,18 +223,43 @@ impl PhosphorosApp {
             column![
                 text("System Status").size(18),
                 vertical_space().height(10),
-                text(format!("Scraper: {}", if self.state.service_manager.scraper.read().running { "Running" } else { "Paused" })).size(14),
-                text(format!("Analyzer: {}", if self.state.service_manager.analyzer.read().running { "Running" } else { "Paused" })).size(14),
-                text(format!("Cluster Engine: {}", if self.state.service_manager.cluster_engine.read().running { "Running" } else { "Paused" })).size(14),
+                text(format!("Scraper: {} - {} entities", 
+                    if self.state.service_manager.scraper.read().running { "🟢 Running" } else { "⏸ Paused" },
+                    stats.scraper_processed
+                )).size(14),
+                vertical_space().height(5),
+                text(format!("Analyzer: {} - {} analyzed", 
+                    if self.state.service_manager.analyzer.read().running { "🟢 Running" } else { "⏸ Paused" },
+                    stats.analyzer_analyzed
+                )).size(14),
+                vertical_space().height(5),
+                text(format!("Cluster Engine: {} - {} clusters", 
+                    if self.state.service_manager.cluster_engine.read().running { "🟢 Running" } else { "⏸ Paused" },
+                    stats.clusters_found
+                )).size(14),
+            ]
+        );
+        
+        // Add anomaly info
+        let anomaly_count = self.state.service_manager.data_pool.read().anomalies.len();
+        let anomaly_card = crate::widgets::card(
+            column![
+                text("Anomaly Detection").size(18),
+                vertical_space().height(10),
+                text(format!("Detected: {} anomalies", anomaly_count)).size(14),
+                vertical_space().height(5),
+                text("Real-time pattern recognition active").size(12),
             ]
         );
 
         column![
             title,
             vertical_space().height(20),
-            stats,
+            stats_row,
             vertical_space().height(20),
             status_card,
+            vertical_space().height(20),
+            anomaly_card,
         ].into()
     }
 
@@ -217,6 +294,24 @@ impl PhosphorosApp {
         if !self.state.panels.seed_management.seeds.is_empty() {
             content = content.push(vertical_space().height(20));
             content = content.push(text(format!("Imported Seeds ({})", self.state.panels.seed_management.seeds.len())).size(18));
+            content = content.push(vertical_space().height(15));
+            
+            // Display each imported seed
+            for seed_info in self.state.panels.seed_management.seeds.iter().take(5) {
+                let seed_card = crate::widgets::card(
+                    column![
+                        text(&seed_info.mnemonic_masked).size(14),
+                        vertical_space().height(5),
+                        text(format!("{} addresses", seed_info.addresses.len())).size(12),
+                        vertical_space().height(5),
+                    ]
+                    .push_maybe(seed_info.addresses.first().map(|addr| {
+                        text(format!("{}: {}", addr.chain, &addr.address[..20])).size(11)
+                    }))
+                );
+                content = content.push(seed_card);
+                content = content.push(vertical_space().height(10));
+            }
         }
 
         scrollable(content).into()
@@ -270,11 +365,29 @@ impl PhosphorosApp {
             title,
             vertical_space().height(20),
             search,
+            vertical_space().height(20),
         ];
 
         if self.state.panels.cluster.clusters.is_empty() {
-            content = content.push(vertical_space().height(20));
-            content = content.push(text("No clusters found. Start analysis to discover clusters.").size(14));
+            content = content.push(text("No clusters found. Start services to discover clusters.").size(14));
+        } else {
+            content = content.push(text(format!("Found {} clusters", self.state.panels.cluster.clusters.len())).size(16));
+            content = content.push(vertical_space().height(15));
+            
+            // Display clusters
+            for (idx, cluster) in self.state.panels.cluster.clusters.iter().enumerate().take(10) {
+                let cluster_card = crate::widgets::card(
+                    column![
+                        text(format!("Cluster #{}", idx + 1)).size(16),
+                        vertical_space().height(5),
+                        text(format!("Members: {}", cluster.members)).size(14),
+                        text(format!("Resonance: {:.3}", cluster.resonance)).size(14),
+                        text(format!("ID: {}", &cluster.id[..20])).size(11),
+                    ]
+                );
+                content = content.push(cluster_card);
+                content = content.push(vertical_space().height(10));
+            }
         }
 
         scrollable(content).into()
@@ -452,5 +565,50 @@ impl std::fmt::Debug for ResonanceIntegration {
 impl std::fmt::Debug for AnalysisIntegration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AnalysisIntegration").finish()
+    }
+}
+
+impl std::fmt::Debug for TaskManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TaskManager").finish()
+    }
+}
+
+// Additional helper methods
+impl PhosphorosApp {
+    /// Spawn background tasks
+    fn spawn_background_tasks(&mut self) {
+        if let Some(ref task_manager) = self.task_manager {
+            let service_mgr = Arc::new(self.state.service_manager.clone());
+            
+            // Spawn all three background services
+            task_manager.spawn_scraper(service_mgr.clone());
+            task_manager.spawn_analyzer(service_mgr.clone());
+            task_manager.spawn_cluster_engine(service_mgr.clone());
+            
+            self.add_log(LogLevel::Info, "Tasks", "Background tasks spawned");
+        }
+    }
+    
+    /// Handle task messages from background services
+    fn handle_task_message(&mut self, message: TaskMessage) {
+        match message {
+            TaskMessage::EntityDiscovered(entity) => {
+                self.add_log(LogLevel::Debug, "Scraper", &format!("Entity discovered: {}", entity.address));
+            }
+            TaskMessage::AnomalyDetected(anomaly) => {
+                self.add_log(LogLevel::Warning, "Analyzer", &format!("Anomaly detected: score={:.2}", anomaly.score));
+            }
+            TaskMessage::ClusterFound(cluster) => {
+                self.add_log(LogLevel::Info, "ClusterEngine", &format!("Cluster found: {} members, resonance={:.3}", cluster.members.len(), cluster.resonance));
+            }
+            TaskMessage::ServiceTick => {
+                // Handle periodic updates
+            }
+            TaskMessage::TaskCompleted { id, success } => {
+                let status = if success { "completed" } else { "failed" };
+                self.add_log(LogLevel::Info, "Tasks", &format!("Task {} {}", id, status));
+            }
+        }
     }
 }
