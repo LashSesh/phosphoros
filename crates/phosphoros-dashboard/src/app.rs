@@ -118,9 +118,17 @@ impl PhosphorosApp {
                             AnomalySeverity::Low
                         };
                         
+                        // TODO: Implement proper anomaly type detection based on reason/features
+                        // For now using Other as a placeholder until ML classification is implemented
+                        let anomaly_type = if a.reason.contains("Extreme") {
+                            AnomalyType::VolumeAnomaly
+                        } else {
+                            AnomalyType::Other
+                        };
+                        
                         AnomalyInfo {
                             id: a.id.to_string(),
-                            anomaly_type: AnomalyType::Other, // Could be enhanced with real type detection
+                            anomaly_type,
                             severity,
                             affected_entities: vec![a.entity_id.to_string()],
                             detected_at: a.timestamp,
@@ -133,22 +141,32 @@ impl PhosphorosApp {
                 
                 // Update infogenetic browser with entities
                 use crate::panels::InfogeneticEntry;
+                // TODO: Make this limit configurable via panel settings
+                const MAX_DISPLAY_ENTRIES: usize = 100;
                 let entries: Vec<InfogeneticEntry> = self.state.service_manager.data_pool.read()
                     .entities.values()
-                    .take(100) // Limit to 100 for performance
+                    .take(MAX_DISPLAY_ENTRIES)
                     .map(|e| {
+                        // Extract spectral signature from features (ψ, ρ, ω)
                         let (psi, rho, omega) = if e.features.len() >= 3 {
                             (e.features[0], e.features[1], e.features[2])
                         } else {
                             (0.0, 0.0, 0.0)
                         };
+                        
+                        // Calculate resonance using spectral signature invariant formula: D = ψ·ρ·ω
+                        let resonance = psi * rho * omega;
+                        
+                        // TODO: Extract actual chain type from entity metadata or connections
+                        let chain = "Unknown".to_string();
+                        
                         InfogeneticEntry {
                             id: e.id.to_string(),
                             address: e.address.clone(),
                             signature: (psi, rho, omega),
-                            resonance: psi * rho * omega,
+                            resonance,
                             cluster_id: None,
-                            chain: "Unknown".to_string(),
+                            chain,
                             discovered_at: e.timestamp,
                             metadata: std::collections::HashMap::new(),
                         }
@@ -1327,18 +1345,28 @@ impl PhosphorosApp {
             }
             PanelMessage::SearchSpace(SearchSpaceMessage::StepForward) => {
                 self.add_log(LogLevel::Info, "SearchSpace", "Stepping forward in search space");
-                // Generate some visible nodes for demonstration
+                
+                // TODO: Replace with actual BIP39 wordlist integration and real search space navigation
+                // This is demonstration data only - connect to cryptogenetik-core for production use
                 use crate::panels::SearchNode;
                 let sample_words = vec!["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse"];
                 let mut nodes = Vec::new();
+                
+                // BIP39 wordlist has 2048 words per word slot
+                const BIP39_WORDLIST_SIZE: usize = 2048;
+                
                 for (idx, word) in sample_words.iter().enumerate() {
+                    // Generate sample resonance values for demonstration
+                    // TODO: Calculate real resonance using HolisticMatrix engine
+                    let resonance = ((idx as f64 * 0.07) % 1.0).max(0.1);
+                    
                     nodes.push(SearchNode {
                         id: format!("node_{}", idx),
                         word: word.to_string(),
                         index: idx,
-                        resonance: (idx as f64 * 0.07) % 1.0,
+                        resonance,
                         distance: idx as f64 * 0.5,
-                        children_count: 2048,
+                        children_count: BIP39_WORDLIST_SIZE,
                     });
                 }
                 self.state.panels.search_space.visible_nodes = nodes;
@@ -1355,11 +1383,14 @@ impl PhosphorosApp {
             }
             PanelMessage::SearchSpace(SearchSpaceMessage::JumpToHighResonance) => {
                 self.add_log(LogLevel::Info, "SearchSpace", "Jumping to high resonance region");
-                // Add a high-resonance position to history
+                
+                // TODO: Implement real high-resonance detection using ResonanceEngine
+                // For now, demonstrate with different sample data
                 use crate::panels::SearchPosition;
+                let high_resonance_words = vec!["quantum", "nebula", "zenith"];
                 let position = SearchPosition {
-                    indices: vec![0, 1, 2],
-                    words: vec!["abandon".to_string(), "ability".to_string(), "able".to_string()],
+                    indices: vec![1234, 567, 890],
+                    words: high_resonance_words.into_iter().map(String::from).collect(),
                     resonance: 0.95,
                     visited_at: chrono::Utc::now(),
                 };
@@ -1372,7 +1403,9 @@ impl PhosphorosApp {
             }
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::DetectCommunities) => {
                 self.add_log(LogLevel::Info, "NetworkExplorer", "Detecting communities...");
-                // Generate sample communities for demonstration
+                
+                // TODO: Implement real community detection using Louvain or Label Propagation algorithms
+                // This is demonstration data - replace with actual network analysis from satellite engine
                 use crate::panels::CommunityInfo;
                 let communities = vec![
                     CommunityInfo {
@@ -1398,7 +1431,11 @@ impl PhosphorosApp {
             }
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::HighlightCriticalNodes) => {
                 self.add_log(LogLevel::Info, "NetworkExplorer", "Highlighting critical nodes...");
-                // Generate sample critical nodes for demonstration
+                
+                // TODO: Implement real centrality calculations using petgraph algorithms
+                // Degree centrality: fraction of nodes connected to this node
+                // Betweenness centrality: fraction of shortest paths passing through this node
+                // This is demonstration data - replace with actual graph analysis
                 use crate::panels::NodeInfo;
                 let critical_nodes = vec![
                     NodeInfo {
