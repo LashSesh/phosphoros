@@ -1,0 +1,140 @@
+[package]
+name = "phosphoros-kryptogenetik"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Prä-holographisches System zur 5D-Skalarprojektion - Kryptogenetik Core"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/phosphoros/kryptogenetik-core"
+keywords = ["blockchain", "forensics", "5d-genetics", "metatron", "triton"]
+categories = ["cryptography", "mathematics", "algorithms"]
+
+[dependencies]
+# Core Dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+rayon = "1.8"  # Parallel processing
+
+# Cryptography & Hashing
+sha2 = "0.10"
+blake3 = "1.5"
+
+# Optional: für BIP39 Integration
+bip39 = { version = "2.0", optional = true }
+
+# Optional: für erweiterte numerische Operationen
+nalgebra = { version = "0.32", optional = true }
+ndarray = { version = "0.15", optional = true }
+
+[dev-dependencies]
+criterion = "0.5"  # Benchmarking
+proptest = "1.4"   # Property-based testing
+
+[features]
+default = []
+bip39-integration = ["bip39"]
+advanced-linalg = ["nalgebra", "ndarray"]
+parallel = ["rayon"]
+
+[[bench]]
+name = "spiral_generation"
+harness = false
+
+[[bench]]
+name = "metatron_embedding"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.bench]
+inherits = "release"
+
+# ============================================================================
+# PROJEKTSTRUKTUR
+# ============================================================================
+# 
+# phosphoros-kryptogenetik/
+# ├── Cargo.toml                 (diese Datei)
+# ├── src/
+# │   ├── lib.rs                (Hauptbibliothek - siehe phosphoros_core artifact)
+# │   ├── geometry/
+# │   │   ├── mod.rs
+# │   │   ├── point5d.rs
+# │   │   └── metatron.rs
+# │   ├── resonance/
+# │   │   ├── mod.rs
+# │   │   ├── gabriel_cell.rs
+# │   │   └── infogenom.rs
+# │   ├── spiral/
+# │   │   ├── mod.rs
+# │   │   └── triton.rs
+# │   ├── alchemy/
+# │   │   ├── mod.rs
+# │   │   ├── evaluator.rs
+# │   │   └── decision.rs
+# │   ├── explorer/
+# │   │   ├── mod.rs
+# │   │   └── qdash.rs
+# │   ├── bridge.rs             (PhosphorosCore API)
+# │   └── bip39_ext.rs          (BIP39 Extensions)
+# ├── examples/
+# │   ├── basic_exploration.rs
+# │   ├── seed_analysis.rs
+# │   └── metatron_visualization.rs
+# ├── benches/
+# │   ├── spiral_generation.rs
+# │   └── metatron_embedding.rs
+# ├── tests/
+# │   └── integration_tests.rs
+# └── README.md
+
+# ============================================================================
+# BUILD ANWEISUNGEN
+# ============================================================================
+#
+# Standard Build:
+#   cargo build --release
+#
+# Mit BIP39 Integration:
+#   cargo build --release --features bip39-integration
+#
+# Mit erweiteter linearer Algebra:
+#   cargo build --release --features advanced-linalg
+#
+# Alle Features:
+#   cargo build --release --all-features
+#
+# Tests:
+#   cargo test
+#   cargo test --release
+#
+# Benchmarks:
+#   cargo bench
+#
+# Dokumentation:
+#   cargo doc --open
+#
+# ============================================================================
+# NUTZUNG ALS BIBLIOTHEK
+# ============================================================================
+#
+# In Cargo.toml eines anderen Projekts:
+#
+# [dependencies]
+# phosphoros-kryptogenetik = { path = "../phosphoros-kryptogenetik" }
+# # oder von crates.io:
+# # phosphoros-kryptogenetik = "1.0"
+#
+# Im Code:
+#
+# use phosphoros_kryptogenetik::PhosphorosCore;
+#
+# fn main() {
+#     let mut core = PhosphorosCore::new();
+#     // ... verwende die API
+# }
