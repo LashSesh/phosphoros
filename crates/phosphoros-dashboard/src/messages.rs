@@ -81,6 +81,12 @@ pub enum SeedMessage {
         /// Number of addresses generated
         addresses: usize,
     },
+    /// Export all seeds to JSON
+    ExportAllJson,
+    /// Export all seeds to CSV
+    ExportAllCsv,
+    /// Export all seeds to Markdown
+    ExportAllMarkdown,
 }
 
 /// Resonance analysis messages
@@ -129,6 +135,12 @@ pub enum ClusterMessage {
     },
     /// Export cluster
     Export(String),
+    /// Export all clusters to JSON
+    ExportAllJson,
+    /// Export all clusters to CSV
+    ExportAllCsv,
+    /// Export all clusters to Markdown
+    ExportAllMarkdown,
 }
 
 /// Log panel messages
@@ -176,6 +188,10 @@ pub enum SettingsMessage {
         /// Priority level
         priority: usize,
     },
+    /// Generate system report
+    GenerateSystemReport,
+    /// Toggle service auto-start
+    ToggleAutoStart,
 }
 
 /// Service messages

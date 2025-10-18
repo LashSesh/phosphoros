@@ -8,6 +8,7 @@ use crate::state::{AppState, LogEntry, LogLevel, Notification, NotificationKind}
 use crate::theme::PhosphorosTheme;
 use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
 use crate::tasks::{TaskManager, TaskMessage};
+use crate::export::{ExportService, ExportFormat, SystemStats};
 use chrono::Utc;
 use iced::widget::{button, column, container, row, scrollable, text, text_input, toggler, progress_bar, horizontal_rule, horizontal_space, vertical_space};
 use iced::{Element, Length, Subscription, Task, Theme};
@@ -361,10 +362,27 @@ impl PhosphorosApp {
         .on_input(|s| Message::Panel(PanelMessage::Cluster(ClusterMessage::Search(s))))
         .padding(12);
 
+        // Export buttons
+        let export_row = row![
+            button(text("Export JSON").size(12))
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllJson)))
+                .padding(8),
+            horizontal_space().width(5),
+            button(text("Export CSV").size(12))
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllCsv)))
+                .padding(8),
+            horizontal_space().width(5),
+            button(text("Export Markdown").size(12))
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllMarkdown)))
+                .padding(8),
+        ];
+
         let mut content = column![
             title,
             vertical_space().height(20),
             search,
+            vertical_space().height(10),
+            export_row,
             vertical_space().height(20),
         ];
 
@@ -440,6 +458,17 @@ impl PhosphorosApp {
             toggler(self.state.dark_mode)
                 .on_toggle(|_| Message::Panel(PanelMessage::Settings(SettingsMessage::ToggleTheme))),
         ];
+        
+        let auto_start_row = row![
+            text("Auto-start Services").size(14),
+            horizontal_space().width(10),
+            toggler(self.config.services.auto_start)
+                .on_toggle(|_| Message::Panel(PanelMessage::Settings(SettingsMessage::ToggleAutoStart))),
+        ];
+        
+        let report_btn = button(text("Generate System Report"))
+            .on_press(Message::Panel(PanelMessage::Settings(SettingsMessage::GenerateSystemReport)))
+            .padding(10);
 
         let content = column![
             title,
@@ -449,6 +478,22 @@ impl PhosphorosApp {
                     text("Appearance").size(18),
                     vertical_space().height(10),
                     theme_row,
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Services").size(18),
+                    vertical_space().height(10),
+                    auto_start_row,
+                ]
+            ),
+            vertical_space().height(15),
+            crate::widgets::card(
+                column![
+                    text("Reports").size(18),
+                    vertical_space().height(10),
+                    report_btn,
                 ]
             ),
         ];
@@ -532,6 +577,31 @@ impl PhosphorosApp {
             PanelMessage::Cluster(ClusterMessage::Search(query)) => {
                 self.state.panels.cluster.search_query = query;
             }
+            PanelMessage::Cluster(ClusterMessage::ExportAllJson) => {
+                self.export_clusters(ExportFormat::Json);
+            }
+            PanelMessage::Cluster(ClusterMessage::ExportAllCsv) => {
+                self.export_clusters(ExportFormat::Csv);
+            }
+            PanelMessage::Cluster(ClusterMessage::ExportAllMarkdown) => {
+                self.export_clusters(ExportFormat::Markdown);
+            }
+            PanelMessage::SeedManagement(SeedMessage::ExportAllJson) => {
+                self.export_seeds(ExportFormat::Json);
+            }
+            PanelMessage::SeedManagement(SeedMessage::ExportAllCsv) => {
+                self.export_seeds(ExportFormat::Csv);
+            }
+            PanelMessage::SeedManagement(SeedMessage::ExportAllMarkdown) => {
+                self.export_seeds(ExportFormat::Markdown);
+            }
+            PanelMessage::Settings(SettingsMessage::GenerateSystemReport) => {
+                self.generate_system_report();
+            }
+            PanelMessage::Settings(SettingsMessage::ToggleAutoStart) => {
+                self.config.services.auto_start = !self.config.services.auto_start;
+                self.add_log(LogLevel::Info, "Settings", &format!("Auto-start: {}", self.config.services.auto_start));
+            }
             PanelMessage::Log(LogMessage::Clear) => {
                 self.state.clear_logs();
                 self.add_log(LogLevel::Info, "Log", "Logs cleared");
@@ -608,6 +678,81 @@ impl PhosphorosApp {
             TaskMessage::TaskCompleted { id, success } => {
                 let status = if success { "completed" } else { "failed" };
                 self.add_log(LogLevel::Info, "Tasks", &format!("Task {} {}", id, status));
+            }
+        }
+    }
+    
+    /// Export clusters to file
+    fn export_clusters(&mut self, format: ExportFormat) {
+        use dirs::home_dir;
+        
+        let home = home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+        let filename = match format {
+            ExportFormat::Json => "phosphoros_clusters.json",
+            ExportFormat::Csv => "phosphoros_clusters.csv",
+            ExportFormat::Markdown => "phosphoros_clusters.md",
+        };
+        let path = home.join(filename);
+        
+        match ExportService::export_clusters(&self.state.panels.cluster.clusters, &path, format) {
+            Ok(_) => {
+                self.add_log(LogLevel::Info, "Export", &format!("Clusters exported to {:?}", path));
+            }
+            Err(e) => {
+                self.add_log(LogLevel::Error, "Export", &format!("Export failed: {}", e));
+            }
+        }
+    }
+    
+    /// Export seeds to file
+    fn export_seeds(&mut self, format: ExportFormat) {
+        use dirs::home_dir;
+        
+        let home = home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+        let filename = match format {
+            ExportFormat::Json => "phosphoros_seeds.json",
+            ExportFormat::Csv => "phosphoros_seeds.csv",
+            ExportFormat::Markdown => "phosphoros_seeds.md",
+        };
+        let path = home.join(filename);
+        
+        match ExportService::export_seeds(&self.state.panels.seed_management.seeds, &path, format) {
+            Ok(_) => {
+                self.add_log(LogLevel::Info, "Export", &format!("Seeds exported to {:?}", path));
+            }
+            Err(e) => {
+                self.add_log(LogLevel::Error, "Export", &format!("Export failed: {}", e));
+            }
+        }
+    }
+    
+    /// Generate comprehensive system report
+    fn generate_system_report(&mut self) {
+        use dirs::home_dir;
+        
+        let home = home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+        let path = home.join("phosphoros_system_report.md");
+        
+        let stats = SystemStats {
+            entities_scraped: self.state.service_manager.scraper.read().processed,
+            anomalies_detected: self.state.service_manager.data_pool.read().anomalies.len(),
+            analysis_runs: self.state.panels.resonance.resonance_history.len(),
+            scraper_running: self.state.service_manager.scraper.read().running,
+            analyzer_running: self.state.service_manager.analyzer.read().running,
+            cluster_engine_running: self.state.service_manager.cluster_engine.read().running,
+        };
+        
+        match ExportService::generate_system_report(
+            &self.state.panels.seed_management.seeds,
+            &self.state.panels.cluster.clusters,
+            &stats,
+            &path,
+        ) {
+            Ok(_) => {
+                self.add_log(LogLevel::Info, "Export", &format!("System report generated: {:?}", path));
+            }
+            Err(e) => {
+                self.add_log(LogLevel::Error, "Export", &format!("Report generation failed: {}", e));
             }
         }
     }
