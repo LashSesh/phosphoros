@@ -1,0 +1,160 @@
+name: Phosphoros Kryptogenetik CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'phosphoros-kryptogenetik/**'
+      - '.github/workflows/phosphoros-kryptogenetik-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'phosphoros-kryptogenetik/**'
+      - '.github/workflows/phosphoros-kryptogenetik-ci.yml'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        rust: [stable]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+    
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build (default features)
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo build --release
+    
+    - name: Build (all features)
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo build --release --all-features
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Test (default features)
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo test
+    
+    - name: Test (all features)
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo test --all-features
+
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        components: rustfmt
+        override: true
+    
+    - name: Check formatting
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo fmt -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        components: clippy
+        override: true
+    
+    - name: Run clippy
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo clippy --all-features -- -D warnings
+
+  doc:
+    name: Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Generate documentation
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo doc --all-features --no-deps
+      env:
+        RUSTDOCFLAGS: -D warnings
+
+  bench:
+    name: Benchmark (compile check)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Check benchmarks compile
+      working-directory: ./phosphoros-kryptogenetik
+      run: cargo bench --no-run
