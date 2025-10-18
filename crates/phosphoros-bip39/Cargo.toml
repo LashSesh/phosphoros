@@ -1,6 +1,44 @@
 [package]
 name = "phosphoros-bip39"
-version = "0.1.0"
-edition = "2024"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "BIP39 multichain wallet support for PHOSPHOROS"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+keywords = ["bip39", "multichain", "wallet", "mnemonic"]
+categories = ["cryptography"]
 
 [dependencies]
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2.0"
+sha2 = "0.10"
+hmac = "0.12"
+pbkdf2 = { version = "0.12", features = ["simple"] }
+hex = "0.4"
+rand = "0.8"
+
+# BIP39 wordlist support
+bip39 = { version = "2.0", features = ["all-languages"] }
+
+# Optional chain dependencies
+bitcoin = { version = "0.31", optional = true }
+k256 = { version = "0.13", optional = true, features = ["ecdsa"] }
+bech32 = { version = "0.9", optional = true }
+
+# Optional resonance analysis
+phosphoros-core = { path = "../phosphoros-core", optional = true }
+
+[features]
+default = []
+# Chain support
+btc = ["bitcoin", "bech32"]
+evm = ["k256"]
+# Other chains would be added similarly
+substrate = []
+cosmos = []
+solana = []
+cardano = []
+monero = []
+# Resonance analysis
+resonance = ["phosphoros-core"]
