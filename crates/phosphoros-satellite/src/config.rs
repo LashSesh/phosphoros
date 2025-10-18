@@ -16,6 +16,10 @@ pub struct SatelliteConfig {
     /// Analysis configuration
     #[serde(default)]
     pub analysis: AnalysisConfig,
+    
+    /// Stealth networking configuration
+    #[serde(default)]
+    pub stealth: StealthConfig,
 }
 
 impl Default for SatelliteConfig {
@@ -23,6 +27,7 @@ impl Default for SatelliteConfig {
         Self {
             api: ApiConfig::default(),
             analysis: AnalysisConfig::default(),
+            stealth: StealthConfig::default(),
         }
     }
 }
@@ -125,6 +130,114 @@ impl AnalysisConfig {
 
     const fn default_max_snapshots() -> usize {
         32
+    }
+}
+
+/// Stealth networking configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StealthConfig {
+    /// Whether stealth mode is enabled
+    #[serde(default)]
+    pub enabled: bool,
+    
+    /// Default stealth mode to use
+    #[serde(default)]
+    pub default_mode: phosphoros_stealthnet::StealthMode,
+    
+    /// Preferred API type for mimicry
+    #[serde(default)]
+    pub preferred_api: Option<phosphoros_stealthnet::ApiType>,
+    
+    /// Enable proxy rotation
+    #[serde(default)]
+    pub proxy_enabled: bool,
+    
+    /// List of proxy configurations
+    #[serde(default)]
+    pub proxies: Vec<ProxyConfigEntry>,
+    
+    /// Proxy rotation mode
+    #[serde(default)]
+    pub proxy_rotation: ProxyRotationMode,
+    
+    /// Enable request logging (for compliance)
+    #[serde(default)]
+    pub enable_logging: bool,
+    
+    /// Enable temporal jitter (random delays)
+    #[serde(default = "StealthConfig::default_enable_jitter")]
+    pub enable_jitter: bool,
+    
+    /// Minimum jitter in milliseconds
+    #[serde(default = "StealthConfig::default_min_jitter")]
+    pub min_jitter_ms: u64,
+    
+    /// Maximum jitter in milliseconds
+    #[serde(default = "StealthConfig::default_max_jitter")]
+    pub max_jitter_ms: u64,
+}
+
+impl Default for StealthConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            default_mode: phosphoros_stealthnet::StealthMode::default(),
+            preferred_api: None,
+            proxy_enabled: false,
+            proxies: Vec::new(),
+            proxy_rotation: ProxyRotationMode::default(),
+            enable_logging: true,
+            enable_jitter: true,
+            min_jitter_ms: Self::default_min_jitter(),
+            max_jitter_ms: Self::default_max_jitter(),
+        }
+    }
+}
+
+impl StealthConfig {
+    const fn default_enable_jitter() -> bool {
+        true
+    }
+    
+    const fn default_min_jitter() -> u64 {
+        100
+    }
+    
+    const fn default_max_jitter() -> u64 {
+        1000
+    }
+}
+
+/// Proxy configuration entry.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProxyConfigEntry {
+    /// Proxy host
+    pub host: String,
+    /// Proxy port
+    pub port: u16,
+    /// Protocol (socks5, http, https)
+    pub protocol: String,
+    /// Optional username
+    pub username: Option<String>,
+    /// Optional password
+    pub password: Option<String>,
+}
+
+/// Proxy rotation mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ProxyRotationMode {
+    /// Round-robin rotation
+    RoundRobin,
+    /// Random selection
+    Random,
+    /// Sequential (no rotation)
+    Sequential,
+}
+
+impl Default for ProxyRotationMode {
+    fn default() -> Self {
+        Self::RoundRobin
     }
 }
 
