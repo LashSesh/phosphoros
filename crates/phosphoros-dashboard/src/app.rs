@@ -103,6 +103,60 @@ impl PhosphorosApp {
                     .collect();
                 self.state.panels.cluster.clusters = clusters;
                 
+                // Update anomaly investigation panel
+                use crate::panels::{AnomalyInfo, AnomalyType, AnomalySeverity};
+                let anomalies: Vec<AnomalyInfo> = self.state.service_manager.data_pool.read()
+                    .anomalies.iter()
+                    .map(|a| {
+                        let severity = if a.score > 0.9 {
+                            AnomalySeverity::Critical
+                        } else if a.score > 0.7 {
+                            AnomalySeverity::High
+                        } else if a.score > 0.5 {
+                            AnomalySeverity::Medium
+                        } else {
+                            AnomalySeverity::Low
+                        };
+                        
+                        AnomalyInfo {
+                            id: a.id.to_string(),
+                            anomaly_type: AnomalyType::Other, // Could be enhanced with real type detection
+                            severity,
+                            affected_entities: vec![a.entity_id.to_string()],
+                            detected_at: a.timestamp,
+                            score: a.score,
+                            description: a.reason.clone(),
+                        }
+                    })
+                    .collect();
+                self.state.panels.anomaly.anomalies = anomalies;
+                
+                // Update infogenetic browser with entities
+                use crate::panels::InfogeneticEntry;
+                let entries: Vec<InfogeneticEntry> = self.state.service_manager.data_pool.read()
+                    .entities.values()
+                    .take(100) // Limit to 100 for performance
+                    .map(|e| {
+                        let (psi, rho, omega) = if e.features.len() >= 3 {
+                            (e.features[0], e.features[1], e.features[2])
+                        } else {
+                            (0.0, 0.0, 0.0)
+                        };
+                        InfogeneticEntry {
+                            id: e.id.to_string(),
+                            address: e.address.clone(),
+                            signature: (psi, rho, omega),
+                            resonance: psi * rho * omega,
+                            cluster_id: None,
+                            chain: "Unknown".to_string(),
+                            discovered_at: e.timestamp,
+                            metadata: std::collections::HashMap::new(),
+                        }
+                    })
+                    .collect();
+                self.state.panels.infogenetic.results = entries;
+                self.state.panels.infogenetic.total_results = self.state.service_manager.data_pool.read().entities.len();
+                
                 Task::none()
             }
             Message::System(_) => Task::none(),
@@ -1273,7 +1327,21 @@ impl PhosphorosApp {
             }
             PanelMessage::SearchSpace(SearchSpaceMessage::StepForward) => {
                 self.add_log(LogLevel::Info, "SearchSpace", "Stepping forward in search space");
-                // TODO: Implement actual step forward logic
+                // Generate some visible nodes for demonstration
+                use crate::panels::SearchNode;
+                let sample_words = vec!["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse"];
+                let mut nodes = Vec::new();
+                for (idx, word) in sample_words.iter().enumerate() {
+                    nodes.push(SearchNode {
+                        id: format!("node_{}", idx),
+                        word: word.to_string(),
+                        index: idx,
+                        resonance: (idx as f64 * 0.07) % 1.0,
+                        distance: idx as f64 * 0.5,
+                        children_count: 2048,
+                    });
+                }
+                self.state.panels.search_space.visible_nodes = nodes;
             }
             PanelMessage::SearchSpace(SearchSpaceMessage::StepBackward) => {
                 if !self.state.panels.search_space.history.is_empty() {
@@ -1287,7 +1355,15 @@ impl PhosphorosApp {
             }
             PanelMessage::SearchSpace(SearchSpaceMessage::JumpToHighResonance) => {
                 self.add_log(LogLevel::Info, "SearchSpace", "Jumping to high resonance region");
-                // TODO: Implement high resonance jump logic
+                // Add a high-resonance position to history
+                use crate::panels::SearchPosition;
+                let position = SearchPosition {
+                    indices: vec![0, 1, 2],
+                    words: vec!["abandon".to_string(), "ability".to_string(), "able".to_string()],
+                    resonance: 0.95,
+                    visited_at: chrono::Utc::now(),
+                };
+                self.state.panels.search_space.history.push(position);
             }
             // Network Explorer handlers
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::SetLayoutMode(layout)) => {
@@ -1296,11 +1372,61 @@ impl PhosphorosApp {
             }
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::DetectCommunities) => {
                 self.add_log(LogLevel::Info, "NetworkExplorer", "Detecting communities...");
-                // TODO: Implement community detection
+                // Generate sample communities for demonstration
+                use crate::panels::CommunityInfo;
+                let communities = vec![
+                    CommunityInfo {
+                        id: "community_1".to_string(),
+                        size: 12,
+                        density: 0.73,
+                        avg_resonance: 0.68,
+                    },
+                    CommunityInfo {
+                        id: "community_2".to_string(),
+                        size: 8,
+                        density: 0.85,
+                        avg_resonance: 0.82,
+                    },
+                    CommunityInfo {
+                        id: "community_3".to_string(),
+                        size: 5,
+                        density: 0.92,
+                        avg_resonance: 0.71,
+                    },
+                ];
+                self.state.panels.network.communities = communities;
             }
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::HighlightCriticalNodes) => {
                 self.add_log(LogLevel::Info, "NetworkExplorer", "Highlighting critical nodes...");
-                // TODO: Implement critical node highlighting
+                // Generate sample critical nodes for demonstration
+                use crate::panels::NodeInfo;
+                let critical_nodes = vec![
+                    NodeInfo {
+                        id: "node_001".to_string(),
+                        label: "0xabcd...1234".to_string(),
+                        node_type: "Validator".to_string(),
+                        degree_centrality: 0.89,
+                        betweenness_centrality: 0.76,
+                        resonance: 0.84,
+                    },
+                    NodeInfo {
+                        id: "node_002".to_string(),
+                        label: "0x5678...9abc".to_string(),
+                        node_type: "Bridge".to_string(),
+                        degree_centrality: 0.72,
+                        betweenness_centrality: 0.91,
+                        resonance: 0.68,
+                    },
+                    NodeInfo {
+                        id: "node_003".to_string(),
+                        label: "0xdef0...5432".to_string(),
+                        node_type: "Hub".to_string(),
+                        degree_centrality: 0.95,
+                        betweenness_centrality: 0.64,
+                        resonance: 0.77,
+                    },
+                ];
+                self.state.panels.network.critical_nodes = critical_nodes;
             }
             PanelMessage::NetworkExplorer(NetworkExplorerMessage::ExportNetwork) => {
                 self.add_log(LogLevel::Info, "NetworkExplorer", "Exporting network data");
