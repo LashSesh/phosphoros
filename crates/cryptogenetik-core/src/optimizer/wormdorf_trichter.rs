@@ -38,7 +38,7 @@ impl WormdorfTrichter {
     /// v' = v + λ · ∇(curvature)
     pub fn apply(&self, v: [f64; 5], gradient: [f64; 5], _score: f64) -> [f64; 5] {
         let mut result = v;
-        
+
         // Compute principal curvature direction (simplified)
         // In full implementation, this would use Hessian analysis
         let curvature_dir = self.principal_curvature_direction(&gradient);
@@ -76,7 +76,7 @@ mod tests {
         let v = [1.0, 1.0, 1.0, 1.0, 1.0];
         let gradient = [0.5, 0.5, 0.5, 0.5, 0.5];
         let result = wt.apply(v, gradient, 0.8);
-        
+
         // Result should be different from input
         assert_ne!(result, v);
     }

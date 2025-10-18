@@ -1,8 +1,12 @@
 //! Holistic Matrix - Complete integration of resonance engines
 
 use super::{
-    channel::ResonanceChannel, chrono::Chronokrator, kosmo::{Kosmokrator, PhaseState},
-    mandorla::MandorlaField, monolith::Monolith, torus::TorusTopology,
+    channel::ResonanceChannel,
+    chrono::Chronokrator,
+    kosmo::{Kosmokrator, PhaseState},
+    mandorla::MandorlaField,
+    monolith::Monolith,
+    torus::TorusTopology,
 };
 use crate::resonance::traits::{Evaluation, GateReason, ResonanceEngine};
 use std::f64::consts::PI;

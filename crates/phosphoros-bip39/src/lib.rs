@@ -38,8 +38,8 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-mod error;
 pub mod derivation;
+mod error;
 pub mod mnemonic;
 pub mod multichain;
 pub mod wordlist;
@@ -48,9 +48,8 @@ pub mod wordlist;
 #[cfg(feature = "resonance")]
 pub mod analysis;
 
-pub use error::{Error, Result};
 pub use derivation::{CurveType, DerivationPath, DerivedKey, MasterKey};
+pub use error::{Error, Result};
 pub use mnemonic::Mnemonic;
 pub use multichain::{Blockchain, MultichainAddress, MultichainWallet};
 pub use wordlist::WordlistLanguage;
-

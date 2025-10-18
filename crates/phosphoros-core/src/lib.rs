@@ -36,4 +36,3 @@ pub use geometry::{MetatronGeometry, Point5D};
 pub use resonance::{
     Evaluation, GateReason, HolisticMatrix, MatrixState, ResonanceEngine, SpectralSignature,
 };
-

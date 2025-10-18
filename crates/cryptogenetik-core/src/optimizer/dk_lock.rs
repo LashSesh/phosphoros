@@ -91,10 +91,10 @@ mod tests {
     fn test_dk_with_reference() {
         let mut dk = DKLock::new(DKConfig::default());
         dk.set_reference([0.0, 0.0, 0.0, 0.0, 0.0]);
-        
+
         let v = [5.0, 5.0, 5.0, 5.0, 5.0];
         let result = dk.apply(v);
-        
+
         // Result should be pulled towards reference
         for &val in &result {
             assert!(val < 5.0);

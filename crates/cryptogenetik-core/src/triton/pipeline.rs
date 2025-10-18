@@ -34,7 +34,12 @@ impl<'a, E: ResonanceEngine> TritonPipeline<'a, E> {
     }
 
     /// Run search for specified steps
-    pub fn search(&mut self, seed_words: &[String], max_steps: usize, seed: u64) -> Result<SearchResult> {
+    pub fn search(
+        &mut self,
+        seed_words: &[String],
+        max_steps: usize,
+        seed: u64,
+    ) -> Result<SearchResult> {
         use rand::Rng;
         let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
 
@@ -63,7 +68,9 @@ impl<'a, E: ResonanceEngine> TritonPipeline<'a, E> {
             let intention = v;
             let gradient = v.map(|x| x * 0.1);
 
-            let eval = self.engine.evaluate(t, perception, intention, gradient, 0.5);
+            let eval = self
+                .engine
+                .evaluate(t, perception, intention, gradient, 0.5);
 
             match eval {
                 Evaluation::Gated { .. } => {
@@ -144,7 +151,7 @@ mod tests {
         let words = vec!["test".to_string()];
         let result = pipeline.search(&words, 100, 12345);
         assert!(result.is_ok());
-        
+
         let result = result.unwrap();
         assert_eq!(result.steps_taken, 100);
     }

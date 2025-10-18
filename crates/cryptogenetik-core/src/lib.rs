@@ -34,8 +34,8 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-mod error;
 pub mod bridge;
+mod error;
 pub mod optimizer;
 pub mod score_hooks;
 pub mod triton;
@@ -45,4 +45,3 @@ pub use error::{Error, Result};
 pub use optimizer::OperatorSet;
 pub use score_hooks::HookSet;
 pub use triton::{SearchResult, TritonPipeline};
-

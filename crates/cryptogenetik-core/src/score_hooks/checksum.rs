@@ -17,7 +17,7 @@ impl ChecksumHook {
         // Simple checksum score: hash and check leading zeros
         let hash = Sha256::digest(data);
         let leading_zeros = hash.iter().take_while(|&&b| b == 0).count();
-        
+
         // More leading zeros = higher score
         (leading_zeros as f64) / 8.0
     }

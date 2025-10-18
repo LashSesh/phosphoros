@@ -52,10 +52,10 @@ mod tests {
     fn test_sw_threshold() {
         let sw = SWThreshold::new(SWConfig::default());
         let v = [1.0, 1.0, 1.0, 1.0, 1.0];
-        
+
         // Above threshold
         assert!(sw.apply(v, 0.6).is_some());
-        
+
         // Below threshold
         assert!(sw.apply(v, 0.4).is_none());
     }
