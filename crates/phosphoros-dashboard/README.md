@@ -161,7 +161,130 @@ Forensic cluster discovery and analysis:
 - Discovery timestamps
 - Export/import capabilities
 
-### 5. System Log 📝
+### 5. Search Space Explorer 🗺️
+
+**NEW**: Manual navigation through cryptographic seed/address space:
+- **Navigation Modes**:
+  - Manual: Point-and-click exploration
+  - Sequential: Step through space systematically
+  - Random Walk: Stochastic exploration
+  - Directed Search: Resonance-gradient guided navigation
+- **View Modes**:
+  - Tree: Hierarchical view of search space
+  - Graph: Network visualization of relationships
+  - List: Simple linear view
+  - 5D Projection: High-dimensional visualization
+- **Features**:
+  - Exploration history with breadcrumb trail
+  - Resonance threshold filtering
+  - Jump to high-resonance regions
+  - Export exploration paths
+  - Real-time visible node display
+
+### 6. Network Topology Explorer 🕸️
+
+**NEW**: Interactive blockchain network visualization and analysis:
+- **Layout Modes**:
+  - Force-Directed: Physics-based layout
+  - Hierarchical: Tree-like structure
+  - Circular: Ring layout
+  - Geographic: Geo-coordinated (if available)
+- **Analysis Tools**:
+  - Community detection (clustering)
+  - Critical node identification (centrality)
+  - Path finding between nodes
+  - Edge weight filtering
+- **Features**:
+  - Node type filtering
+  - Interactive node selection
+  - Network metrics display
+  - Export network data
+
+### 7. Infogenetic Database Browser 🧬
+
+**NEW**: Advanced querying and exploration of the spectral database:
+- **Query Types**:
+  - Address search
+  - Spectral signature range queries
+  - Cluster membership search
+  - Full-text search
+  - Advanced custom queries
+- **Features**:
+  - Multi-criteria filtering
+  - Flexible sorting (timestamp, resonance, address, cluster size)
+  - Pagination support
+  - Detailed entry inspection
+  - Export search results
+- **Display**:
+  - Spectral signatures (ψ, ρ, ω)
+  - Resonance scores
+  - Chain identification
+  - Discovery timestamps
+  - Metadata viewing
+
+### 8. Anomaly Investigation 🚨
+
+**NEW**: Deep forensic analysis of detected blockchain anomalies:
+- **Anomaly Types**:
+  - Sybil attacks
+  - Money laundering patterns
+  - Volume anomalies
+  - Temporal anomalies
+  - Structural anomalies
+- **Investigation Tools**:
+  - Related entity discovery
+  - Timeline analysis
+  - Similar case matching
+  - Investigation notes
+- **Features**:
+  - Severity filtering (Low, Medium, High, Critical)
+  - Type-based filtering
+  - Affected entity tracking
+  - Visual timeline display
+  - Export investigation reports
+
+### 9. Forensic Workflows 🔬
+
+**NEW**: Guided step-by-step investigation processes:
+- **Pre-built Workflows**:
+  1. **Sybil Attack Investigation** (30-45 min)
+     - Identify seed cluster
+     - Analyze temporal patterns
+     - Map network topology
+     - Calculate resonance signatures
+     - Generate report
+  2. **Money Laundering Trace** (45-60 min)
+     - Identify origin transaction
+     - Trace fund flow
+     - Identify mixing services
+     - Map destination clusters
+  3. **Comprehensive Address Profiling** (20-30 min)
+     - Gather address data
+     - Analyze transaction patterns
+     - Compute spectral signature
+     - Find similar addresses
+  4. **Cluster Forensics Analysis** (30-40 min)
+     - Load cluster data
+     - Analyze internal structure
+     - Identify external connections
+     - Compute cluster resonance
+- **Features**:
+  - Step-by-step guidance
+  - Progress tracking
+  - Data collection at each step
+  - Workflow history
+  - Export workflow results
+
+### 10. Stealth/Privacy 🔒
+
+Advanced privacy and stealth networking controls:
+- Traffic mimicry modes
+- Proxy rotation
+- Temporal jitter
+- Request logging controls
+- Compliance notices
+
+### 11. System Log 📝
 
 Complete activity logging:
 - Filterable log entries
@@ -170,7 +293,7 @@ Complete activity logging:
 - Auto-scroll option
 - Clear logs functionality
 
-### 6. Settings & Tasks ⚙️
+### 12. Settings & Tasks ⚙️
 
 System configuration and control:
 - Dark/Light theme toggle

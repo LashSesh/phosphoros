@@ -40,6 +40,21 @@ pub enum PanelMessage {
     /// Cluster explorer messages
     Cluster(ClusterMessage),
 
+    /// Search space explorer messages
+    SearchSpace(SearchSpaceMessage),
+
+    /// Network explorer messages
+    NetworkExplorer(NetworkExplorerMessage),
+
+    /// Infogenetic browser messages
+    InfogeneticBrowser(InfogeneticBrowserMessage),
+
+    /// Anomaly investigation messages
+    AnomalyInvestigation(AnomalyInvestigationMessage),
+
+    /// Forensic workflows messages
+    ForensicWorkflows(ForensicWorkflowsMessage),
+
     /// Stealth/Privacy messages
     Stealth(StealthMessage),
 
@@ -339,4 +354,141 @@ pub enum NotificationMessage {
     Error(String),
     /// Dismiss notification
     Dismiss(usize),
+}
+
+/// Search Space Explorer messages
+#[derive(Debug, Clone)]
+pub enum SearchSpaceMessage {
+    /// Navigate to a position
+    NavigateTo(Vec<usize>),
+    /// Step forward in current direction
+    StepForward,
+    /// Step backward (undo last step)
+    StepBackward,
+    /// Change navigation mode
+    SetNavigationMode(crate::panels::NavigationMode),
+    /// Change view mode
+    SetViewMode(crate::panels::ViewMode),
+    /// Set resonance threshold filter
+    SetThreshold(f64),
+    /// Toggle auto-explore
+    ToggleAutoExplore,
+    /// Clear exploration history
+    ClearHistory,
+    /// Jump to high-resonance region
+    JumpToHighResonance,
+    /// Export current path
+    ExportPath,
+}
+
+/// Network Explorer messages
+#[derive(Debug, Clone)]
+pub enum NetworkExplorerMessage {
+    /// Load a network by ID
+    LoadNetwork(String),
+    /// Select a node for inspection
+    SelectNode(Option<String>),
+    /// Change layout mode
+    SetLayoutMode(crate::panels::LayoutMode),
+    /// Toggle node type filter
+    ToggleNodeTypeFilter(String),
+    /// Toggle edge visibility
+    ToggleEdges,
+    /// Set edge weight threshold
+    SetEdgeThreshold(f64),
+    /// Find path between nodes
+    FindPath {
+        source: String,
+        target: String,
+    },
+    /// Clear path finding
+    ClearPaths,
+    /// Detect communities
+    DetectCommunities,
+    /// Highlight critical nodes
+    HighlightCriticalNodes,
+    /// Export network data
+    ExportNetwork,
+}
+
+/// Infogenetic Browser messages
+#[derive(Debug, Clone)]
+pub enum InfogeneticBrowserMessage {
+    /// Update search query
+    QueryChanged(String),
+    /// Set query type
+    SetQueryType(crate::panels::QueryType),
+    /// Add filter criterion
+    AddFilter(crate::panels::FilterCriterion),
+    /// Remove filter
+    RemoveFilter(usize),
+    /// Clear all filters
+    ClearFilters,
+    /// Change sort field
+    SetSortBy(crate::panels::SortField),
+    /// Toggle sort direction
+    ToggleSortDirection,
+    /// Execute search
+    Search,
+    /// Navigate to page
+    GoToPage(usize),
+    /// Change items per page
+    SetItemsPerPage(usize),
+    /// Select entry for details
+    SelectEntry(Option<usize>),
+    /// Export results
+    ExportResults,
+}
+
+/// Anomaly Investigation messages
+#[derive(Debug, Clone)]
+pub enum AnomalyInvestigationMessage {
+    /// Select anomaly for investigation
+    SelectAnomaly(Option<usize>),
+    /// Update investigation notes
+    NotesChanged(String),
+    /// Add type filter
+    AddTypeFilter(crate::panels::AnomalyType),
+    /// Remove type filter
+    RemoveTypeFilter(crate::panels::AnomalyType),
+    /// Add severity filter
+    AddSeverityFilter(crate::panels::AnomalySeverity),
+    /// Remove severity filter
+    RemoveSeverityFilter(crate::panels::AnomalySeverity),
+    /// Clear all filters
+    ClearFilters,
+    /// Find related entities
+    FindRelatedEntities,
+    /// Load timeline
+    LoadTimeline,
+    /// Find similar cases
+    FindSimilarCases,
+    /// Mark anomaly as investigated
+    MarkInvestigated,
+    /// Export investigation report
+    ExportReport,
+}
+
+/// Forensic Workflows messages
+#[derive(Debug, Clone)]
+pub enum ForensicWorkflowsMessage {
+    /// Start a workflow
+    StartWorkflow(String),
+    /// Cancel active workflow
+    CancelWorkflow,
+    /// Complete current step
+    CompleteStep,
+    /// Go to previous step
+    PreviousStep,
+    /// Update step data
+    UpdateStepData {
+        key: String,
+        value: String,
+    },
+    /// Load workflow history
+    LoadHistory,
+    /// View workflow execution
+    ViewExecution(String),
+    /// Export workflow results
+    ExportResults,
 }
