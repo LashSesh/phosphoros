@@ -1,23 +1,80 @@
 # PHOSPHOROS - Prä-Holographisches System zur 5D-Skalarprojektion
 
-> Core Integration + GUI-Ready Gateway Architecture
+> Enterprise-Ready Suite for High-Dimensional Blockchain Forensics
 
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/LashSesh/phosphoros)
 
-**PHOSPHOROS** is a sophisticated system for topological mapping of cryptographic seed spaces using 5D-spectral analysis and holistic resonance engines.
+**PHOSPHOROS** is a sophisticated enterprise system for topological mapping of cryptographic seed spaces using 5D-spectral analysis, holistic resonance engines, and autonomous blockchain forensics.
+
+🎯 **NEW: [PHOSPHOROS Dashboard](#-phosphoros-dashboard)** - Fully integrated GUI with real-time autonomous operation!
 
 📖 **[Read the Delta Blueprint](DELTA_BLUEPRINT.md)** for complete architecture documentation and AI agent integration guide.
 
 ## 🌟 Overview
 
-PHOSPHOROS integrates advanced mathematical concepts including:
+PHOSPHOROS integrates advanced mathematical concepts with enterprise-grade blockchain forensics:
+
 - **5D Spectral Geometry**: Metatron Sacred Geometry with 5D projection
 - **Holistic Resonance**: Multi-layer resonance engine (Kosmokrator, Chronokrator, O.P.H.A.N.)
 - **Topological Optimization**: Four operators (WT, SW, DK, PI) for search space reduction
 - **Multichain Support**: BIP39 integration for Bitcoin, Ethereum, Substrate, and more
 - **Satellite Forensics**: Blockchain analysis, anomaly detection, and cluster identification
 - **Infogenetic Mapping**: Spectral signatures (ψ, ρ, ω) for cryptographic analysis
+- **🆕 Living Lab Dashboard**: Real-time GUI with autonomous operation
+
+## 🖥️ PHOSPHOROS Dashboard
+
+The **PHOSPHOROS Dashboard** is a fully integrated, production-ready interface for blockchain forensics with autonomous background services.
+
+### Key Features
+
+✨ **6 Modular Panels:**
+- 🏠 **Home**: Live overview with real-time service status and statistics
+- 🔑 **Seed & Wallet**: BIP39 mnemonic import with multi-chain address generation
+- 📊 **Resonance & Spectro**: Real-time 5D resonance analysis with spectral signatures
+- 🔍 **Cluster Explorer**: Automatic cluster discovery and analysis
+- 📝 **System Log**: Filterable logs with severity levels
+- ⚙️ **Settings & Tasks**: Configuration and system reports
+
+🤖 **3 Autonomous Services:**
+- **Scraper**: Continuous entity discovery (5s interval)
+- **Analyzer**: Real-time anomaly detection (3s interval)
+- **Cluster Engine**: Automatic KNN clustering (10s interval)
+
+🔄 **Real-Time Operation:**
+- Thread-safe async architecture with tokio
+- Live statistics and metrics
+- Background task management
+- Message-driven state updates
+
+💾 **Data Export:**
+- JSON export for programmatic access
+- CSV export for spreadsheet analysis
+- Markdown reports for documentation
+- Comprehensive system reports
+
+### Quick Start Dashboard
+
+```bash
+# Run the dashboard
+cargo run -p phosphoros-dashboard --release
+
+# With debug logging
+RUST_LOG=debug cargo run -p phosphoros-dashboard
+```
+
+### Dashboard Screenshots
+
+The dashboard features a professional dark mode interface with:
+- Real-time service status indicators (🟢 Running / ⏸ Paused)
+- Live entity, cluster, and anomaly counters
+- Export buttons for all data types
+- Filterable system logs
+- Theme toggle (Dark/Light)
+
+See [Dashboard Documentation](crates/phosphoros-dashboard/README.md) for detailed information.
 
 ## 📦 Workspace Structure
 
@@ -28,7 +85,8 @@ phosphoros/
 │   ├── cryptogenetik-core/      # Search + optimization
 │   ├── phosphoros-bip39/        # Multichain wallet support
 │   ├── phosphoros-satellite/    # Blockchain forensics & analysis
-│   ├── phosphoros-cli/          # Command-line tools (planned)
+│   ├── phosphoros-dashboard/    # 🆕 GUI Dashboard (Living Lab)
+│   ├── phosphoros-cli/          # Command-line tools
 │   └── phosphoros-gateway/      # REST/WS API gateway
 ├── ouroboros_dna/              # Visualization tools
 └── phosphoros-kryptogenetik/   # Legacy implementation
@@ -235,14 +293,16 @@ cargo doc --workspace --all-features --no-deps
 
 ## 🎯 Use Cases
 
-1. **Cryptographic Research**: Analyze seed space topology
-2. **Forensic Analysis**: Map and explore cryptographic relationships
-3. **Blockchain Forensics**: Detect Sybil attacks, money laundering, anomalous behavior
-4. **Wallet Profiling**: Build behavioral profiles and detect patterns
+1. **Cryptographic Research**: Analyze seed space topology with 5D spectral analysis
+2. **Blockchain Forensics**: Detect Sybil attacks, money laundering, anomalous behavior
+3. **Wallet Profiling**: Build behavioral profiles and detect patterns
+4. **Forensic Analysis**: Map and explore cryptographic relationships
 5. **Infogenetic Studies**: Build spectral databases of addresses
 6. **Seed Recovery**: Reconstruct seeds via 5D-spectral convergence
 7. **Multichain Analysis**: Cross-chain address generation and analysis
 8. **Network Analysis**: Understand blockchain network topology and critical nodes
+9. **🆕 Real-Time Monitoring**: Live dashboard for continuous blockchain surveillance
+10. **🆕 Enterprise Reporting**: Automated report generation for compliance and analysis
 
 ## ⚠️ Security Notice
 
@@ -262,9 +322,12 @@ PHOSPHOROS is a research tool for understanding cryptographic seed spaces, not a
 - ✅ No `unwrap()`/`expect()` in library code
 - ✅ Comprehensive error handling with `thiserror`
 - ✅ Full determinism (seeded RNG)
-- ✅ Extensive test coverage
+- ✅ Extensive test coverage (139+ tests passing)
 - ✅ Documentation for all public APIs
 - ✅ `clippy` clean with `-D warnings`
+- ✅ Thread-safe async architecture
+- ✅ Real-time GUI dashboard
+- ✅ Enterprise data export capabilities
 
 ### Feature Flags
 
@@ -282,6 +345,10 @@ PHOSPHOROS is a research tool for understanding cryptographic seed spaces, not a
 
 **phosphoros-satellite**:
 - `api`: Enables REST API endpoints (Axum, Tokio, Tower, Tracing)
+
+**phosphoros-dashboard**:
+- Default features include all integrations
+- `tokio`, `canvas`, `advanced` enabled by default
 
 ## 🤝 Contributing
 
