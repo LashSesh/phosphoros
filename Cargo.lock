@@ -4094,6 +4094,7 @@ dependencies = [
  "phosphoros-bip39",
  "phosphoros-core",
  "phosphoros-satellite",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "thiserror 2.0.17",

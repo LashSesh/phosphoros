@@ -6,6 +6,7 @@ use crate::messages::*;
 use crate::panels::PanelId;
 use crate::state::{AppState, LogEntry, LogLevel, Notification, NotificationKind};
 use crate::theme::PhosphorosTheme;
+use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
 use chrono::Utc;
 use iced::widget::{button, column, container, row, scrollable, text, text_input, toggler, progress_bar, horizontal_rule, horizontal_space, vertical_space};
 use iced::{Element, Length, Subscription, Task, Theme};
@@ -18,6 +19,9 @@ pub struct PhosphorosApp {
     config: Config,
     theme: PhosphorosTheme,
     notification_counter: usize,
+    // Integration components (not Debug, so we store them separately)
+    resonance_integration: Option<ResonanceIntegration>,
+    analysis_integration: Option<AnalysisIntegration>,
 }
 
 impl PhosphorosApp {
@@ -31,6 +35,8 @@ impl PhosphorosApp {
             config,
             theme,
             notification_counter: 0,
+            resonance_integration: Some(ResonanceIntegration::new()),
+            analysis_integration: Some(AnalysisIntegration::new()),
         };
 
         app.add_log(LogLevel::Info, "System", "PHOSPHOROS Dashboard initialized");
@@ -365,11 +371,49 @@ impl PhosphorosApp {
             PanelMessage::SeedManagement(SeedMessage::InputChanged(input)) => {
                 self.state.panels.seed_management.input = input;
             }
+            PanelMessage::SeedManagement(SeedMessage::ImportSeed) => {
+                // Real wallet integration
+                let input = self.state.panels.seed_management.input.clone();
+                match WalletIntegration::import_mnemonic(&input) {
+                    Ok(seed_info) => {
+                        let addr_count = seed_info.addresses.len();
+                        self.state.panels.seed_management.seeds.push(seed_info);
+                        self.state.panels.home.seeds_count = self.state.panels.seed_management.seeds.len();
+                        self.add_log(LogLevel::Info, "Wallet", &format!("Imported seed with {} addresses", addr_count));
+                        self.state.panels.seed_management.input.clear();
+                    }
+                    Err(e) => {
+                        self.add_log(LogLevel::Error, "Wallet", &format!("Import failed: {}", e));
+                    }
+                }
+            }
             PanelMessage::SeedManagement(SeedMessage::Clear) => {
                 self.state.panels.seed_management.input.clear();
             }
             PanelMessage::Resonance(ResonanceMessage::StartAnalysis) => {
-                self.state.panels.resonance.running = !self.state.panels.resonance.running;
+                let was_running = self.state.panels.resonance.running;
+                self.state.panels.resonance.running = !was_running;
+                
+                if !was_running {
+                    // Start analysis using real resonance integration
+                    if let Some(ref mut integration) = self.resonance_integration {
+                        // Simulate analysis with random points
+                        let perception = [0.5, 0.5, 0.5, 0.5, 0.5];
+                        let intention = [0.6, 0.6, 0.6, 0.6, 0.6];
+                        
+                        match integration.analyze_point(perception, intention) {
+                            Ok(result) => {
+                                self.state.panels.resonance.best_resonance = result.best_resonance;
+                                self.state.panels.resonance.resonance_history.push(result.signature);
+                                self.add_log(LogLevel::Info, "Resonance", &format!("Best resonance: {:.6}", result.best_resonance));
+                            }
+                            Err(e) => {
+                                self.add_log(LogLevel::Error, "Resonance", &format!("Analysis failed: {}", e));
+                            }
+                        }
+                    }
+                }
+                
                 self.add_log(LogLevel::Info, "Resonance", if self.state.panels.resonance.running { "Started" } else { "Stopped" });
             }
             PanelMessage::Cluster(ClusterMessage::Search(query)) => {
@@ -396,5 +440,17 @@ impl PhosphorosApp {
 impl Default for PhosphorosApp {
     fn default() -> Self {
         Self::new().0
+    }
+}
+
+impl std::fmt::Debug for ResonanceIntegration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ResonanceIntegration").finish()
+    }
+}
+
+impl std::fmt::Debug for AnalysisIntegration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AnalysisIntegration").finish()
     }
 }
