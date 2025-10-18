@@ -1,0 +1,39 @@
+[package]
+name = "phosphoros-satellite"
+version = "0.1.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Satellite forensic analysis subsystem for PHOSPHOROS - blockchain anomaly detection and cluster analysis"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+keywords = ["forensics", "blockchain", "analysis", "clustering"]
+categories = ["cryptography", "mathematics"]
+
+[dependencies]
+# Core PHOSPHOROS dependencies
+phosphoros-core = { path = "../phosphoros-core" }
+thiserror = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+# Analysis and data structures
+ndarray = { version = "0.15", features = ["serde"] }
+petgraph = "0.6"
+parking_lot = "0.12"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["serde", "v4"] }
+
+# Optional API dependencies
+axum = { version = "0.7", features = ["json"], optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"], optional = true }
+tower = { version = "0.4", optional = true }
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+
+[dev-dependencies]
+rand = "0.8"
+
+[features]
+default = []
+api = ["axum", "tokio", "tower", "tracing", "tracing-subscriber"]

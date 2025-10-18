@@ -1,6 +1,21 @@
 [package]
 name = "phosphoros-gateway"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "API gateway for PHOSPHOROS - exposes satellite and core functionality"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
+phosphoros-satellite = { path = "../phosphoros-satellite", features = ["api"] }
+phosphoros-core = { path = "../phosphoros-core" }
+axum = { version = "0.7", features = ["json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[features]
+default = []
+
