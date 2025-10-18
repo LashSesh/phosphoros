@@ -69,10 +69,10 @@ Legend:
 | Topological Optimization | `cryptogenetik-core`   | Search pipeline, search space reduction, operator logic       | WormdorfTrichter (WT), SWThreshold (SW), DKLock (DK), PICanonical (PI), OperatorSet, ScoreHooks (Checksum, PartialWords, Pattern) | 13/13 ✅         |
 | Multichain Wallets       | `phosphoros-bip39`     | BIP39/HD wallets, multichain keys, entropy, validation        | 10+ languages, all HD path types, CurveType, Multichain support (BTC, ETH, Substrate, Cosmos, Solana, Cardano, Monero), feature-gated | 12/12 ✅         |
 | CLI / Gateway            | `phosphoros-cli`, `phosphoros-gateway` | User tools, optional API / GUI bridge                         | CLI skeleton, REST/WebSocket, future: live projection rendering | 1/1 ✅           |
-| Legacy Integration       | `phosphoros-kryptogenetik` | Legacy compat, can migrate to new modular engine             | 29 legacy tests + 10 integration tests maintained, gradual migration path             | 39/39 ✅         |
+| Legacy Integration       | `phosphoros-kryptogenetik` | Legacy compat, can migrate to new modular engine             | 28 unit tests + 10 integration tests maintained, gradual migration path             | 38/38 ✅         |
 | Visualization            | `ouroboros_dna`        | Visual tools for 5D geometry and resonance                    | Field visualization, debugging tools                          | 15/15 ✅         |
 
-**Total Test Coverage**: 126/126 unit tests + 4 doc tests = **130 tests passing** ✅
+**Total Test Coverage**: 125/125 unit tests + 4 doc tests = **129 tests passing** ✅
 
 ---
 
