@@ -3,9 +3,10 @@
 use serde::{Deserialize, Serialize};
 
 /// Stealth mode determining the level of traffic concealment.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum StealthMode {
     /// No stealth - direct requests
+    #[default]
     Open,
     
     /// Traffic mimicry - requests appear as legitimate API calls
@@ -47,12 +48,6 @@ impl StealthMode {
             StealthMode::Steganography,
             StealthMode::Adaptive,
         ]
-    }
-}
-
-impl Default for StealthMode {
-    fn default() -> Self {
-        StealthMode::Open
     }
 }
 

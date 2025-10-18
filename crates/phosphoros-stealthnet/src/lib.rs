@@ -58,6 +58,6 @@ pub use error::{Result, StealthError};
 pub use mimicry::{ApiMimicry, ApiTemplate, ApiType};
 pub use mode::StealthMode;
 pub use payload::{PayloadShaper, PayloadTransformer};
-pub use proxy::{ProxyConfig, ProxyManager, StealthProxy};
+pub use proxy::{ProxyConfig, ProxyManager, ProxyProtocol, RotationMode, StealthProxy};
 pub use request::{StealthRequest, StealthRequestBuilder};
 pub use steganography::{SteganographyEncoder, ZeroWidthEncoder};
