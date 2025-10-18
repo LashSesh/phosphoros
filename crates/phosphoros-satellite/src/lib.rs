@@ -49,6 +49,7 @@ pub mod api;
 pub mod config;
 pub mod engine;
 pub mod error;
+pub mod integration;
 pub mod models;
 pub mod state;
 
@@ -59,6 +60,7 @@ pub use api::build_router;
 pub use config::{AnalysisConfig, ApiConfig, SatelliteConfig};
 pub use engine::SatelliteEngine;
 pub use error::{Result, SatelliteError};
+pub use integration::{resonance_to_spectral, ToPoint5D, ToSpectralSignature};
 pub use models::{
     AnalysisReport, AnalysisRequest, AnomalyScore, EntityObservation, EntropySummary,
     ResonanceHotspot, SnapshotIngest, SnapshotRecord, TopologySummary,

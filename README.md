@@ -16,6 +16,7 @@ PHOSPHOROS integrates advanced mathematical concepts including:
 - **Holistic Resonance**: Multi-layer resonance engine (Kosmokrator, Chronokrator, O.P.H.A.N.)
 - **Topological Optimization**: Four operators (WT, SW, DK, PI) for search space reduction
 - **Multichain Support**: BIP39 integration for Bitcoin, Ethereum, Substrate, and more
+- **Satellite Forensics**: Blockchain analysis, anomaly detection, and cluster identification
 - **Infogenetic Mapping**: Spectral signatures (ψ, ρ, ω) for cryptographic analysis
 
 ## 📦 Workspace Structure
@@ -26,8 +27,9 @@ phosphoros/
 │   ├── phosphoros-core/         # 5D geometry + holistic resonance
 │   ├── cryptogenetik-core/      # Search + optimization
 │   ├── phosphoros-bip39/        # Multichain wallet support
+│   ├── phosphoros-satellite/    # Blockchain forensics & analysis
 │   ├── phosphoros-cli/          # Command-line tools (planned)
-│   └── phosphoros-gateway/      # REST/WS API (planned)
+│   └── phosphoros-gateway/      # REST/WS API gateway
 ├── ouroboros_dna/              # Visualization tools
 └── phosphoros-kryptogenetik/   # Legacy implementation
 ```
@@ -105,6 +107,20 @@ BIP39 and multichain wallet support:
 
 **Features**: `btc`, `evm`, `substrate`, `cosmos`, `solana`, `cardano`, `monero`, `resonance`
 
+### Layer 4: Satellite Forensics (`phosphoros-satellite`)
+
+Blockchain forensic analysis and anomaly detection:
+
+- **Entity Tracking**: Wallet, validator, and contract observation
+- **Anomaly Detection**: Z-score based unusual behavior identification
+- **Cluster Analysis**: KNN graphs and resonance hotspot detection
+- **Topological Analysis**: Connected components, articulation points, Betti numbers
+- **Entropy Metrics**: Spectral entropy and distribution analysis
+- **REST API**: Optional Axum-based API service (feature-gated)
+- **Core Integration**: Seamless conversion to Point5D and SpectralSignature
+
+**Features**: `api` (enables REST endpoints)
+
 ## 🔬 Key Concepts
 
 ### Spectral Signatures
@@ -155,6 +171,9 @@ pub enum Evaluation {
 - **phosphoros-core**: 46 tests ✅
 - **phosphoros-bip39**: 12 tests ✅
 - **cryptogenetik-core**: 13 tests ✅
+- **phosphoros-satellite**: 9 tests ✅
+- **phosphoros-kryptogenetik**: 38 tests ✅
+- **Total**: 139 tests passing ✅
 
 ### Benchmarks
 
@@ -218,9 +237,12 @@ cargo doc --workspace --all-features --no-deps
 
 1. **Cryptographic Research**: Analyze seed space topology
 2. **Forensic Analysis**: Map and explore cryptographic relationships
-3. **Infogenetic Studies**: Build spectral databases of addresses
-4. **Seed Recovery**: Reconstruct seeds via 5D-spectral convergence
-5. **Multichain Analysis**: Cross-chain address generation and analysis
+3. **Blockchain Forensics**: Detect Sybil attacks, money laundering, anomalous behavior
+4. **Wallet Profiling**: Build behavioral profiles and detect patterns
+5. **Infogenetic Studies**: Build spectral databases of addresses
+6. **Seed Recovery**: Reconstruct seeds via 5D-spectral convergence
+7. **Multichain Analysis**: Cross-chain address generation and analysis
+8. **Network Analysis**: Understand blockchain network topology and critical nodes
 
 ## ⚠️ Security Notice
 
@@ -257,6 +279,9 @@ PHOSPHOROS is a research tool for understanding cryptographic seed spaces, not a
 **phosphoros-bip39**:
 - `btc`, `evm`, `substrate`, `cosmos`, `solana`, `cardano`, `monero`: Chain support
 - `resonance`: Spectral wordlist analysis
+
+**phosphoros-satellite**:
+- `api`: Enables REST API endpoints (Axum, Tokio, Tower, Tracing)
 
 ## 🤝 Contributing
 
