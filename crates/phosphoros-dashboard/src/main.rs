@@ -18,6 +18,9 @@ mod services;
 mod state;
 mod theme;
 mod widgets;
+mod integration;
+mod tasks;
+mod export;
 
 use app::PhosphorosApp;
 use iced::Settings;
