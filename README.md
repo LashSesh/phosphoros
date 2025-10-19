@@ -71,16 +71,40 @@ cargo run -p phosphoros-dashboard --release
 RUST_LOG=debug cargo run -p phosphoros-dashboard
 ```
 
-### Dashboard Screenshots
+### Premium Enterprise Interface
 
-The dashboard features a professional dark mode interface with:
-- Real-time service status indicators (🟢 Running / ⏸ Paused)
+The dashboard features a **premium, high-end forensic suite interface** with:
+
+**Visual Excellence:**
+- 🎨 Deep, sophisticated color palette (40+ semantic colors)
+- ✨ Multi-level shadow system for visual depth
+- 📊 Premium metric cards with icons and trends
+- 🏷️ Status badges with color-coded indicators
+- 💎 Glass morphism effects for overlays
+- 🌓 Professional dark theme (light theme available)
+
+**Enhanced Components:**
+- Premium buttons (primary, secondary, success, danger)
+- Elevated cards with shadows and hover effects
+- Status cards with colored borders and glows
+- Section headers with dividers
+- Metric displays with trend indicators
+- Empty state designs
+
+**Professional Navigation:**
+- Grouped sidebar (Core, Analysis, Investigation, System)
+- Active state highlighting with colored borders
+- Icon + text layout
+- Status footer with task counter
+
+**Enterprise Features:**
+- Real-time service status indicators
 - Live entity, cluster, and anomaly counters
-- Export buttons for all data types
+- Export capabilities (JSON, CSV, Markdown)
 - Filterable system logs
-- Theme toggle (Dark/Light)
+- Professional settings panel
 
-See [Dashboard Documentation](crates/phosphoros-dashboard/README.md) for detailed information.
+See [Premium UI Documentation](PREMIUM_UI_ENHANCEMENTS.md) and [Design Guide](UI_DESIGN_GUIDE.md) for details.
 
 ## 📦 Workspace Structure
 
