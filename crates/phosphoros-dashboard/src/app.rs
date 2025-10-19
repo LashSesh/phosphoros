@@ -266,130 +266,210 @@ impl PhosphorosApp {
     }
 
     fn home_view(&self) -> Element<Message> {
-        let title = text(PanelId::Home.name()).size(28);
+        use crate::widgets::{section_header, badge, BadgeType};
+        
+        // Premium header with subtitle
+        let title = column![
+            text("PHOSPHOROS").size(36),
+            vertical_space().height(4),
+            text("Enterprise Blockchain Forensics Suite").size(14),
+        ];
         
         // Get live statistics
         let stats = self.state.service_manager.stats_summary();
+        let anomaly_count = self.state.service_manager.data_pool.read().anomalies.len();
         
-        // Create stat cards inline to avoid lifetime issues
+        // Create premium metric cards with icons
         let stats_row = row![
             crate::widgets::card(
                 column![
-                    text("Seeds").size(14),
-                    vertical_space().height(8),
-                    text(self.state.panels.home.seeds_count.to_string()).size(32),
-                ]
+                    text("🔑").size(28),
+                    vertical_space().height(12),
+                    text(self.state.panels.home.seeds_count.to_string()).size(36),
+                    vertical_space().height(6),
+                    text("Seed Configurations").size(13),
+                ].align_x(iced::Alignment::Center)
             ),
-            horizontal_space().width(16),
+            horizontal_space().width(20),
             crate::widgets::card(
                 column![
-                    text("Clusters").size(14),
-                    vertical_space().height(8),
-                    text(stats.clusters_found.to_string()).size(32),
-                ]
+                    text("🔍").size(28),
+                    vertical_space().height(12),
+                    text(stats.clusters_found.to_string()).size(36),
+                    vertical_space().height(6),
+                    text("Active Clusters").size(13),
+                ].align_x(iced::Alignment::Center)
             ),
-            horizontal_space().width(16),
+            horizontal_space().width(20),
             crate::widgets::card(
                 column![
-                    text("Entities").size(14),
-                    vertical_space().height(8),
-                    text(stats.entities_in_pool.to_string()).size(32),
-                ]
+                    text("🕸️").size(28),
+                    vertical_space().height(12),
+                    text(stats.entities_in_pool.to_string()).size(36),
+                    vertical_space().height(6),
+                    text("Tracked Entities").size(13),
+                ].align_x(iced::Alignment::Center)
+            ),
+            horizontal_space().width(20),
+            crate::widgets::card(
+                column![
+                    text("🚨").size(28),
+                    vertical_space().height(12),
+                    text(anomaly_count.to_string()).size(36),
+                    vertical_space().height(6),
+                    text("Anomalies Detected").size(13),
+                ].align_x(iced::Alignment::Center)
             ),
         ];
 
+        // System status with premium badges
+        let scraper_running = self.state.service_manager.scraper.read().running;
+        let analyzer_running = self.state.service_manager.analyzer.read().running;
+        let cluster_running = self.state.service_manager.cluster_engine.read().running;
+        
         let status_card = crate::widgets::card(
             column![
-                text("System Status").size(18),
-                vertical_space().height(10),
-                text(format!("Scraper: {} - {} entities", 
-                    if self.state.service_manager.scraper.read().running { "🟢 Running" } else { "⏸ Paused" },
-                    stats.scraper_processed
-                )).size(14),
-                vertical_space().height(5),
-                text(format!("Analyzer: {} - {} analyzed", 
-                    if self.state.service_manager.analyzer.read().running { "🟢 Running" } else { "⏸ Paused" },
-                    stats.analyzer_analyzed
-                )).size(14),
-                vertical_space().height(5),
-                text(format!("Cluster Engine: {} - {} clusters", 
-                    if self.state.service_manager.cluster_engine.read().running { "🟢 Running" } else { "⏸ Paused" },
-                    stats.clusters_found
-                )).size(14),
+                section_header("Autonomous Services"),
+                vertical_space().height(16),
+                row![
+                    container(text("Scraper Service").size(16)).width(Length::Fixed(180.0)),
+                    badge(
+                        if scraper_running { "ACTIVE" } else { "PAUSED" },
+                        if scraper_running { BadgeType::Success } else { BadgeType::Neutral }
+                    ),
+                    horizontal_space().width(16),
+                    text(format!("{} entities processed", stats.scraper_processed)).size(14),
+                ].spacing(8).align_y(iced::Alignment::Center),
+                vertical_space().height(12),
+                row![
+                    container(text("Analyzer Service").size(16)).width(Length::Fixed(180.0)),
+                    badge(
+                        if analyzer_running { "ACTIVE" } else { "PAUSED" },
+                        if analyzer_running { BadgeType::Success } else { BadgeType::Neutral }
+                    ),
+                    horizontal_space().width(16),
+                    text(format!("{} analyzed", stats.analyzer_analyzed)).size(14),
+                ].spacing(8).align_y(iced::Alignment::Center),
+                vertical_space().height(12),
+                row![
+                    container(text("Cluster Engine").size(16)).width(Length::Fixed(180.0)),
+                    badge(
+                        if cluster_running { "ACTIVE" } else { "PAUSED" },
+                        if cluster_running { BadgeType::Success } else { BadgeType::Neutral }
+                    ),
+                    horizontal_space().width(16),
+                    text(format!("{} clusters identified", stats.clusters_found)).size(14),
+                ].spacing(8).align_y(iced::Alignment::Center),
             ]
         );
         
-        // Add anomaly info
-        let anomaly_count = self.state.service_manager.data_pool.read().anomalies.len();
+        // Anomaly monitoring card with status indicator
         let anomaly_card = crate::widgets::card(
             column![
-                text("Anomaly Detection").size(18),
+                section_header("Real-Time Monitoring"),
+                vertical_space().height(16),
+                row![
+                    text(format!("Detected {} anomalous patterns", anomaly_count)).size(16),
+                    horizontal_space().width(12),
+                    if anomaly_count > 10 {
+                        badge("HIGH ACTIVITY", BadgeType::Warning)
+                    } else if anomaly_count > 0 {
+                        badge("MONITORING", BadgeType::Info)
+                    } else {
+                        badge("NORMAL", BadgeType::Success)
+                    },
+                ].spacing(8).align_y(iced::Alignment::Center),
                 vertical_space().height(10),
-                text(format!("Detected: {} anomalies", anomaly_count)).size(14),
-                vertical_space().height(5),
-                text("Real-time pattern recognition active").size(12),
+                text("Continuous blockchain surveillance and pattern recognition").size(13),
             ]
         );
 
         column![
             title,
-            vertical_space().height(20),
+            vertical_space().height(32),
             stats_row,
-            vertical_space().height(20),
+            vertical_space().height(28),
             status_card,
-            vertical_space().height(20),
+            vertical_space().height(24),
             anomaly_card,
         ].into()
     }
 
     fn seed_view(&self) -> Element<Message> {
-        let title = text(PanelId::SeedManagement.name()).size(28);
+        use crate::widgets::{section_header, badge, BadgeType, primary_button, secondary_button};
+        
+        let title = column![
+            text("Seed & Wallet Management").size(36),
+            vertical_space().height(4),
+            text("BIP39 mnemonic import with multi-chain address generation").size(14),
+        ];
 
         let input = text_input(
             "Enter mnemonic, seed, or private key...",
             &self.state.panels.seed_management.input,
         )
         .on_input(|s| Message::Panel(PanelMessage::SeedManagement(SeedMessage::InputChanged(s))))
-        .padding(12);
+        .padding(14)
+        .size(14);
 
         let buttons = row![
-            button(text("Import Seed"))
-                .on_press(Message::Panel(PanelMessage::SeedManagement(SeedMessage::ImportSeed)))
-                .padding(10),
-            horizontal_space().width(10),
-            button(text("Clear"))
-                .on_press(Message::Panel(PanelMessage::SeedManagement(SeedMessage::Clear)))
-                .padding(10),
+            primary_button("Import Seed")
+                .on_press(Message::Panel(PanelMessage::SeedManagement(SeedMessage::ImportSeed))),
+            horizontal_space().width(12),
+            secondary_button("Clear")
+                .on_press(Message::Panel(PanelMessage::SeedManagement(SeedMessage::Clear))),
         ];
 
         let mut content = column![
             title,
-            vertical_space().height(20),
-            input,
-            vertical_space().height(10),
-            buttons,
+            vertical_space().height(32),
+            crate::widgets::card(
+                column![
+                    section_header("Import Configuration"),
+                    vertical_space().height(16),
+                    input,
+                    vertical_space().height(16),
+                    buttons,
+                ]
+            ),
         ];
 
         if !self.state.panels.seed_management.seeds.is_empty() {
+            content = content.push(vertical_space().height(28));
+            let seed_count = self.state.panels.seed_management.seeds.len();
+            content = content.push(
+                row![
+                    text(format!("Imported Seeds")).size(24),
+                    horizontal_space().width(12),
+                    text(format!("{} configurations", seed_count)).size(14),
+                ].align_y(iced::Alignment::Center)
+            );
             content = content.push(vertical_space().height(20));
-            content = content.push(text(format!("Imported Seeds ({})", self.state.panels.seed_management.seeds.len())).size(18));
-            content = content.push(vertical_space().height(15));
             
-            // Display each imported seed
+            // Display each imported seed with premium styling
             for seed_info in self.state.panels.seed_management.seeds.iter().take(5) {
+                let addr_count = seed_info.addresses.len();
                 let seed_card = crate::widgets::card(
                     column![
-                        text(&seed_info.mnemonic_masked).size(14),
-                        vertical_space().height(5),
-                        text(format!("{} addresses", seed_info.addresses.len())).size(12),
-                        vertical_space().height(5),
+                        row![
+                            text(&seed_info.mnemonic_masked).size(15),
+                            horizontal_space().width(12),
+                            text(format!("{} addresses", addr_count)).size(12),
+                        ].align_y(iced::Alignment::Center),
+                        vertical_space().height(12),
                     ]
                     .push_maybe(seed_info.addresses.first().map(|addr| {
-                        text(format!("{}: {}", addr.chain, &addr.address[..20])).size(11)
+                        let chain = addr.chain.clone();
+                        let addr_display = addr.address[..std::cmp::min(40, addr.address.len())].to_string();
+                        row![
+                            text(chain).size(11),
+                            horizontal_space().width(8),
+                            text(addr_display).size(12),
+                        ].align_y(iced::Alignment::Center)
                     }))
                 );
                 content = content.push(seed_card);
-                content = content.push(vertical_space().height(10));
+                content = content.push(vertical_space().height(12));
             }
         }
 
