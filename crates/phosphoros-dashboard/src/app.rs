@@ -209,34 +209,130 @@ impl PhosphorosApp {
     }
 
     fn sidebar_view(&self) -> Element<Message> {
+        use crate::theme::colors;
+        use iced::Color;
+        
         let mut sidebar_content = column![]
-            .spacing(8)
+            .spacing(6)
             .padding(16);
 
-        sidebar_content = sidebar_content.push(text("PHOSPHOROS").size(24));
-        sidebar_content = sidebar_content.push(text("Living Lab").size(14));
-        sidebar_content = sidebar_content.push(vertical_space().height(20));
-
-        for panel_id in PanelId::all() {
-            let btn_text = format!("{} {}", panel_id.icon(), panel_id.name());
-            let btn = button(text(btn_text).size(14))
-                .on_press(Message::Panel(PanelMessage::SwitchTo(panel_id)))
+        // Premium header with logo
+        let header = column![
+            text("PHOSPHOROS").size(28),
+            vertical_space().height(2),
+            text("Enterprise Forensics Suite").size(11),
+            vertical_space().height(4),
+            container(horizontal_space())
+                .height(2)
                 .width(Length::Fill)
-                .padding(12);
-            sidebar_content = sidebar_content.push(btn);
+                .style(|_theme: &Theme| {
+                    container::Style {
+                        background: Some(colors::PRIMARY.into()),
+                        ..Default::default()
+                    }
+                }),
+        ];
+        
+        sidebar_content = sidebar_content.push(header);
+        sidebar_content = sidebar_content.push(vertical_space().height(24));
+
+        // Group panels by category
+        let nav_sections = vec![
+            ("Core Operations", vec![PanelId::Home, PanelId::SeedManagement, PanelId::Resonance]),
+            ("Analysis Tools", vec![PanelId::ClusterExplorer, PanelId::SearchSpaceExplorer, PanelId::NetworkExplorer]),
+            ("Investigation", vec![PanelId::InfogeneticBrowser, PanelId::AnomalyInvestigation, PanelId::ForensicWorkflows]),
+            ("System", vec![PanelId::Stealth, PanelId::SystemLog, PanelId::Settings]),
+        ];
+
+        for (section_name, panels) in nav_sections {
+            sidebar_content = sidebar_content.push(
+                text(section_name).size(11)
+            );
+            sidebar_content = sidebar_content.push(vertical_space().height(8));
+            
+            for panel_id in panels {
+                let is_active = self.state.active_panel == panel_id;
+                let btn_content = row![
+                    text(panel_id.icon()).size(16),
+                    horizontal_space().width(10),
+                    text(panel_id.name()).size(13),
+                ].align_y(iced::Alignment::Center);
+                
+                let btn = button(btn_content)
+                    .on_press(Message::Panel(PanelMessage::SwitchTo(panel_id)))
+                    .width(Length::Fill)
+                    .padding(10)
+                    .style(move |_theme: &Theme, status| {
+                        use iced::widget::button::Status;
+                        use iced::{Border, Shadow, Vector};
+                        
+                        let (bg, border_color) = if is_active {
+                            (colors::ACTIVE, colors::PRIMARY)
+                        } else {
+                            match status {
+                                Status::Hovered => (colors::HOVER, colors::BORDER_HOVER),
+                                _ => (Color::TRANSPARENT, Color::TRANSPARENT),
+                            }
+                        };
+                        
+                        button::Style {
+                            background: Some(bg.into()),
+                            text_color: if is_active { colors::PRIMARY_BRIGHT } else { colors::TEXT },
+                            border: Border {
+                                color: border_color,
+                                width: if is_active { 2.0 } else { 0.0 },
+                                radius: 8.0.into(),
+                            },
+                            shadow: if is_active {
+                                Shadow {
+                                    color: Color::from_rgba(0.25, 0.55, 0.95, 0.2),
+                                    offset: Vector::new(0.0, 2.0),
+                                    blur_radius: 8.0,
+                                }
+                            } else {
+                                Shadow::default()
+                            },
+                        }
+                    });
+                    
+                sidebar_content = sidebar_content.push(btn);
+                sidebar_content = sidebar_content.push(vertical_space().height(4));
+            }
+            
+            sidebar_content = sidebar_content.push(vertical_space().height(12));
         }
 
-        sidebar_content = sidebar_content.push(vertical_space().height(20));
+        // Status footer
         let active_tasks = self.state.service_manager.active_tasks();
-        let tasks_text = if active_tasks > 0 {
-            format!("⚡ {} Active Tasks", active_tasks)
-        } else {
-            "⏸ All Tasks Paused".to_string()
-        };
-        sidebar_content = sidebar_content.push(text(tasks_text).size(12));
+        let status_footer = container(
+            column![
+                container(horizontal_space())
+                    .height(1)
+                    .width(Length::Fill)
+                    .style(|_theme: &Theme| {
+                        container::Style {
+                            background: Some(colors::BORDER.into()),
+                            ..Default::default()
+                        }
+                    }),
+                vertical_space().height(12),
+                row![
+                    text("⚡").size(14),
+                    horizontal_space().width(8),
+                    text(if active_tasks > 0 {
+                        format!("{} Active Tasks", active_tasks)
+                    } else {
+                        "All Tasks Paused".to_string()
+                    }).size(12),
+                ].align_y(iced::Alignment::Center),
+            ]
+        ).padding(8);
+
+        sidebar_content = sidebar_content.push(vertical_space().height(Length::Fill));
+        sidebar_content = sidebar_content.push(status_footer);
 
         container(sidebar_content)
-            .width(250)
+            .width(280)
             .height(Length::Fill)
             .style(|_theme: &Theme| crate::theme::container_styles::sidebar())
             .into()
@@ -511,58 +607,114 @@ impl PhosphorosApp {
     }
 
     fn cluster_view(&self) -> Element<Message> {
-        let title = text(PanelId::ClusterExplorer.name()).size(28);
+        use crate::widgets::{section_header, badge, BadgeType, secondary_button};
+        
+        let title = column![
+            text("Cluster Explorer").size(36),
+            vertical_space().height(4),
+            text("Automatic KNN clustering and resonance hotspot detection").size(14),
+        ];
 
         let search = text_input(
             "Search clusters...",
             &self.state.panels.cluster.search_query,
         )
         .on_input(|s| Message::Panel(PanelMessage::Cluster(ClusterMessage::Search(s))))
-        .padding(12);
+        .padding(14)
+        .size(14);
 
-        // Export buttons
+        // Export buttons with premium styling
         let export_row = row![
-            button(text("Export JSON").size(12))
-                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllJson)))
-                .padding(8),
-            horizontal_space().width(5),
-            button(text("Export CSV").size(12))
-                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllCsv)))
-                .padding(8),
-            horizontal_space().width(5),
-            button(text("Export Markdown").size(12))
-                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllMarkdown)))
-                .padding(8),
+            secondary_button("Export JSON")
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllJson))),
+            horizontal_space().width(8),
+            secondary_button("Export CSV")
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllCsv))),
+            horizontal_space().width(8),
+            secondary_button("Export Markdown")
+                .on_press(Message::Panel(PanelMessage::Cluster(ClusterMessage::ExportAllMarkdown))),
         ];
 
         let mut content = column![
             title,
-            vertical_space().height(20),
-            search,
-            vertical_space().height(10),
-            export_row,
-            vertical_space().height(20),
+            vertical_space().height(32),
+            crate::widgets::card(
+                column![
+                    section_header("Search & Export"),
+                    vertical_space().height(16),
+                    search,
+                    vertical_space().height(12),
+                    export_row,
+                ]
+            ),
+            vertical_space().height(28),
         ];
 
         if self.state.panels.cluster.clusters.is_empty() {
-            content = content.push(text("No clusters found. Start services to discover clusters.").size(14));
+            let empty_state = crate::widgets::card(
+                column![
+                    text("🔍").size(48),
+                    vertical_space().height(16),
+                    text("No clusters found").size(20),
+                    vertical_space().height(8),
+                    text("Start the cluster engine service to discover entity clusters").size(14),
+                ].align_x(iced::Alignment::Center)
+            );
+            content = content.push(empty_state);
         } else {
-            content = content.push(text(format!("Found {} clusters", self.state.panels.cluster.clusters.len())).size(16));
-            content = content.push(vertical_space().height(15));
+            let cluster_count = self.state.panels.cluster.clusters.len();
+            content = content.push(
+                row![
+                    text("Discovered Clusters").size(24),
+                    horizontal_space().width(12),
+                    text(format!("{} total", cluster_count)).size(14),
+                ].align_y(iced::Alignment::Center)
+            );
+            content = content.push(vertical_space().height(20));
             
-            // Display clusters
+            // Display clusters with premium styling
             for (idx, cluster) in self.state.panels.cluster.clusters.iter().enumerate().take(10) {
+                let resonance_badge = if cluster.resonance > 0.7 {
+                    badge("HIGH RESONANCE", BadgeType::Success)
+                } else if cluster.resonance > 0.4 {
+                    badge("MEDIUM", BadgeType::Info)
+                } else {
+                    badge("LOW", BadgeType::Neutral)
+                };
+                
                 let cluster_card = crate::widgets::card(
                     column![
-                        text(format!("Cluster #{}", idx + 1)).size(16),
-                        vertical_space().height(5),
-                        text(format!("Members: {}", cluster.members)).size(14),
-                        text(format!("Resonance: {:.3}", cluster.resonance)).size(14),
-                        text(format!("ID: {}", &cluster.id[..20])).size(11),
+                        row![
+                            text(format!("Cluster #{}", idx + 1)).size(18),
+                            horizontal_space().width(12),
+                            resonance_badge,
+                        ].align_y(iced::Alignment::Center),
+                        vertical_space().height(12),
+                        row![
+                            column![
+                                text("Members").size(11),
+                                vertical_space().height(4),
+                                text(cluster.members.to_string()).size(20),
+                            ],
+                            horizontal_space().width(32),
+                            column![
+                                text("Resonance Score").size(11),
+                                vertical_space().height(4),
+                                text(format!("{:.3}", cluster.resonance)).size(20),
+                            ],
+                        ],
+                        vertical_space().height(12),
+                        text(format!("ID: {}", &cluster.id[..std::cmp::min(40, cluster.id.len())])).size(11),
                     ]
                 );
                 content = content.push(cluster_card);
-                content = content.push(vertical_space().height(10));
+                content = content.push(vertical_space().height(12));
+            }
+            
+            if cluster_count > 10 {
+                content = content.push(
+                    text(format!("Showing 10 of {} clusters", cluster_count)).size(12)
+                );
             }
         }
 
