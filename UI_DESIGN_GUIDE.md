@@ -143,23 +143,23 @@ metric_card(
 ## Typography Scale
 
 ```rust
-// Headings
+// Headings (semantic structure)
 .size(36)  // H1 - Main panel titles
 .size(28)  // H2 - Legacy compatibility
 .size(24)  // H3 - Major sections
 .size(18)  // H4 - Subsections
 .size(16)  // H5 - Card headers
 
-// Body
+// Body (content)
 .size(16)  // Large body text
 .size(14)  // Standard body text
 .size(13)  // Supporting text
 .size(12)  // Small text, badges
 .size(11)  // Fine print, metadata
 
-// Special
-.size(48)  // Extra large (empty states)
-.size(36)  // Metric values
+// Special (non-semantic emphasis)
+.size(48)  // Extra large icons (empty states)
+.size(36)  // Large metrics/statistics (same size as H1, but for numbers)
 .size(20)  // Sub-metrics
 ```
 
