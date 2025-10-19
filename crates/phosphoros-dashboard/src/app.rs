@@ -880,50 +880,85 @@ impl PhosphorosApp {
     }
 
     fn settings_view(&self) -> Element<Message> {
-        let title = text(PanelId::Settings.name()).size(28);
+        use crate::widgets::{section_header, primary_button};
+        
+        let title = column![
+            text("Settings & Configuration").size(36),
+            vertical_space().height(4),
+            text("Customize your forensics suite experience").size(14),
+        ];
 
         let theme_row = row![
-            text("Dark Mode").size(14),
-            horizontal_space().width(10),
+            column![
+                text("Dark Mode").size(16),
+                vertical_space().height(4),
+                text("Toggle between dark and light themes").size(12),
+            ],
+            horizontal_space().width(Length::Fill),
             toggler(self.state.dark_mode)
                 .on_toggle(|_| Message::Panel(PanelMessage::Settings(SettingsMessage::ToggleTheme))),
-        ];
+        ].align_y(iced::Alignment::Center);
         
         let auto_start_row = row![
-            text("Auto-start Services").size(14),
-            horizontal_space().width(10),
+            column![
+                text("Auto-start Services").size(16),
+                vertical_space().height(4),
+                text("Automatically start autonomous services on launch").size(12),
+            ],
+            horizontal_space().width(Length::Fill),
             toggler(self.config.services.auto_start)
                 .on_toggle(|_| Message::Panel(PanelMessage::Settings(SettingsMessage::ToggleAutoStart))),
-        ];
+        ].align_y(iced::Alignment::Center);
         
-        let report_btn = button(text("Generate System Report"))
-            .on_press(Message::Panel(PanelMessage::Settings(SettingsMessage::GenerateSystemReport)))
-            .padding(10);
+        let report_btn = primary_button("Generate System Report")
+            .on_press(Message::Panel(PanelMessage::Settings(SettingsMessage::GenerateSystemReport)));
 
         let content = column![
             title,
-            vertical_space().height(20),
+            vertical_space().height(32),
             crate::widgets::card(
                 column![
-                    text("Appearance").size(18),
-                    vertical_space().height(10),
+                    section_header("Appearance"),
+                    vertical_space().height(16),
                     theme_row,
                 ]
             ),
-            vertical_space().height(15),
+            vertical_space().height(20),
             crate::widgets::card(
                 column![
-                    text("Services").size(18),
-                    vertical_space().height(10),
+                    section_header("Services"),
+                    vertical_space().height(16),
                     auto_start_row,
                 ]
             ),
-            vertical_space().height(15),
+            vertical_space().height(20),
             crate::widgets::card(
                 column![
-                    text("Reports").size(18),
-                    vertical_space().height(10),
+                    section_header("Reports & Export"),
+                    vertical_space().height(16),
+                    text("Generate comprehensive system reports for analysis and documentation").size(14),
+                    vertical_space().height(12),
                     report_btn,
+                ]
+            ),
+            vertical_space().height(20),
+            crate::widgets::card(
+                column![
+                    section_header("System Information"),
+                    vertical_space().height(16),
+                    row![
+                        column![
+                            text("Version").size(11),
+                            vertical_space().height(4),
+                            text("1.0.0").size(16),
+                        ],
+                        horizontal_space().width(48),
+                        column![
+                            text("Status").size(11),
+                            vertical_space().height(4),
+                            text("Production Ready").size(16),
+                        ],
+                    ],
                 ]
             ),
         ];
