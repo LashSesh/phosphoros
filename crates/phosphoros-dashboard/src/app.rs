@@ -362,19 +362,21 @@ impl PhosphorosApp {
     }
 
     fn home_view(&self) -> Element<Message> {
-        use crate::widgets::{section_header, badge, BadgeType};
-        
-        // Premium header with subtitle
+        use crate::widgets::{section_header, badge, BadgeType, primary_button, secondary_button};
+
+        // Premium header with subtitle - Law Enforcement Focus
         let title = column![
             text("PHOSPHOROS").size(36),
             vertical_space().height(4),
             text("Enterprise Blockchain Forensics Suite").size(14),
+            vertical_space().height(2),
+            text("Law Enforcement & Financial Intelligence Platform").size(12),
         ];
-        
+
         // Get live statistics
         let stats = self.state.service_manager.stats_summary();
         let anomaly_count = self.state.service_manager.data_pool.read().anomalies.len();
-        
+
         // Create premium metric cards with icons
         let stats_row = row![
             crate::widgets::card(
@@ -418,17 +420,100 @@ impl PhosphorosApp {
             ),
         ];
 
+        // Law Enforcement Quick Actions - prominently displayed
+        let quick_actions_card = crate::widgets::card(
+            column![
+                section_header("Law Enforcement Quick Actions"),
+                vertical_space().height(16),
+                text("Common investigation workflows for financial crime analysis").size(13),
+                vertical_space().height(16),
+                row![
+                    primary_button("Monero Transaction Trace")
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow("money-laundering-trace".to_string())))),
+                    horizontal_space().width(12),
+                    primary_button("Sybil Attack Detection")
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow("sybil-investigation".to_string())))),
+                    horizontal_space().width(12),
+                    primary_button("Wallet Cluster Analysis")
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow("cluster-forensics".to_string())))),
+                ],
+                vertical_space().height(12),
+                row![
+                    secondary_button("Address Profiling")
+                        .on_press(Message::Panel(PanelMessage::ForensicWorkflows(ForensicWorkflowsMessage::StartWorkflow("address-profiling".to_string())))),
+                    horizontal_space().width(12),
+                    secondary_button("Export Evidence Report")
+                        .on_press(Message::Panel(PanelMessage::Settings(SettingsMessage::GenerateSystemReport))),
+                    horizontal_space().width(12),
+                    secondary_button("View All Anomalies")
+                        .on_press(Message::Panel(PanelMessage::SwitchTo(PanelId::AnomalyInvestigation))),
+                ],
+            ]
+        );
+
+        // Monero-specific capabilities card
+        let monero_card = crate::widgets::card(
+            column![
+                row![
+                    text("Monero (XMR) Analysis Capabilities").size(18),
+                    horizontal_space().width(12),
+                    badge("SPECIALIZED", BadgeType::Primary),
+                ].align_y(iced::Alignment::Center),
+                vertical_space().height(16),
+                text("Advanced cryptographic analysis for privacy-focused blockchains:").size(13),
+                vertical_space().height(12),
+                row![
+                    column![
+                        text("5D Spectral Analysis").size(14),
+                        text("Ring signature pattern detection").size(12),
+                    ],
+                    horizontal_space().width(32),
+                    column![
+                        text("Temporal Correlation").size(14),
+                        text("Transaction timing analysis").size(12),
+                    ],
+                    horizontal_space().width(32),
+                    column![
+                        text("Cluster Heuristics").size(14),
+                        text("Address linkability detection").size(12),
+                    ],
+                ],
+                vertical_space().height(16),
+                container(
+                    column![
+                        text("IRS Cryptocurrency Tracing Requirements").size(14),
+                        vertical_space().height(8),
+                        text("This system implements methodologies aligned with:").size(12),
+                        text("- Transaction graph analysis and visualization").size(11),
+                        text("- Cross-chain tracking and exchange identification").size(11),
+                        text("- Statistical anomaly detection for suspicious patterns").size(11),
+                        text("- Exportable forensic reports for legal proceedings").size(11),
+                    ]
+                ).padding(12).style(|_theme: &iced::Theme| {
+                    container::Style {
+                        background: Some(crate::theme::colors::PANEL_BG.into()),
+                        border: iced::Border {
+                            color: crate::theme::colors::INFO,
+                            width: 1.0,
+                            radius: 8.0.into(),
+                        },
+                        ..Default::default()
+                    }
+                }),
+            ]
+        );
+
         // System status with premium badges
         let scraper_running = self.state.service_manager.scraper.read().running;
         let analyzer_running = self.state.service_manager.analyzer.read().running;
         let cluster_running = self.state.service_manager.cluster_engine.read().running;
-        
+
         let status_card = crate::widgets::card(
             column![
-                section_header("Autonomous Services"),
+                section_header("Autonomous Analysis Services"),
                 vertical_space().height(16),
                 row![
-                    container(text("Scraper Service").size(16)).width(Length::Fixed(180.0)),
+                    container(text("Entity Discovery").size(16)).width(Length::Fixed(180.0)),
                     badge(
                         if scraper_running { "ACTIVE" } else { "PAUSED" },
                         if scraper_running { BadgeType::Success } else { BadgeType::Neutral }
@@ -438,7 +523,7 @@ impl PhosphorosApp {
                 ].spacing(8).align_y(iced::Alignment::Center),
                 vertical_space().height(12),
                 row![
-                    container(text("Analyzer Service").size(16)).width(Length::Fixed(180.0)),
+                    container(text("Anomaly Detection").size(16)).width(Length::Fixed(180.0)),
                     badge(
                         if analyzer_running { "ACTIVE" } else { "PAUSED" },
                         if analyzer_running { BadgeType::Success } else { BadgeType::Neutral }
@@ -448,7 +533,7 @@ impl PhosphorosApp {
                 ].spacing(8).align_y(iced::Alignment::Center),
                 vertical_space().height(12),
                 row![
-                    container(text("Cluster Engine").size(16)).width(Length::Fixed(180.0)),
+                    container(text("Pattern Recognition").size(16)).width(Length::Fixed(180.0)),
                     badge(
                         if cluster_running { "ACTIVE" } else { "PAUSED" },
                         if cluster_running { BadgeType::Success } else { BadgeType::Neutral }
@@ -458,14 +543,14 @@ impl PhosphorosApp {
                 ].spacing(8).align_y(iced::Alignment::Center),
             ]
         );
-        
+
         // Anomaly monitoring card with status indicator
         let anomaly_card = crate::widgets::card(
             column![
-                section_header("Real-Time Monitoring"),
+                section_header("Real-Time Threat Monitoring"),
                 vertical_space().height(16),
                 row![
-                    text(format!("Detected {} anomalous patterns", anomaly_count)).size(16),
+                    text(format!("Detected {} suspicious patterns", anomaly_count)).size(16),
                     horizontal_space().width(12),
                     if anomaly_count > 10 {
                         badge("HIGH ACTIVITY", BadgeType::Warning)
@@ -476,19 +561,24 @@ impl PhosphorosApp {
                     },
                 ].spacing(8).align_y(iced::Alignment::Center),
                 vertical_space().height(10),
-                text("Continuous blockchain surveillance and pattern recognition").size(13),
+                text("Continuous blockchain surveillance for money laundering, fraud, and illicit activity").size(13),
             ]
         );
 
-        column![
+        scrollable(column![
             title,
-            vertical_space().height(32),
-            stats_row,
-            vertical_space().height(28),
-            status_card,
             vertical_space().height(24),
+            stats_row,
+            vertical_space().height(24),
+            quick_actions_card,
+            vertical_space().height(20),
+            monero_card,
+            vertical_space().height(20),
+            status_card,
+            vertical_space().height(20),
             anomaly_card,
-        ].into()
+            vertical_space().height(20),
+        ]).into()
     }
 
     fn seed_view(&self) -> Element<Message> {
