@@ -1,0 +1,38 @@
+[package]
+name = "phosphoros-monero"
+version = "1.0.0"
+edition = "2021"
+authors = ["PHOSPHOROS Project Team"]
+description = "Monero blockchain forensics and ring signature analysis"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LashSesh/phosphoros"
+keywords = ["monero", "forensics", "blockchain", "ring-signature"]
+categories = ["cryptography"]
+
+[dependencies]
+# Core
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+hex = "0.4"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# HTTP client for RPC
+reqwest = { version = "0.12", features = ["json"] }
+
+# Monero cryptography from phosphoros-bip39
+phosphoros-bip39 = { path = "../phosphoros-bip39", features = ["monero"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []

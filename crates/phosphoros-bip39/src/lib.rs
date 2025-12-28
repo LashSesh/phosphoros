@@ -44,6 +44,10 @@ pub mod mnemonic;
 pub mod multichain;
 pub mod wordlist;
 
+// Monero-specific cryptography
+#[cfg(feature = "monero")]
+pub mod monero;
+
 // Optional resonance analysis module
 #[cfg(feature = "resonance")]
 pub mod analysis;
