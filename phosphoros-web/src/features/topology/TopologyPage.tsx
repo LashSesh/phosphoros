@@ -1,21 +1,67 @@
-import { useState } from 'react'
-import { Network, ZoomIn, ZoomOut, Maximize2, Filter } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { ZoomIn, ZoomOut, Maximize2, Filter } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { ForceGraph, GraphNode, GraphLink } from '@/components/graphs/ForceGraph'
+import { formatAddress, formatResonance, getResonanceColor } from '@/lib/utils'
+import { cn } from '@/lib/utils'
+
+// Generate mock data for demo
+function generateMockData(): { nodes: GraphNode[]; links: GraphLink[] } {
+  const types: GraphNode['type'][] = ['wallet', 'contract', 'exchange', 'unknown']
+  const nodes: GraphNode[] = []
+  const links: GraphLink[] = []
+
+  // Create nodes
+  for (let i = 0; i < 30; i++) {
+    nodes.push({
+      id: `node-${i}`,
+      label: `0x${Math.random().toString(16).slice(2, 10)}`,
+      type: types[Math.floor(Math.random() * types.length)],
+      resonance: Math.random(),
+      cluster: `Cluster ${Math.floor(Math.random() * 5) + 1}`,
+    })
+  }
+
+  // Create links
+  for (let i = 0; i < 50; i++) {
+    const sourceIdx = Math.floor(Math.random() * nodes.length)
+    let targetIdx = Math.floor(Math.random() * nodes.length)
+    while (targetIdx === sourceIdx) {
+      targetIdx = Math.floor(Math.random() * nodes.length)
+    }
+    links.push({
+      source: nodes[sourceIdx].id,
+      target: nodes[targetIdx].id,
+      weight: Math.random(),
+    })
+  }
+
+  return { nodes, links }
+}
 
 export function TopologyPage() {
-  const [selectedNode, setSelectedNode] = useState<string | null>(null)
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null)
   const [layout, setLayout] = useState<'force' | 'hierarchical' | 'circular'>('force')
 
-  const mockStats = {
-    nodes: 156,
-    edges: 423,
-    communities: 8,
-    criticalNodes: 12,
-  }
+  const { nodes, links } = useMemo(() => generateMockData(), [])
+
+  const stats = useMemo(() => {
+    const communities = new Set(nodes.map(n => n.cluster)).size
+    const criticalNodes = nodes.filter(n => n.resonance > 0.8).length
+    return {
+      nodes: nodes.length,
+      edges: links.length,
+      communities,
+      criticalNodes,
+    }
+  }, [nodes, links])
+
+  const displayNode = hoveredNode || selectedNode
 
   return (
     <div className="space-y-6">
@@ -56,25 +102,25 @@ export function TopologyPage() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{mockStats.nodes}</div>
+            <div className="text-2xl font-bold">{stats.nodes}</div>
             <p className="text-sm text-muted-foreground">Nodes</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{mockStats.edges}</div>
+            <div className="text-2xl font-bold">{stats.edges}</div>
             <p className="text-sm text-muted-foreground">Edges</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-accent">{mockStats.communities}</div>
+            <div className="text-2xl font-bold text-accent">{stats.communities}</div>
             <p className="text-sm text-muted-foreground">Communities</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-warning">{mockStats.criticalNodes}</div>
+            <div className="text-2xl font-bold text-warning">{stats.criticalNodes}</div>
             <p className="text-sm text-muted-foreground">Critical Nodes</p>
           </CardContent>
         </Card>
@@ -99,13 +145,14 @@ export function TopologyPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[500px] rounded-lg border-2 border-dashed border-muted flex items-center justify-center bg-muted/20">
-              <div className="text-center">
-                <Network className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">D3.js force-directed graph will render here</p>
-                <p className="text-sm text-muted-foreground mt-2">Layout: {layout}</p>
-              </div>
-            </div>
+            <ForceGraph
+              nodes={nodes}
+              links={links}
+              width={800}
+              height={500}
+              onNodeClick={setSelectedNode}
+              onNodeHover={setHoveredNode}
+            />
           </CardContent>
         </Card>
 
@@ -114,31 +161,39 @@ export function TopologyPage() {
           <CardHeader>
             <CardTitle className="text-lg">Details</CardTitle>
             <CardDescription>
-              {selectedNode ? 'Node properties' : 'Select a node to view details'}
+              {displayNode ? 'Node properties' : 'Select a node to view details'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {selectedNode ? (
-              <div className="space-y-4">
+            {displayNode ? (
+              <div className="space-y-4 animate-in">
                 <div>
                   <p className="text-xs text-muted-foreground">Address</p>
-                  <code className="text-sm font-address">{selectedNode}</code>
+                  <code className="text-sm font-address">{formatAddress(displayNode.label, 10)}</code>
                 </div>
                 <Separator />
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Connections</p>
-                    <p className="text-lg font-bold">24</p>
+                    <p className="text-xs text-muted-foreground">Type</p>
+                    <Badge variant="outline" className="mt-1 capitalize">
+                      {displayNode.type}
+                    </Badge>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Centrality</p>
-                    <p className="text-lg font-bold">0.82</p>
+                    <p className="text-xs text-muted-foreground">Resonance</p>
+                    <p className={cn('text-lg font-bold', getResonanceColor(displayNode.resonance))}>
+                      {formatResonance(displayNode.resonance)}
+                    </p>
                   </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Community</p>
-                  <Badge>Cluster #3</Badge>
+                  <Badge className="mt-1">{displayNode.cluster}</Badge>
                 </div>
+                <Separator />
+                <Button className="w-full" size="sm">
+                  Investigate Entity
+                </Button>
               </div>
             ) : (
               <div className="py-8 text-center text-sm text-muted-foreground">

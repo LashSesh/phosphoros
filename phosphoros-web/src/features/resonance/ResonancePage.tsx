@@ -1,38 +1,95 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Activity, Play, Pause, Settings2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { SpectralGauge } from '@/components/charts/SpectralGauge'
+import { ResonanceTimeSeries } from '@/components/charts/ResonanceTimeSeries'
 import { cn, formatResonance, getResonanceColor } from '@/lib/utils'
+
+interface TimeSeriesPoint {
+  timestamp: Date
+  psi: number
+  rho: number
+  omega: number
+  resonance: number
+}
 
 export function ResonancePage() {
   const [isRunning, setIsRunning] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [bestResonance, setBestResonance] = useState(0.73)
-
-  const spectralSignature = {
+  const [spectralSignature, setSpectralSignature] = useState({
     psi: 0.85,
     rho: 0.92,
     omega: 0.78,
-  }
+  })
+  const [history, setHistory] = useState<TimeSeriesPoint[]>([])
+
+  // Generate initial history
+  useEffect(() => {
+    const initialHistory: TimeSeriesPoint[] = []
+    const now = Date.now()
+    for (let i = 20; i >= 0; i--) {
+      const psi = 0.6 + Math.random() * 0.35
+      const rho = 0.7 + Math.random() * 0.25
+      const omega = 0.5 + Math.random() * 0.4
+      initialHistory.push({
+        timestamp: new Date(now - i * 5000),
+        psi,
+        rho,
+        omega,
+        resonance: psi * rho * omega,
+      })
+    }
+    setHistory(initialHistory)
+  }, [])
+
+  // Simulate real-time updates when running
+  useEffect(() => {
+    if (!isRunning) return
+
+    const interval = setInterval(() => {
+      // Update spectral signature with slight variations
+      setSpectralSignature(prev => ({
+        psi: Math.min(1, Math.max(0, prev.psi + (Math.random() - 0.5) * 0.05)),
+        rho: Math.min(1, Math.max(0, prev.rho + (Math.random() - 0.5) * 0.03)),
+        omega: Math.min(1, Math.max(0, prev.omega + (Math.random() - 0.5) * 0.04)),
+      }))
+
+      // Add to history
+      setHistory(prev => {
+        const newPoint: TimeSeriesPoint = {
+          timestamp: new Date(),
+          psi: spectralSignature.psi,
+          rho: spectralSignature.rho,
+          omega: spectralSignature.omega,
+          resonance: spectralSignature.psi * spectralSignature.rho * spectralSignature.omega,
+        }
+        return [...prev.slice(-30), newPoint]
+      })
+
+      // Update progress
+      setProgress(prev => {
+        const next = prev + Math.random() * 3
+        if (next >= 100) {
+          setIsRunning(false)
+          return 100
+        }
+        return next
+      })
+    }, 500)
+
+    return () => clearInterval(interval)
+  }, [isRunning, spectralSignature])
+
+  const resonance = spectralSignature.psi * spectralSignature.rho * spectralSignature.omega
 
   const toggleAnalysis = () => {
-    setIsRunning(!isRunning)
     if (!isRunning) {
-      // Simulate progress
-      let p = 0
-      const interval = setInterval(() => {
-        p += Math.random() * 5
-        if (p >= 100) {
-          p = 100
-          clearInterval(interval)
-          setIsRunning(false)
-        }
-        setProgress(p)
-      }, 200)
+      setProgress(0)
     }
+    setIsRunning(!isRunning)
   }
 
   return (
@@ -83,8 +140,24 @@ export function ResonancePage() {
         </Card>
       )}
 
-      {/* Spectral Signature */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Spectral Signature & Gauge */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Gauge */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Resonance Gauge</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpectralGauge
+              psi={spectralSignature.psi}
+              rho={spectralSignature.rho}
+              omega={spectralSignature.omega}
+              height={220}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Spectral Values */}
         <Card>
           <CardHeader>
             <CardTitle>Spectral Signature (ψ, ρ, ω)</CardTitle>
@@ -93,16 +166,16 @@ export function ResonancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Psi */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium">ψ (Coherence)</span>
-                  <span className="text-cyan-400">{formatResonance(spectralSignature.psi)}</span>
+                  <span className="text-cyan-400 font-mono">{formatResonance(spectralSignature.psi)}</span>
                 </div>
                 <div className="h-3 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full bg-cyan-400 transition-all"
+                    className="h-full bg-cyan-400 transition-all duration-500"
                     style={{ width: `${spectralSignature.psi * 100}%` }}
                   />
                 </div>
@@ -112,11 +185,11 @@ export function ResonancePage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium">ρ (Stability)</span>
-                  <span className="text-blue-400">{formatResonance(spectralSignature.rho)}</span>
+                  <span className="text-blue-400 font-mono">{formatResonance(spectralSignature.rho)}</span>
                 </div>
                 <div className="h-3 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full bg-blue-400 transition-all"
+                    className="h-full bg-blue-400 transition-all duration-500"
                     style={{ width: `${spectralSignature.rho * 100}%` }}
                   />
                 </div>
@@ -126,11 +199,11 @@ export function ResonancePage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium">ω (Efficiency)</span>
-                  <span className="text-amber-400">{formatResonance(spectralSignature.omega)}</span>
+                  <span className="text-amber-400 font-mono">{formatResonance(spectralSignature.omega)}</span>
                 </div>
                 <div className="h-3 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full bg-amber-400 transition-all"
+                    className="h-full bg-amber-400 transition-all duration-500"
                     style={{ width: `${spectralSignature.omega * 100}%` }}
                   />
                 </div>
@@ -138,15 +211,12 @@ export function ResonancePage() {
 
               <Separator />
 
-              {/* Combined Resonance */}
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground mb-2">Combined Resonance</p>
-                <p className={cn('text-5xl font-bold', getResonanceColor(bestResonance))}>
-                  {formatResonance(bestResonance)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  ψ × ρ × ω = {formatResonance(spectralSignature.psi * spectralSignature.rho * spectralSignature.omega)}
-                </p>
+              {/* Combined */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">ψ × ρ × ω</span>
+                <span className={cn('text-2xl font-bold font-mono', getResonanceColor(resonance))}>
+                  {formatResonance(resonance)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -157,56 +227,52 @@ export function ResonancePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings2 className="h-5 w-5" />
-              Operator Configuration
+              Operators
             </CardTitle>
             <CardDescription>
-              Topological operators for spectral analysis
+              Topological operators
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">WT (Wave Transform)</label>
-                <Input type="number" defaultValue="1.0" step="0.1" />
+            <div className="grid gap-3 grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">WT (Wave)</label>
+                <Input type="number" defaultValue="1.0" step="0.1" className="h-8" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">SW (Spectral Width)</label>
-                <Input type="number" defaultValue="0.5" step="0.1" />
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">SW (Spectral)</label>
+                <Input type="number" defaultValue="0.5" step="0.1" className="h-8" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">DK (Double-Kick)</label>
-                <Input type="number" defaultValue="0.3" step="0.1" />
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">DK (Double-Kick)</label>
+                <Input type="number" defaultValue="0.3" step="0.1" className="h-8" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">PI (Phase Injection)</label>
-                <Input type="number" defaultValue="0.1" step="0.1" />
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">PI (Phase)</label>
+                <Input type="number" defaultValue="0.1" step="0.1" className="h-8" />
               </div>
             </div>
 
-            <Separator />
-
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1">
-                Reset Defaults
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" size="sm" className="flex-1">
+                Reset
               </Button>
-              <Button className="flex-1">Apply Configuration</Button>
+              <Button size="sm" className="flex-1">Apply</Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Resonance History Placeholder */}
+      {/* Resonance History Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Resonance History</CardTitle>
           <CardDescription>
-            Time-series visualization of resonance patterns
+            Time-series visualization of spectral components
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 rounded-lg border-2 border-dashed border-muted flex items-center justify-center">
-            <p className="text-muted-foreground">ECharts visualization will render here</p>
-          </div>
+          <ResonanceTimeSeries data={history} height={300} />
         </CardContent>
       </Card>
     </div>
