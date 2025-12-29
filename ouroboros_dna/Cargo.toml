@@ -9,7 +9,7 @@ bip39 = { version = "2", default-features = false, features = ["std", "rand"] }
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 ethers-core = "2"
-ethers-providers = { version = "2", features = ["rustls"] }
+ethers-providers = { version = "2", default-features = false, features = ["legacy-ws"] }
 ethers-signers = "2"
 hex = "0.4"
 rand = "0.8"
