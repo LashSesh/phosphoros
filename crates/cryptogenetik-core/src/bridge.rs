@@ -2,8 +2,8 @@
 
 use crate::optimizer::OperatorSet;
 use crate::score_hooks::HookSet;
-use crate::triton::{ProgressCallback, SearchResult, TritonPipeline};
-use crate::{Error, Result};
+use crate::triton::{ProgressCallback, TritonPipeline};
+use crate::Result;
 use phosphoros_core::ResonanceEngine;
 
 /// PhosphorosCore - Main bridge integrating resonance engine with search

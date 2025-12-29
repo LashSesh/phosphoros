@@ -2,7 +2,7 @@
 
 use crate::optimizer::OperatorSet;
 use crate::score_hooks::HookSet;
-use crate::{Error, Result};
+use crate::Result;
 use phosphoros_core::{Evaluation, ResonanceEngine};
 use rand::SeedableRng;
 

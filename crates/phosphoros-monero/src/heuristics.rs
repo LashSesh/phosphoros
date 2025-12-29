@@ -10,8 +10,6 @@
 //! - Miller et al. "An Empirical Analysis of Linkability in the Monero Blockchain"
 //! - Vijayakumaran "Analysis of CryptoNote Transaction Graphs"
 
-use crate::{Error, Result};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// Result of applying a heuristic

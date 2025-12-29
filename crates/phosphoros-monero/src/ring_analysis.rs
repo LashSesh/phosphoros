@@ -8,7 +8,7 @@ use crate::{
         CombinedHeuristic, DecoySelectionHeuristic, HeuristicResult, OutputReuseHeuristic,
         TemporalHeuristic,
     },
-    rpc::{MoneroRpcClient, OutputInfo, OutputRequest, TransactionInfo},
+    rpc::{MoneroRpcClient, OutputRequest, TransactionInfo},
     Error, Result,
 };
 use serde::{Deserialize, Serialize};
@@ -144,7 +144,7 @@ impl RingAnalyzer {
         let combined_result = self.combined.combine(&heuristic_results);
 
         // Calculate per-member probabilities
-        let mut ring_members_with_prob: Vec<RingMemberInfo> = ring_members
+        let ring_members_with_prob: Vec<RingMemberInfo> = ring_members
             .into_iter()
             .enumerate()
             .map(|(i, mut m)| {

@@ -1,7 +1,6 @@
 //! Holistic Matrix - Complete integration of resonance engines
 
 use super::{
-    channel::ResonanceChannel,
     chrono::Chronokrator,
     kosmo::{Kosmokrator, PhaseState},
     mandorla::MandorlaField,

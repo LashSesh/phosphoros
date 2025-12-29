@@ -4,7 +4,7 @@
 //! the true spend in Monero ring signatures.
 
 use crate::algorithms::qaoa::{QAOA, MaxCutProblem, QAOAResult};
-use crate::algorithms::quantum_walk::{QuantumWalk, QuantumWalkResult};
+use crate::algorithms::quantum_walk::QuantumWalk;
 use crate::backend::QuantumBackend;
 use crate::backend::simulator::LocalSimulator;
 use crate::backend::BackendError;

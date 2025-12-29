@@ -7,9 +7,7 @@
 
 use crate::backend::{QuantumBackend, QuantumCircuit, QuantumResult, BackendError};
 use crate::backend::simulator::LocalSimulator;
-use crate::Complex;
 use nalgebra::DMatrix;
-use std::f64::consts::PI;
 
 /// Continuous-Time Quantum Walk implementation
 pub struct QuantumWalk<B: QuantumBackend> {

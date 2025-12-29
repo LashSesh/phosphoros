@@ -6,8 +6,6 @@
 
 use crate::backend::{QuantumBackend, QuantumCircuit, BackendError};
 use crate::backend::simulator::LocalSimulator;
-use crate::Complex;
-use nalgebra::DMatrix;
 use std::f64::consts::PI;
 
 /// Variational Quantum Eigensolver

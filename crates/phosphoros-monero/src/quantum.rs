@@ -17,7 +17,6 @@ use phosphoros_quantum::forensics::{RingSignatureQAOA, RingMember, QuantumRingAn
 use phosphoros_quantum::backend::simulator::LocalSimulator;
 
 use crate::ring_analysis::{RingAnalysisResult, RingMemberInfo};
-use crate::heuristics::HeuristicResult;
 use crate::error::Error;
 
 /// Quantum-enhanced ring signature analyzer
@@ -204,6 +203,7 @@ impl QuantumRingAnalyzer {
 #[cfg(all(test, feature = "quantum"))]
 mod tests {
     use super::*;
+    use crate::heuristics::HeuristicResult;
 
     fn create_test_members() -> Vec<RingMemberInfo> {
         vec![

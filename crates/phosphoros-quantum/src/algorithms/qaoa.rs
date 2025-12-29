@@ -5,9 +5,8 @@
 //! - Transaction graph clustering
 //! - Optimal decoy selection
 
-use crate::backend::{QuantumBackend, QuantumCircuit, QuantumResult, BackendError};
+use crate::backend::{QuantumBackend, QuantumCircuit, BackendError};
 use crate::backend::simulator::LocalSimulator;
-use crate::Complex;
 use std::f64::consts::PI;
 
 /// QAOA implementation for combinatorial optimization

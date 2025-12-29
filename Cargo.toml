@@ -10,6 +10,7 @@ members = [
     "crates/phosphoros-quantum",
     "crates/phosphoros-satellite",
     "crates/phosphoros-stealthnet",
+    "crates/phosphoros-types",
     "ouroboros_dna",
     "phosphoros-kryptogenetik"
 ]
@@ -17,3 +18,4 @@ resolver = "2"
 
 [workspace.dependencies]
 phosphoros-quantum = { path = "crates/phosphoros-quantum" }
+phosphoros-types = { path = "crates/phosphoros-types" }
