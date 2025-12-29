@@ -1,8 +1,83 @@
 //! Metatron Sacred Geometry - 13-Node topological structure with 5D projection
+//!
+//! The Metatron geometry provides a canonical embedding topology for mapping
+//! arbitrary objects into 5D space. It consists of 13 nodes arranged in a
+//! sacred geometric pattern.
+//!
+//! ## Node Structure
+//!
+//! ```text
+//!        ┌─────────────────────┐
+//!        │  Metatron 13-Node   │
+//!        └─────────────────────┘
+//!
+//!     Node 0: Center (0, 0, 0)
+//!
+//!     Nodes 1-6: Hexagon ring
+//!       ╱ ╲
+//!      3   2
+//!     │     │
+//!     4  0  1
+//!     │     │
+//!      5   6
+//!       ╲ ╱
+//!
+//!     Nodes 7-12: Cube vertices
+//!     (±0.5, ±0.5, ±0.5)
+//! ```
+//!
+//! ## 5D Projection
+//!
+//! Each 3D node is projected to 5D as `[x, y, z, r, φ]` where:
+//! - `x, y, z`: Original 3D coordinates
+//! - `r`: Radial distance from origin
+//! - `φ`: Angular position (atan2(y, x))
+//!
+//! ## Usage
+//!
+//! ```rust
+//! use phosphoros_core::MetatronGeometry;
+//!
+//! let metatron = MetatronGeometry::new();
+//!
+//! // Embed any object via its hash
+//! let embedding = metatron.embed_object(42u64);
+//!
+//! // Access specific nodes
+//! let center = metatron.get_node_5d(0);  // Center node
+//! let hex1 = metatron.get_node_5d(1);    // First hexagon node
+//! ```
 
 use super::Point5D;
 
-/// Metatron Sacred Geometry with 13 canonical nodes
+/// Metatron Sacred Geometry with 13 canonical nodes.
+///
+/// Provides deterministic embedding of objects into 5D space via weighted
+/// interpolation of canonical nodes. The same hash always produces the
+/// same embedding.
+///
+/// # Node Layout
+///
+/// - **Node 0**: Center at origin
+/// - **Nodes 1-6**: Hexagonal ring in XY plane
+/// - **Nodes 7-12**: Cube vertices (subset)
+///
+/// # Example
+///
+/// ```rust
+/// use phosphoros_core::MetatronGeometry;
+///
+/// let metatron = MetatronGeometry::default();
+///
+/// // Different hashes produce different (but deterministic) embeddings
+/// let a = metatron.embed_object(123);
+/// let b = metatron.embed_object(456);
+/// assert_ne!(a, b);
+///
+/// // Same hash always produces same result
+/// let a2 = metatron.embed_object(123);
+/// assert_eq!(a, a2);
+/// ```
 pub struct MetatronGeometry {
     #[allow(dead_code)]
     nodes_3d: [[f64; 3]; 13],
