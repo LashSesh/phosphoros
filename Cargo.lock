@@ -1283,6 +1283,7 @@ version = "1.0.0"
 dependencies = [
  "phosphoros-bip39",
  "phosphoros-core",
+ "phosphoros-quantum",
  "rand 0.8.5",
  "rayon",
  "serde",
@@ -4325,6 +4326,7 @@ version = "1.0.0"
 dependencies = [
  "nalgebra 0.32.6",
  "ndarray",
+ "phosphoros-quantum",
  "rayon",
  "serde",
  "thiserror 2.0.17",
@@ -4395,6 +4397,7 @@ dependencies = [
  "chrono",
  "hex",
  "phosphoros-bip39",
+ "phosphoros-quantum",
  "reqwest 0.12.24",
  "serde",
  "serde_json",
@@ -4413,7 +4416,6 @@ dependencies = [
  "nalgebra 0.33.2",
  "num-complex",
  "num-traits",
- "phosphoros-core",
  "proptest",
  "rand 0.8.5",
  "rand_distr",

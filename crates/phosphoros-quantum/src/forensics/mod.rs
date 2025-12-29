@@ -6,4 +6,4 @@
 
 mod ring_qaoa;
 
-pub use ring_qaoa::{RingSignatureQAOA, QuantumRingAnalysis};
+pub use ring_qaoa::{RingSignatureQAOA, RingMember, QuantumRingAnalysis};

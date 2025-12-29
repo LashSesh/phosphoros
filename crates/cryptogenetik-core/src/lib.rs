@@ -8,6 +8,7 @@
 //! - **Operators**: WT (contraction), SW (threshold), DK (lock), PI (canonical)
 //! - **Score Hooks**: Early scoring with checksum, partial words, patterns
 //! - **Resonance Integration**: Pluggable resonance engines via trait
+//! - **Quantum Search**: Grover-accelerated search (with `quantum` feature)
 //!
 //! ## Quick Start
 //!
@@ -37,11 +38,13 @@
 pub mod bridge;
 mod error;
 pub mod optimizer;
+pub mod quantum;
 pub mod score_hooks;
 pub mod triton;
 
 pub use bridge::{Outcome, PhosphorosCore};
 pub use error::{Error, Result};
 pub use optimizer::OperatorSet;
+pub use quantum::{QuantumSearchConfig, QuantumSearchEngine, QuantumSearchMode};
 pub use score_hooks::HookSet;
 pub use triton::{SearchResult, TritonPipeline};

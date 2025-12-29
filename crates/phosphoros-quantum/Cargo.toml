@@ -17,9 +17,6 @@ scs = []
 full = ["simulator", "grover", "qaoa", "vqe", "quantum-walk", "scs"]
 
 [dependencies]
-# PHOSPHOROS Core
-phosphoros-core = { path = "../phosphoros-core" }
-
 # Math & Linear Algebra
 nalgebra = "0.33"
 num-complex = "0.4"
