@@ -24,7 +24,11 @@ phosphoros-bip39 = { path = "../phosphoros-bip39", optional = true }
 # Optional parallel processing
 rayon = { version = "1.8", optional = true }
 
+# Optional quantum integration
+phosphoros-quantum = { path = "../phosphoros-quantum", optional = true }
+
 [features]
 default = []
 bip39-integration = ["phosphoros-bip39"]
 parallel = ["rayon"]
+quantum = ["phosphoros-quantum"]

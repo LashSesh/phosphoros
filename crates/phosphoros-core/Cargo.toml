@@ -18,7 +18,11 @@ nalgebra = { version = "0.32", optional = true }
 ndarray = { version = "0.15", optional = true }
 rayon = { version = "1.8", optional = true }
 
+# Optional quantum integration
+phosphoros-quantum = { path = "../phosphoros-quantum", optional = true }
+
 [features]
 default = []
 advanced-linalg = ["nalgebra", "ndarray"]
 parallel = ["rayon"]
+quantum = ["phosphoros-quantum"]
