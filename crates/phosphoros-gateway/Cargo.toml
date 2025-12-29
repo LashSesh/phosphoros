@@ -22,7 +22,8 @@ utoipa-swagger-ui = { version = "6", features = ["axum"] }
 
 # Prometheus metrics
 metrics = "0.24"
-metrics-exporter-prometheus = "0.16"
+# Use http-listener feature without rustls to avoid aws-lc-rs dependency on Windows
+metrics-exporter-prometheus = { version = "0.16", default-features = false, features = ["http-listener"] }
 
 [features]
 default = []
