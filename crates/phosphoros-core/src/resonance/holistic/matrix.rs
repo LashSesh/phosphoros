@@ -13,12 +13,19 @@ use std::f64::consts::PI;
 /// Complete state of the Holistic Matrix
 #[derive(Debug, Clone)]
 pub struct MatrixState {
+    /// Current simulation time
     pub time: f64,
+    /// Kosmokrator coherence measure κ(t)
     pub kosmokrator_coherence: f64,
+    /// Chronokrator total divergence D_total
     pub chronokrator_dtotal: f64,
+    /// Whether the Monolith was triggered
     pub monolith_triggered: bool,
+    /// Torus spatial phase φ_s
     pub torus_spatial: f64,
+    /// Torus temporal phase φ_t
     pub torus_temporal: f64,
+    /// Number of outputs generated
     pub output_count: usize,
 }
 
@@ -178,12 +185,19 @@ impl Pfauenthron {
 /// - Torus topology (S¹ × S¹ phase space)
 #[derive(Debug, Clone)]
 pub struct HolisticMatrix {
+    /// Kosmokrator - Exclusion engine with Proof-of-Resonance
     pub kosmokrator: Kosmokrator,
+    /// Chronokrator - Temporal expansion and divergence tracking
     pub chronokrator: Chronokrator,
+    /// Pfauenthron - O.P.H.A.N. array with Mandorla field
     pub pfauenthron: Pfauenthron,
+    /// Torus topology - S¹ × S¹ phase space embedding
     pub torus: TorusTopology,
+    /// Current simulation time
     pub time: f64,
+    /// History of 5D output vectors
     pub output_history: Vec<Option<[f64; 5]>>,
+    /// Cached matrix state for performance
     cached_state: MatrixState,
 }
 

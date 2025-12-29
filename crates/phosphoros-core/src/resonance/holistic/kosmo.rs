@@ -5,15 +5,19 @@ use std::ops::{Add, Mul};
 /// Complex number for phase space operations
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Complex {
+    /// Real component
     pub re: f64,
+    /// Imaginary component
     pub im: f64,
 }
 
 impl Complex {
+    /// Create a new complex number from real and imaginary parts
     pub fn new(re: f64, im: f64) -> Self {
         Self { re, im }
     }
 
+    /// Create a complex number from polar coordinates (r, θ)
     pub fn from_polar(r: f64, theta: f64) -> Self {
         Self {
             re: r * theta.cos(),
@@ -21,14 +25,17 @@ impl Complex {
         }
     }
 
+    /// Calculate the magnitude |z| = √(re² + im²)
     pub fn magnitude(&self) -> f64 {
         (self.re * self.re + self.im * self.im).sqrt()
     }
 
+    /// Calculate the phase angle θ = atan2(im, re)
     pub fn phase(&self) -> f64 {
         self.im.atan2(self.re)
     }
 
+    /// Return the complex conjugate z* = re - i·im
     pub fn conjugate(&self) -> Self {
         Self {
             re: self.re,
@@ -62,7 +69,9 @@ impl Mul for Complex {
 /// Phase space state - superposition of operators with phase positions
 #[derive(Debug, Clone)]
 pub struct PhaseState {
+    /// Amplitude coefficients |αᵢ| for each basis state
     pub amplitudes: Vec<f64>,
+    /// Phase angles θᵢ for each basis state
     pub phases: Vec<f64>,
 }
 
