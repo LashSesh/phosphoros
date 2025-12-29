@@ -54,8 +54,15 @@ impl BackendRegistry {
     }
 
     /// Get the default backend
+    ///
+    /// # Panics
+    /// This should never panic as the invariant is maintained by the constructor
+    /// and `set_default()` method.
     pub fn default(&self) -> &dyn QuantumBackend {
-        self.backends.get(&self.default_backend).unwrap().as_ref()
+        self.backends
+            .get(&self.default_backend)
+            .expect("default backend must exist - invariant violated")
+            .as_ref()
     }
 
     /// Register a new backend

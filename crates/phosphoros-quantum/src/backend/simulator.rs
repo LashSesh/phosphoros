@@ -18,7 +18,8 @@ pub struct LocalSimulator {
     /// Current quantum state
     state: QuantumState,
 
-    /// Cached gate matrices for performance
+    /// Cached gate matrices for performance (reserved for future optimization)
+    #[allow(dead_code)]
     gate_cache: HashMap<String, DMatrix<Complex>>,
 }
 

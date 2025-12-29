@@ -88,7 +88,7 @@ impl QuantumRingAnalyzer {
         let (best_index, best_confidence) = combined_probabilities
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(i, &p)| (i, p))
             .unwrap_or((0, 0.0));
 

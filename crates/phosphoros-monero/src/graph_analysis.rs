@@ -281,7 +281,7 @@ impl TransactionGraph {
         }
 
         // Sort by anomaly score
-        anomalies.sort_by(|a, b| b.anomaly_score.partial_cmp(&a.anomaly_score).unwrap());
+        anomalies.sort_by(|a, b| b.anomaly_score.partial_cmp(&a.anomaly_score).unwrap_or(std::cmp::Ordering::Equal));
 
         anomalies
     }

@@ -26,8 +26,9 @@ pub struct QuantumResonanceEngine<B: QuantumBackend> {
     time: f64,
 }
 
-/// Cached resonance evaluation data
+/// Cached resonance evaluation data (for future cache invalidation)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ResonanceCache {
     perception: [f64; 5],
     intention: [f64; 5],

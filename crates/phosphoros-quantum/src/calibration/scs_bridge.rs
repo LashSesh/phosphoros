@@ -24,6 +24,8 @@ pub struct SCSBridge {
 
     /// Calibration step timing
     last_step: Option<Instant>,
+    /// Step interval in milliseconds (reserved for rate-limiting)
+    #[allow(dead_code)]
     step_interval_ms: u64,
 }
 
@@ -157,7 +159,7 @@ impl SCSBridge {
     /// Verify Proof-of-Resonance
     ///
     /// PoR ensures that configuration updates only improve or maintain performance.
-    fn verify_por(&self, new_config: &CalibrationConfig) -> bool {
+    fn verify_por(&self, _new_config: &CalibrationConfig) -> bool {
         // In a full implementation, this would simulate the new config
         // For now, we check if the trend is positive
         if self.state.history.len() < 2 {

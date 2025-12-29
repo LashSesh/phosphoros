@@ -199,7 +199,7 @@ impl<B: QuantumBackend> GroverSearch<B> {
 
         // Sort by probability (descending)
         let mut pairs: Vec<_> = solutions.into_iter().zip(probabilities.into_iter()).collect();
-        pairs.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        pairs.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         pairs.into_iter().unzip()
     }
