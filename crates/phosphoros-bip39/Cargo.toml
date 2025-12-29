@@ -38,9 +38,10 @@ default = []
 # Chain support
 btc = ["bitcoin", "bech32"]
 evm = ["k256", "sha3"]
-# Other chains would be added similarly
+# Cosmos SDK chains (ATOM, OSMO, JUNO, etc.)
+cosmos = ["k256", "bech32"]
+# Other chains (placeholder for now)
 substrate = []
-cosmos = []
 solana = []
 cardano = []
 monero = ["curve25519-dalek", "sha3"]

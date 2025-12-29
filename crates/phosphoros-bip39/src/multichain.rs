@@ -7,6 +7,7 @@
 //! - `monero` - Real Ed25519 derivation for Monero addresses
 //! - `btc` - Real secp256k1 derivation for Bitcoin addresses (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR)
 //! - `evm` - Real secp256k1 derivation for Ethereum/EVM addresses
+//! - `cosmos` - Real secp256k1 derivation for Cosmos SDK chains (bech32)
 
 use crate::{derivation::DerivedKey, Error, Result};
 
@@ -20,6 +21,9 @@ use crate::bitcoin::{
 
 #[cfg(feature = "evm")]
 use crate::ethereum::generate_address as eth_generate_address;
+
+#[cfg(feature = "cosmos")]
+use crate::cosmos::{generate_address as cosmos_generate_address, CosmosChain};
 
 /// Supported blockchains
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -169,15 +173,37 @@ impl MultichainAddress {
                 ))
             }
 
+            // Cosmos with real cryptography (cosmos feature)
+            #[cfg(feature = "cosmos")]
+            Blockchain::Cosmos => {
+                // Use proper Cosmos address generation with secp256k1 + bech32
+                let cosmos_addr = cosmos_generate_address(key, CosmosChain::cosmos())?;
+
+                Ok(Self {
+                    address: cosmos_addr.address,
+                    pubkey_hex: cosmos_addr.public_key_compressed,
+                    blockchain,
+                })
+            }
+            #[cfg(not(feature = "cosmos"))]
+            Blockchain::Cosmos => {
+                // Placeholder when cosmos feature is not enabled
+                Err(Error::UnsupportedBlockchain(
+                    "Cosmos support requires the 'cosmos' feature flag".into(),
+                ))
+            }
+
             // Other blockchains - placeholder implementations
             // TODO: Implement with proper cryptographic libraries
             _ => {
                 let address = match blockchain {
                     Blockchain::Substrate => format!("5{}", &key.public_key_hex()[0..47]),
-                    Blockchain::Cosmos => format!("cosmos1{}", &key.public_key_hex()[0..39]),
                     Blockchain::Solana => key.public_key_hex()[0..44].to_string(),
                     Blockchain::Cardano => format!("addr1{}", &key.public_key_hex()[0..53]),
-                    Blockchain::Bitcoin | Blockchain::Monero | Blockchain::Ethereum => {
+                    Blockchain::Bitcoin
+                    | Blockchain::Monero
+                    | Blockchain::Ethereum
+                    | Blockchain::Cosmos => {
                         unreachable!()
                     } // Handled above
                 };
@@ -362,6 +388,29 @@ mod tests {
     fn test_ethereum_requires_feature() {
         let key = mock_key();
         let addr = MultichainAddress::from_key(&key, Blockchain::Ethereum);
+        assert!(addr.is_err());
+    }
+
+    #[cfg(feature = "cosmos")]
+    #[test]
+    fn test_cosmos_address_generation() {
+        let key = mock_key();
+        let addr = MultichainAddress::from_key(&key, Blockchain::Cosmos);
+        assert!(addr.is_ok());
+        let addr = addr.unwrap();
+        // Cosmos addresses start with cosmos1
+        assert!(
+            addr.address.starts_with("cosmos1"),
+            "Expected cosmos1 prefix: {}",
+            addr.address
+        );
+    }
+
+    #[cfg(not(feature = "cosmos"))]
+    #[test]
+    fn test_cosmos_requires_feature() {
+        let key = mock_key();
+        let addr = MultichainAddress::from_key(&key, Blockchain::Cosmos);
         assert!(addr.is_err());
     }
 }

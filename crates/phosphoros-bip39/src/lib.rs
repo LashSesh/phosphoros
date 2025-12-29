@@ -57,6 +57,10 @@ pub mod bitcoin;
 #[cfg(feature = "evm")]
 pub mod ethereum;
 
+// Cosmos/Tendermint-specific address generation
+#[cfg(feature = "cosmos")]
+pub mod cosmos;
+
 // Optional resonance analysis module
 #[cfg(feature = "resonance")]
 pub mod analysis;
@@ -74,3 +78,7 @@ pub use bitcoin::{BitcoinAddress, BitcoinAddressType, BitcoinNetwork};
 // Re-export Ethereum types when evm feature is enabled
 #[cfg(feature = "evm")]
 pub use ethereum::EthereumAddress;
+
+// Re-export Cosmos types when cosmos feature is enabled
+#[cfg(feature = "cosmos")]
+pub use cosmos::{CosmosAddress, CosmosChain};
