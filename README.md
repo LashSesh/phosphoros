@@ -1,141 +1,21 @@
 # PHOSPHOROS
 
-**Quantum-Enhanced Blockchain Forensics Engine**
+**Multichain Blockchain Forensics Platform with Quantum-Enhanced Analytics**
 
 [![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
-[![Quantum](https://img.shields.io/badge/quantum-enabled-blueviolet.svg)](#quantum-algorithms)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](#api-documentation)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](#docker-deployment)
 
-PHOSPHOROS is an advanced forensic analysis system combining **5D spectral geometry**, **holistic resonance engines**, and **quantum algorithms** for blockchain investigation. Features the world's first **quantum-based Monero ring signature analysis** using QAOA.
+PHOSPHOROS is an enterprise-grade blockchain forensics platform combining **multichain address analysis**, **5D spectral geometry**, and **quantum-enhanced algorithms** for comprehensive transaction tracing across Bitcoin, Ethereum, Cosmos, Monero, and more.
 
-## Quantum Computing Integration
+## Features
 
-PHOSPHOROS integrates a full quantum simulation framework for enhanced forensic capabilities:
-
-### QAOA Ring Signature Analysis
-
-The **Quantum Approximate Optimization Algorithm** provides probabilistic identification of real transaction inputs in Monero ring signatures:
-
-```rust
-use phosphoros_monero::{QuantumRingAnalyzer, RingAnalysisResult};
-
-// Quantum-classical hybrid analysis
-let analyzer = QuantumRingAnalyzer::new(depth: 2, shots: 1000)
-    .with_quantum_weight(0.5);
-
-let result = analyzer.analyze(&ring_members, &classical_result)?;
-
-println!("Classical prediction: {:?}", result.classical_index);
-println!("Quantum prediction: {:?}", result.quantum_index);
-println!("Combined confidence: {:.2}%", result.combined_confidence * 100.0);
-println!("Quantum improvement: {:.2}%", result.improvement_over_classical * 100.0);
-```
-
-### Grover-Accelerated Search
-
-√N speedup for unstructured search in the Triton pipeline:
-
-```rust
-use cryptogenetik_core::{QuantumSearchEngine, QuantumSearchConfig};
-
-let engine = QuantumSearchEngine::new(
-    QuantumSearchConfig::new(8).with_threshold(0.7)
-);
-
-// Hybrid quantum-classical search
-let result = engine.hybrid_search(
-    search_space,
-    |idx| quantum_score_fn(idx),  // Quantum pruning
-    |idx| classical_eval(idx),     // Classical evaluation
-)?;
-
-println!("Quantum pruning factor: {:.2}%", result.quantum_pruning_factor * 100.0);
-println!("Effective speedup: {:.1}x", result.effective_speedup(search_space));
-```
-
-### Quantum Algorithms
-
-| Algorithm | Use Case | Speedup |
-|-----------|----------|---------|
-| **QAOA** | MaxCut optimization, ring decomposition | Problem-dependent |
-| **Grover** | Unstructured search | √N |
-| **VQE** | Ground state estimation | Exponential (quantum advantage) |
-| **Quantum Walk** | Graph centrality, link analysis | Polynomial |
-
-### SCS Calibration System
-
-Seraphic Calibration System with **Double-Kick operator** for automatic hyperparameter tuning:
-
-```
-T = Φ_V ∘ Φ_U
-
-Φ_U: velocity update (ψ component)
-Φ_V: config update (ρ component)
-```
-
-Supports four regimes: `Standard`, `Aggressive`, `Exploring`, `Homeostasis`
-
-## Architecture
-
-```
-phosphoros/
-├── crates/
-│   ├── phosphoros-quantum/      # Quantum computing framework
-│   │   ├── backend/             # QuantumBackend trait, LocalSimulator
-│   │   ├── algorithms/          # Grover, QAOA, VQE, Quantum Walk
-│   │   ├── calibration/         # SCS Bridge, Double-Kick operator
-│   │   ├── engines/             # QuantumResonanceEngine, HybridMatrix
-│   │   └── forensics/           # RingSignatureQAOA
-│   │
-│   ├── phosphoros-core/         # 5D geometry + holistic resonance
-│   ├── phosphoros-monero/       # Monero forensics + quantum integration
-│   ├── cryptogenetik-core/      # Search + Grover acceleration
-│   ├── phosphoros-bip39/        # Multichain wallet support
-│   ├── phosphoros-satellite/    # Blockchain forensics
-│   ├── phosphoros-dashboard/    # GUI Dashboard
-│   ├── phosphoros-gateway/      # REST/WS API
-│   └── phosphoros-cli/          # Command-line tools
-│
-├── ouroboros_dna/               # Visualization
-└── phosphoros-kryptogenetik/    # Legacy implementation
-```
-
-## Core Concepts
-
-### Performance Triplet (ψ, ρ, ω)
-
-The universal resonance invariant used across all PHOSPHOROS systems:
-
-```rust
-pub struct SpectralSignature {
-    pub psi: f64,    // Coherence (0-1)
-    pub rho: f64,    // Stability (0-1)
-    pub omega: f64,  // Efficiency (0-1)
-}
-
-// Resonance score (INVARIANT)
-fn resonance(&self) -> f64 {
-    self.psi * self.rho * self.omega
-}
-```
-
-### 13-Node Metatron Geometry
-
-Sacred geometry topology embedded in 5D space:
-
-- 12 peripheral nodes + 1 central node
-- Encodes high-dimensional quantum states
-- Used for state space discretization
-
-### Holistic Matrix Engine
-
-Multi-layer resonance evaluation:
-
-1. **Kosmokrator**: Proof-of-Resonance exclusion gate
-2. **Chronokrator**: Temporal expansion control
-3. **Mandorla Field**: Perception-intention intersection
-4. **Monolith**: Action singularity trigger
-5. **Torus Topology**: S¹ × S¹ phase space navigation
+- **Multichain Support**: Bitcoin (P2PKH/P2SH/P2WPKH/P2TR), Ethereum (EIP-55), Cosmos SDK, Monero, Solana, Substrate
+- **Quantum Algorithms**: QAOA, Grover search, VQE, Quantum Walk for enhanced forensic analysis
+- **Enterprise Ready**: Docker deployment, OpenAPI 3.0 documentation, Prometheus metrics
+- **BIP39/32/44**: Full hierarchical deterministic wallet derivation
+- **Forensic Pipeline**: Anomaly detection, cluster analysis, topological pattern recognition
 
 ## Quick Start
 
@@ -144,120 +24,261 @@ Multi-layer resonance evaluation:
 ```bash
 git clone https://github.com/LashSesh/phosphoros.git
 cd phosphoros
-cargo build --workspace --all-features --release
+cargo build --workspace --release
 ```
 
-### Run Dashboard
+### Run Gateway API
 
 ```bash
-cargo run -p phosphoros-dashboard --release
+cargo run -p phosphoros-gateway --release
 ```
+
+The API will be available at:
+- `http://localhost:8080/` - Service info
+- `http://localhost:8080/swagger-ui/` - Interactive API docs
+- `http://localhost:8080/metrics` - Prometheus metrics
+
+### Docker Deployment
+
+```bash
+# Production build
+docker build -t phosphoros .
+
+# Run with docker-compose
+docker-compose up -d
+```
+
+## Architecture
+
+```
+phosphoros/
+├── crates/
+│   ├── phosphoros-core/         # 5D geometry, spectral signatures, resonance engine
+│   ├── phosphoros-quantum/      # Quantum algorithms (QAOA, Grover, VQE)
+│   ├── phosphoros-bip39/        # Multichain wallet derivation
+│   │   ├── bitcoin.rs           # P2PKH, P2SH-P2WPKH, P2WPKH, P2TR
+│   │   ├── ethereum.rs          # EIP-55 checksummed addresses
+│   │   ├── cosmos.rs            # Bech32 encoding for Cosmos SDK
+│   │   └── monero.rs            # Ed25519 Monero addresses
+│   ├── phosphoros-monero/       # Monero ring signature forensics
+│   ├── phosphoros-satellite/    # Blockchain snapshot analysis
+│   ├── phosphoros-gateway/      # REST API with OpenAPI + Prometheus
+│   ├── phosphoros-stealthnet/   # Privacy protocol analysis
+│   ├── phosphoros-dashboard/    # Visualization GUI
+│   ├── phosphoros-cli/          # Command-line tools
+│   └── cryptogenetik-core/      # Quantum-accelerated search
+├── Dockerfile                   # Multi-stage production build
+└── docker-compose.yml           # Service orchestration
+```
+
+## Multichain Address Generation
+
+PHOSPHOROS provides cryptographically correct address generation for multiple blockchains:
+
+### Bitcoin
+
+```rust
+use phosphoros_bip39::{Mnemonic, MasterKey, DerivationPath, CurveType};
+use phosphoros_bip39::bitcoin::{generate_address, BitcoinAddressType, BitcoinNetwork};
+
+let mnemonic = Mnemonic::generate(24, WordlistLanguage::English)?;
+let seed = mnemonic.to_seed(None);
+let master = MasterKey::from_seed(seed, CurveType::Secp256k1);
+let key = master.derive(&DerivationPath::bitcoin(0, 0, 0))?;
+
+// Generate all Bitcoin address types
+let p2pkh = generate_address(&key, BitcoinAddressType::P2PKH, BitcoinNetwork::Mainnet)?;
+let p2wpkh = generate_address(&key, BitcoinAddressType::P2WPKH, BitcoinNetwork::Mainnet)?;
+let p2tr = generate_address(&key, BitcoinAddressType::P2TR, BitcoinNetwork::Mainnet)?;
+```
+
+### Ethereum
+
+```rust
+use phosphoros_bip39::ethereum::generate_address;
+
+let eth_addr = generate_address(&key)?;
+// Returns EIP-55 checksummed address: 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed
+```
+
+### Cosmos SDK
+
+```rust
+use phosphoros_bip39::cosmos::{generate_address, CosmosChain};
+
+let cosmos = generate_address(&key, CosmosChain::cosmos())?;  // cosmos1...
+let osmosis = generate_address(&key, CosmosChain::osmosis())?; // osmo1...
+let juno = generate_address(&key, CosmosChain::juno())?;       // juno1...
+```
+
+## Quantum-Enhanced Forensics
+
+### QAOA Ring Signature Analysis
+
+Probabilistic identification of real inputs in Monero ring signatures:
+
+```rust
+use phosphoros_monero::QuantumRingAnalyzer;
+
+let analyzer = QuantumRingAnalyzer::new(depth: 2, shots: 1000)
+    .with_quantum_weight(0.5);
+
+let result = analyzer.analyze(&ring_members, &classical_result)?;
+println!("Combined confidence: {:.2}%", result.combined_confidence * 100.0);
+```
+
+### Grover-Accelerated Search
+
+Quadratic speedup for transaction pattern matching:
+
+```rust
+use cryptogenetik_core::QuantumSearchEngine;
+
+let engine = QuantumSearchEngine::new(config);
+let result = engine.hybrid_search(search_space, quantum_oracle, classical_eval)?;
+```
+
+## API Documentation
+
+The gateway exposes a RESTful API with automatic OpenAPI 3.0 documentation:
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Service information |
+| `/health` | GET | Health check |
+| `/metrics` | GET | Prometheus metrics |
+| `/swagger-ui/` | GET | Interactive API docs |
+| `/satellite/v1/snapshots` | GET/POST | Blockchain snapshots |
+| `/satellite/v1/analyze/:id` | POST | Run forensic analysis |
+| `/satellite/v1/reports/latest` | GET | Latest analysis report |
+
+### Example: Ingest Snapshot
+
+```bash
+curl -X POST http://localhost:8080/satellite/v1/snapshots \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "btc-block-800000",
+    "observations": [{
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+      "features": [0.1, 0.2, 0.3, 0.4, 0.5]
+    }]
+  }'
+```
+
+## Prometheus Metrics
+
+PHOSPHOROS exports the following metrics for monitoring:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `phosphoros_http_requests_total` | Counter | HTTP requests by path/method/status |
+| `phosphoros_http_request_duration_seconds` | Histogram | Request latency |
+| `phosphoros_snapshots_ingested_total` | Counter | Snapshots ingested by chain |
+| `phosphoros_analyses_completed_total` | Counter | Forensic analyses completed |
+| `phosphoros_hotspots_detected` | Histogram | Resonance hotspots per analysis |
+
+## Feature Flags
+
+### phosphoros-bip39
+
+```toml
+[features]
+btc = ["bitcoin", "bech32"]       # Bitcoin address generation
+evm = ["k256", "sha3"]            # Ethereum/EVM addresses
+cosmos = ["k256", "bech32"]       # Cosmos SDK chains
+monero = ["curve25519-dalek"]     # Monero addresses
+```
+
+### phosphoros-quantum
+
+```toml
+[features]
+grover = []      # Grover's search algorithm
+qaoa = []        # Quantum Approximate Optimization
+vqe = []         # Variational Quantum Eigensolver
+full = []        # All algorithms
+```
+
+## Core Concepts
+
+### Spectral Signature (psi, rho, omega)
+
+The universal resonance triplet used across all PHOSPHOROS systems:
+
+```rust
+pub struct SpectralSignature {
+    pub psi: f64,    // Coherence (0-1)
+    pub rho: f64,    // Stability (0-1)
+    pub omega: f64,  // Efficiency (0-1)
+}
+
+// Resonance invariant
+fn resonance(&self) -> f64 {
+    self.psi * self.rho * self.omega
+}
+```
+
+### 5D Point Geometry
+
+High-dimensional embedding for entity analysis:
+
+```rust
+pub struct Point5D {
+    pub x: f64,  // Spatial
+    pub y: f64,
+    pub z: f64,
+    pub w: f64,  // Temporal
+    pub v: f64,  // Value/intensity
+}
+```
+
+## Development
 
 ### Run Tests
 
 ```bash
+# All tests
 cargo test --workspace --all-features
+
+# With specific chain features
+cargo test -p phosphoros-bip39 --features btc,evm,cosmos
 ```
 
-## Feature Flags
+### Run Benchmarks
 
-### phosphoros-quantum
-- `simulator` (default): Local quantum simulator
-- `grover`: Grover's search algorithm
-- `qaoa`: Quantum Approximate Optimization
-- `vqe`: Variational Quantum Eigensolver
-- `quantum-walk`: Continuous-time quantum walks
-- `scs`: Seraphic Calibration System
-- `full`: All algorithms
-
-### phosphoros-monero
-- `quantum`: QAOA ring signature analysis
-
-### cryptogenetik-core
-- `quantum`: Grover-accelerated search
-
-### phosphoros-core
-- `quantum`: Quantum resonance engine
-- `advanced-linalg`: nalgebra/ndarray
-- `parallel`: Rayon parallelization
-
-## Monero Ring Signature Analysis
-
-PHOSPHOROS provides the first quantum-enhanced approach to Monero forensics:
-
-### Classical Heuristics
-- **Temporal Analysis**: Gamma distribution deviation detection
-- **Decoy Selection**: Pattern anomaly identification
-- **Output Reuse**: Frequency-based filtering
-
-### Quantum Enhancement
-- **QAOA MaxCut**: Partitions ring into real/decoy groups
-- **Quantum Walk**: Centrality-based ranking
-- **Hybrid Combination**: Weighted classical-quantum fusion
-
-### Analysis Pipeline
-
-```
-Ring Signature
-      │
-      ▼
-┌─────────────────────────────────────┐
-│     Classical Heuristics            │
-│  (Temporal, Decoy, Reuse analysis)  │
-└───────────────┬─────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────┐
-│      Quantum QAOA Analysis          │
-│  (MaxCut partitioning of ring)      │
-└───────────────┬─────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────┐
-│     Hybrid Combination              │
-│  (Weighted probability fusion)      │
-└───────────────┬─────────────────────┘
-                │
-                ▼
-        Predicted Real Input
+```bash
+cargo bench -p phosphoros-core
 ```
 
-## Performance
+### Clippy
 
-### Test Coverage
-- phosphoros-quantum: 20+ tests
-- phosphoros-core: 46 tests
-- phosphoros-monero: 15 tests
-- cryptogenetik-core: 13 tests
-- Total: 150+ tests passing
-
-### Benchmarks
-```
-5D Operations:       ~14M ops/sec
-Metatron Embed:      ~1.2M ops/sec
-Resonance Eval:      ~640K ops/sec
-Quantum Gate (1Q):   ~500K ops/sec
-QAOA Layer:          ~10K ops/sec
-Grover Iteration:    ~20K ops/sec
+```bash
+cargo clippy --workspace --all-features -- -D warnings
 ```
 
 ## Security Notice
 
-**IMPORTANT**: This system is for research and forensic analysis only.
+**IMPORTANT**: This system is designed for forensic analysis and research.
 
-- Do NOT use for generating production private keys
-- Do NOT use for managing real cryptocurrency wallets
-- Always use official, audited wallet software for real funds
+- Do NOT use for managing real cryptocurrency funds
+- Do NOT use generated keys for production wallets
 - Quantum simulation runs on classical hardware
+- Always use audited wallet software for real assets
 
-## Production Quality
+## Performance
 
-- No `unsafe` code
-- Comprehensive error handling with `thiserror`
-- Full determinism (seeded RNG)
-- Thread-safe async architecture
-- Documentation for all public APIs
-- `clippy` clean with `-D warnings`
+```
+5D Operations:       ~14M ops/sec
+Metatron Embed:      ~1.2M ops/sec
+Resonance Eval:      ~640K ops/sec
+Bitcoin Address:     ~50K ops/sec
+Ethereum Address:    ~45K ops/sec
+QAOA Layer:          ~10K ops/sec
+```
 
 ## License
 
@@ -265,8 +286,8 @@ Dual-licensed under MIT or Apache 2.0.
 
 ---
 
-**Version**: 2.0.0 (Quantum Edition)
-**Status**: Production-ready with quantum integration
-**Author**: PHOSPHOROS Project Team
+**Version**: 2.1.0
+**Status**: Production-ready
+**Maintainer**: PHOSPHOROS Project Team
 
-*The first quantum-enhanced blockchain forensics system*
+*Enterprise blockchain forensics with quantum-enhanced analytics*

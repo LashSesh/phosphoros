@@ -9,10 +9,14 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[cfg(feature = "api")]
+use utoipa::ToSchema;
+
 use crate::error::{Result, SatelliteError};
 
 /// Represents a single entity (wallet, validator, smart-contract) captured during ingestion.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct EntityObservation {
     /// Unique identifier for this entity observation
     pub id: Uuid,
@@ -63,6 +67,7 @@ impl EntityObservation {
 
 /// Raw ingestion payload accepted by the API.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct SnapshotIngest {
     /// Human-readable label for this snapshot
     pub label: String,
@@ -95,6 +100,7 @@ impl SnapshotIngest {
 
 /// Stored snapshot enriched with timestamps and derived metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct SnapshotRecord {
     /// Unique identifier for this snapshot
     pub id: Uuid,
@@ -136,6 +142,7 @@ impl SnapshotRecord {
 
 /// Request payload used to tune an analysis run.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct AnalysisRequest {
     /// Number of nearest neighbors for KNN graph construction
     #[serde(default)]
@@ -150,6 +157,7 @@ pub struct AnalysisRequest {
 
 /// Result returned by the analytics pipeline.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct AnalysisReport {
     /// ID of the snapshot being analyzed
     pub snapshot_id: Uuid,
@@ -169,6 +177,7 @@ pub struct AnalysisReport {
 
 /// A detected resonance hotspot in the entity graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct ResonanceHotspot {
     /// Origin entity ID
     pub origin: Uuid,
@@ -180,6 +189,7 @@ pub struct ResonanceHotspot {
 
 /// Anomaly score for a single entity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct AnomalyScore {
     /// Entity ID
     pub entity: Uuid,
@@ -189,6 +199,7 @@ pub struct AnomalyScore {
 
 /// Summary of topological properties of the entity graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct TopologySummary {
     /// Number of connected components
     pub components: usize,
@@ -200,6 +211,7 @@ pub struct TopologySummary {
 
 /// Summary of entropy analysis.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "api", derive(ToSchema))]
 pub struct EntropySummary {
     /// Spectral entropy value
     pub spectral: f64,

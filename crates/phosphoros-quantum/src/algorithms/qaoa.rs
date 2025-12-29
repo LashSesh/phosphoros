@@ -288,10 +288,12 @@ impl MaxCutProblem {
     }
 
     /// Create from adjacency matrix
+    #[allow(clippy::needless_range_loop)]
     pub fn from_adjacency_matrix(matrix: &[Vec<f64>]) -> Self {
         let num_nodes = matrix.len();
         let mut problem = Self::new(num_nodes);
 
+        // Iterate over upper triangle of adjacency matrix
         for i in 0..num_nodes {
             for j in (i + 1)..num_nodes {
                 if matrix[i][j] != 0.0 {

@@ -61,7 +61,7 @@ impl WordlistLanguage {
     }
 
     /// Convert to bip39 crate language
-    pub(crate) fn to_bip39_language(&self) -> bip39::Language {
+    pub(crate) fn to_bip39_language(self) -> bip39::Language {
         match self {
             Self::English => bip39::Language::English,
             Self::ChineseSimplified => bip39::Language::SimplifiedChinese,

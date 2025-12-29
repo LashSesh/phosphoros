@@ -198,7 +198,7 @@ impl<B: QuantumBackend> GroverSearch<B> {
         }
 
         // Sort by probability (descending)
-        let mut pairs: Vec<_> = solutions.into_iter().zip(probabilities.into_iter()).collect();
+        let mut pairs: Vec<_> = solutions.into_iter().zip(probabilities).collect();
         pairs.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         pairs.into_iter().unzip()
@@ -239,6 +239,7 @@ impl ResonanceOracle {
     }
 
     /// Decode a state index to 5D coordinates
+    #[allow(clippy::needless_range_loop)]
     pub fn decode_to_5d(&self, state: usize, num_qubits: usize) -> [f64; 5] {
         let bits_per_dim = num_qubits / 5;
         let max_val = (1 << bits_per_dim) - 1;

@@ -66,7 +66,8 @@ pub struct RingAnalyzer {
     reuse: OutputReuseHeuristic,
     /// Combined heuristic
     combined: CombinedHeuristic,
-    /// Cache of output reuse counts
+    /// Cache of output reuse counts (reserved for optimization)
+    #[allow(dead_code)]
     reuse_cache: HashMap<u64, usize>,
 }
 
@@ -103,7 +104,7 @@ impl RingAnalyzer {
         let tx_height = tx_info.block_height;
 
         // Parse transaction JSON
-        let parsed = self.parse_transaction(&tx_info)?;
+        let parsed = self.parse_transaction(tx_info)?;
 
         if input_index >= parsed.inputs.len() {
             return Err(Error::AnalysisFailed(format!(
@@ -186,7 +187,7 @@ impl RingAnalyzer {
         }
 
         let tx_info = &txs[0];
-        let parsed = self.parse_transaction(&tx_info)?;
+        let parsed = self.parse_transaction(tx_info)?;
 
         let mut results = Vec::with_capacity(parsed.inputs.len());
 

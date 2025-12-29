@@ -32,9 +32,12 @@ tower = { version = "0.4", optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
 
+# OpenAPI documentation
+utoipa = { version = "4", features = ["uuid", "chrono"], optional = true }
+
 [dev-dependencies]
 rand = "0.8"
 
 [features]
 default = []
-api = ["axum", "tokio", "tower", "tracing", "tracing-subscriber"]
+api = ["axum", "tokio", "tower", "tracing", "tracing-subscriber", "utoipa"]

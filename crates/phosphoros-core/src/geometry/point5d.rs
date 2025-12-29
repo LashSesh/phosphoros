@@ -1,8 +1,55 @@
 //! 5-dimensional point in information space
+//!
+//! This module provides [`Point5D`], the fundamental primitive for representing
+//! positions and vectors in the 5D information manifold.
+//!
+//! ## Coordinate System
+//!
+//! The 5D coordinates `[x, y, z, w, v]` represent:
+//! - `x, y, z`: Spatial dimensions (traditional 3D space)
+//! - `w`: Temporal/4th dimension
+//! - `v`: Semantic/information dimension
+//!
+//! ## Operations
+//!
+//! Supports standard vector operations:
+//! - [`Point5D::norm`]: L2 (Euclidean) norm
+//! - [`Point5D::normalize`]: Scale to unit length
+//! - [`Point5D::dot`]: Inner product
+//! - [`Point5D::distance`]: Euclidean distance
+//! - [`Point5D::add`]: Vector addition
+//! - [`Point5D::scale`]: Scalar multiplication
 
 use serde::{Deserialize, Serialize};
 
-/// 5-dimensional point in information space
+/// A 5-dimensional point/vector in the PHOSPHOROS information space.
+///
+/// `Point5D` is the fundamental geometric primitive, used for representing:
+/// - Positions in 5D space
+/// - Direction vectors (perception, intention, gradient)
+/// - Embeddings from [`MetatronGeometry`](crate::MetatronGeometry)
+///
+/// # Coordinates
+///
+/// The coordinates `[x, y, z, w, v]` map to:
+/// - `x, y, z`: Spatial dimensions
+/// - `w`: Temporal dimension
+/// - `v`: Semantic/information dimension
+///
+/// # Example
+///
+/// ```rust
+/// use phosphoros_core::Point5D;
+///
+/// // Create a point
+/// let p = Point5D::new(3.0, 4.0, 0.0, 0.0, 0.0);
+/// assert!((p.norm() - 5.0).abs() < 1e-10);
+///
+/// // Normalize to unit vector
+/// let unit = p.normalize();
+/// assert!((unit.coords[0] - 0.6).abs() < 1e-10);
+/// assert!((unit.coords[1] - 0.8).abs() < 1e-10);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Point5D {
     /// 5D coordinates [x, y, z, w, v]

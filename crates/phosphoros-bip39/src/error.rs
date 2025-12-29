@@ -32,6 +32,10 @@ pub enum Error {
     /// Address generation failed
     #[error("Address generation failed: {0}")]
     AddressGenerationFailed(String),
+
+    /// Invalid cryptographic key
+    #[error("Invalid key: {0}")]
+    InvalidKey(String),
 }
 
 /// Result type for phosphoros-bip39

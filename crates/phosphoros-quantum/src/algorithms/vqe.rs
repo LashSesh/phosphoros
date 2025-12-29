@@ -301,7 +301,7 @@ impl Hamiltonian {
         ];
 
         for (i, j) in edges {
-            let mut pauli = vec!['I'; 13];
+            let mut pauli = ['I'; 13];
             pauli[i] = 'Z';
             pauli[j] = 'Z';
             h.add_term(0.5, &pauli.iter().collect::<String>());

@@ -1,19 +1,53 @@
 //! Kosmokrator - Exclusion Engine with Proof-of-Resonance
+//!
+//! The Kosmokrator implements the first stage of the holistic resonance pipeline,
+//! filtering states based on phase coherence (Proof-of-Resonance).
+//!
+//! ## Proof-of-Resonance (PoR)
+//!
+//! A state passes PoR if:
+//! 1. Coherence exceeds threshold: `κ(t) ≥ κ⋆`
+//! 2. Coherence is stable: `|dκ/dt| ≤ ε`
+//!
+//! ## Coherence Measure
+//!
+//! ```text
+//! κ(t) = |1/N Σⱼ e^(iθⱼ)|
+//! ```
+//!
+//! This measures phase alignment across all components.
 
 use std::ops::{Add, Mul};
 
-/// Complex number for phase space operations
+/// Complex number for phase space operations.
+///
+/// Used internally for computing phase coherence via complex exponentials.
+///
+/// # Example
+///
+/// ```rust
+/// use phosphoros_core::resonance::holistic::Complex;
+///
+/// let z = Complex::from_polar(1.0, std::f64::consts::PI / 4.0);
+/// assert!((z.magnitude() - 1.0).abs() < 1e-10);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Complex {
+    /// Real part
     pub re: f64,
+    /// Imaginary part
     pub im: f64,
 }
 
 impl Complex {
+    /// Create a new complex number from real and imaginary parts.
     pub fn new(re: f64, im: f64) -> Self {
         Self { re, im }
     }
 
+    /// Create a complex number from polar coordinates (r, θ).
+    ///
+    /// Returns `r * e^(iθ) = r*(cos(θ) + i*sin(θ))`
     pub fn from_polar(r: f64, theta: f64) -> Self {
         Self {
             re: r * theta.cos(),
@@ -21,14 +55,17 @@ impl Complex {
         }
     }
 
+    /// Compute the magnitude (absolute value): `|z| = √(re² + im²)`
     pub fn magnitude(&self) -> f64 {
         (self.re * self.re + self.im * self.im).sqrt()
     }
 
+    /// Compute the phase (argument): `arg(z) = atan2(im, re)`
     pub fn phase(&self) -> f64 {
         self.im.atan2(self.re)
     }
 
+    /// Return the complex conjugate: `z* = re - i*im`
     pub fn conjugate(&self) -> Self {
         Self {
             re: self.re,
@@ -59,10 +96,15 @@ impl Mul for Complex {
     }
 }
 
-/// Phase space state - superposition of operators with phase positions
+/// Phase space state - superposition of components with amplitudes and phases.
+///
+/// Represents a state as a collection of amplitude-phase pairs that can be
+/// converted to complex representation for coherence calculations.
 #[derive(Debug, Clone)]
 pub struct PhaseState {
+    /// Amplitude for each component (non-negative)
     pub amplitudes: Vec<f64>,
+    /// Phase angle (radians) for each component
     pub phases: Vec<f64>,
 }
 

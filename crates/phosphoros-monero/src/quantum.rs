@@ -156,9 +156,10 @@ pub struct QuantumEnhancedResult {
     pub combined_confidence: f64,
     /// Per-member probability distribution
     pub probabilities: Vec<f64>,
-    /// Full quantum analysis details
+    /// Full quantum analysis details (contains QuantumRingAnalysis when quantum feature enabled)
     #[cfg(feature = "quantum")]
     pub quantum_details: Option<QuantumRingAnalysis>,
+    /// Placeholder when quantum feature is disabled
     #[cfg(not(feature = "quantum"))]
     pub quantum_details: Option<()>,
     /// Improvement over classical analysis

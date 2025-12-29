@@ -37,10 +37,11 @@ phosphoros-core = { path = "../phosphoros-core", optional = true }
 default = []
 # Chain support
 btc = ["bitcoin", "bech32"]
-evm = ["k256"]
-# Other chains would be added similarly
+evm = ["k256", "sha3"]
+# Cosmos SDK chains (ATOM, OSMO, JUNO, etc.)
+cosmos = ["k256", "bech32"]
+# Other chains (placeholder for now)
 substrate = []
-cosmos = []
 solana = []
 cardano = []
 monero = ["curve25519-dalek", "sha3"]
