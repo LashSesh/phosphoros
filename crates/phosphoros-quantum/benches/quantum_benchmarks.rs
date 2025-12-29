@@ -6,7 +6,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion, Benchmark
 use phosphoros_quantum::backend::simulator::LocalSimulator;
 use phosphoros_quantum::backend::{QuantumBackend, QuantumCircuit};
 use phosphoros_quantum::algorithms::grover::{GroverSearch, FunctionOracle};
-use phosphoros_quantum::algorithms::qaoa::QAOA;
+use phosphoros_quantum::algorithms::qaoa::{QAOA, MaxCutProblem};
 
 /// Benchmark single-qubit gate operations
 fn bench_single_qubit_gates(c: &mut Criterion) {
@@ -144,23 +144,23 @@ fn bench_qaoa(c: &mut Criterion) {
     group.sample_size(20); // Reduce samples due to longer runtime
 
     // Simple graph for MaxCut
-    let edges: Vec<(usize, usize, f64)> = vec![
-        (0, 1, 1.0),
-        (1, 2, 1.0),
-        (2, 3, 1.0),
-        (3, 0, 1.0),
-    ];
+    let mut problem = MaxCutProblem::new(4);
+    problem.add_edge(0, 1, 1.0);
+    problem.add_edge(1, 2, 1.0);
+    problem.add_edge(2, 3, 1.0);
+    problem.add_edge(3, 0, 1.0);
 
     for depth in [1, 2, 3] {
+        let problem_clone = problem.clone();
         group.bench_with_input(
             BenchmarkId::new("maxcut_4node", depth),
             &depth,
-            |b, &p| {
+            move |b, &p| {
                 let backend = LocalSimulator::new(4);
-                let qaoa = QAOA::new(backend, 4).with_depth(p);
+                let qaoa = QAOA::new(backend, p);
 
                 b.iter(|| {
-                    qaoa.maxcut(black_box(&edges), 50).unwrap()
+                    qaoa.solve_maxcut(black_box(&problem_clone), 50).unwrap()
                 });
             },
         );
