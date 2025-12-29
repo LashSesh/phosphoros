@@ -7,9 +7,7 @@
 
 use crate::backend::{QuantumBackend, QuantumCircuit, QuantumResult, BackendError};
 use crate::backend::simulator::LocalSimulator;
-use crate::Complex;
 use nalgebra::DMatrix;
-use std::f64::consts::PI;
 
 /// Continuous-Time Quantum Walk implementation
 pub struct QuantumWalk<B: QuantumBackend> {
@@ -84,7 +82,7 @@ impl<B: QuantumBackend> QuantumWalk<B> {
             .enumerate()
             .map(|(i, &p)| (i, p))
             .collect();
-        hotspots.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        hotspots.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         // Estimate mixing time (simplified)
         let mixing_time = self.estimate_mixing_time(&probabilities);

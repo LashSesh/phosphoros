@@ -4,7 +4,7 @@
 //! the true spend in Monero ring signatures.
 
 use crate::algorithms::qaoa::{QAOA, MaxCutProblem, QAOAResult};
-use crate::algorithms::quantum_walk::{QuantumWalk, QuantumWalkResult};
+use crate::algorithms::quantum_walk::QuantumWalk;
 use crate::backend::QuantumBackend;
 use crate::backend::simulator::LocalSimulator;
 use crate::backend::BackendError;
@@ -14,9 +14,6 @@ use nalgebra::DMatrix;
 pub struct RingSignatureQAOA<B: QuantumBackend> {
     /// QAOA solver
     qaoa: QAOA<B>,
-
-    /// QAOA depth parameter
-    depth: usize,
 
     /// Number of measurement shots
     shots: usize,
@@ -72,7 +69,6 @@ impl<B: QuantumBackend> RingSignatureQAOA<B> {
         let qaoa = QAOA::new(backend, depth);
         Self {
             qaoa,
-            depth,
             shots: 1000,
         }
     }
@@ -88,8 +84,6 @@ impl<B: QuantumBackend> RingSignatureQAOA<B> {
         if members.is_empty() {
             return Err(BackendError::InvalidCircuit("Empty ring".to_string()));
         }
-
-        let n = members.len();
 
         // Step 1: Build MaxCut problem from ring members
         let problem = self.build_ring_problem(members);
@@ -267,7 +261,7 @@ impl<B: QuantumBackend> RingSignatureQAOA<B> {
     fn find_most_likely(&self, probabilities: &[f64]) -> (usize, f64) {
         let (idx, &prob) = probabilities.iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .unwrap_or((0, &0.0));
 
         (idx, prob)
@@ -283,6 +277,7 @@ impl RingSignatureQAOA<LocalSimulator> {
 }
 
 /// Helper to create ring members from raw data
+#[allow(dead_code)]
 pub fn create_ring_members(
     global_indices: &[u64],
     block_heights: &[u64],
@@ -315,7 +310,7 @@ mod tests {
     #[test]
     fn test_ring_analyzer_creation() {
         let analyzer = RingSignatureQAOA::default_local(16, 2);
-        assert_eq!(analyzer.depth, 2);
+        assert_eq!(analyzer.shots, 1000); // default shots
     }
 
     #[test]

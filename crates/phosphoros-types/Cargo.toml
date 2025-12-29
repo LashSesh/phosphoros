@@ -1,0 +1,13 @@
+[package]
+name = "phosphoros-types"
+version = "1.0.0"
+edition = "2021"
+description = "Shared types for PHOSPHOROS ecosystem"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2.0"
+
+[features]
+default = []

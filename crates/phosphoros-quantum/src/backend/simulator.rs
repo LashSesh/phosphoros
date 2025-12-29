@@ -18,7 +18,8 @@ pub struct LocalSimulator {
     /// Current quantum state
     state: QuantumState,
 
-    /// Cached gate matrices for performance
+    /// Cached gate matrices for performance (reserved for future optimization)
+    #[allow(dead_code)]
     gate_cache: HashMap<String, DMatrix<Complex>>,
 }
 
@@ -57,37 +58,55 @@ impl LocalSimulator {
     }
 
     /// Apply a two-qubit gate to the state
+    ///
+    /// The gate matrix is assumed to be in standard (control, target) ordering where
+    /// the first qubit (q1) is control and second (q2) is target. The matrix acts on
+    /// the 4-dimensional subspace |00⟩, |01⟩, |10⟩, |11⟩ where the first digit is q1
+    /// and the second is q2.
     fn apply_two_qubit_gate(&mut self, gate_matrix: &DMatrix<Complex>, q1: usize, q2: usize) {
         let dim = self.state.amplitudes.len();
         let mut new_amplitudes = self.state.amplitudes.clone();
 
-        // Ensure q1 < q2 for consistent indexing
+        // Determine which qubit maps to which bit position
         let (low, high) = if q1 < q2 { (q1, q2) } else { (q2, q1) };
 
         for i in 0..dim {
             // Only process if both target bits are 0 in the index
             if ((i >> low) & 1 == 0) && ((i >> high) & 1 == 0) {
-                let i00 = i;
-                let i01 = i | (1 << low);
-                let i10 = i | (1 << high);
-                let i11 = i | (1 << low) | (1 << high);
+                // State indices based on bit positions
+                let i00 = i;                              // both qubits = 0
+                let i_low = i | (1 << low);               // low qubit = 1
+                let i_high = i | (1 << high);             // high qubit = 1
+                let i11 = i | (1 << low) | (1 << high);   // both qubits = 1
 
-                let a00 = self.state.amplitudes[i00];
-                let a01 = self.state.amplitudes[i01];
-                let a10 = self.state.amplitudes[i10];
-                let a11 = self.state.amplitudes[i11];
-
-                // Apply 4x4 gate matrix
-                // Index mapping depends on qubit ordering
-                let (idx0, idx1, idx2, idx3) = if q1 < q2 {
-                    (i00, i01, i10, i11)
+                // Map matrix indices to state indices
+                // Matrix is in (q1, q2) order: |q1=0,q2=0⟩, |q1=0,q2=1⟩, |q1=1,q2=0⟩, |q1=1,q2=1⟩
+                // State vector is in bit order: bit position = qubit index
+                let indices = if q1 < q2 {
+                    // q1 is at lower bit position, q2 at higher
+                    // Matrix col 0: q1=0,q2=0 → low=0,high=0 → i00
+                    // Matrix col 1: q1=0,q2=1 → low=0,high=1 → i_high
+                    // Matrix col 2: q1=1,q2=0 → low=1,high=0 → i_low
+                    // Matrix col 3: q1=1,q2=1 → both=1       → i11
+                    [i00, i_high, i_low, i11]
                 } else {
-                    (i00, i10, i01, i11)
+                    // q1 is at higher bit position, q2 at lower
+                    // Matrix col 0: q1=0,q2=0 → high=0,low=0 → i00
+                    // Matrix col 1: q1=0,q2=1 → high=0,low=1 → i_low
+                    // Matrix col 2: q1=1,q2=0 → high=1,low=0 → i_high
+                    // Matrix col 3: q1=1,q2=1 → both=1       → i11
+                    [i00, i_low, i_high, i11]
                 };
 
-                let amplitudes = [a00, a01, a10, a11];
-                let indices = [idx0, idx1, idx2, idx3];
+                // Get input amplitudes in matrix column order
+                let amplitudes = [
+                    self.state.amplitudes[indices[0]],
+                    self.state.amplitudes[indices[1]],
+                    self.state.amplitudes[indices[2]],
+                    self.state.amplitudes[indices[3]],
+                ];
 
+                // Apply the 4x4 gate matrix
                 for (row, &out_idx) in indices.iter().enumerate() {
                     let mut sum = Complex::new(0.0, 0.0);
                     for (col, &amp) in amplitudes.iter().enumerate() {
@@ -362,7 +381,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "Two-qubit gate implementation needs refinement"]
     fn test_bell_state() {
         let sim = LocalSimulator::new(2);
         let mut circuit = QuantumCircuit::new(2);
@@ -370,15 +388,18 @@ mod tests {
 
         let result = sim.run_circuit(&circuit, 1000).unwrap();
 
-        // Bell state |00⟩ + |11⟩ - should only measure 00 or 11
+        // Bell state |Φ+⟩ = (|00⟩ + |11⟩)/√2 - should only measure 00 or 11
         let p00 = result.probability("00");
         let p11 = result.probability("11");
         let p01 = result.probability("01");
         let p10 = result.probability("10");
 
-        // Relaxed assertions due to quantum randomness and simulator simplifications
-        assert!(p00 > 0.1 || p11 > 0.1, "At least one of p00 or p11 should be significant");
-        assert!(p00 + p11 > p01 + p10, "Bell states should dominate");
+        // Bell state should give ~50% |00⟩ and ~50% |11⟩
+        assert!(p00 > 0.35, "Expected p00 ~0.5, got {}", p00);
+        assert!(p11 > 0.35, "Expected p11 ~0.5, got {}", p11);
+        assert!(p01 < 0.1, "Expected p01 ~0, got {}", p01);
+        assert!(p10 < 0.1, "Expected p10 ~0, got {}", p10);
+        assert!((p00 + p11 - 1.0).abs() < 0.15, "p00 + p11 should be ~1.0");
     }
 
     #[test]

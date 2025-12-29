@@ -10,8 +10,6 @@
 //! - Miller et al. "An Empirical Analysis of Linkability in the Monero Blockchain"
 //! - Vijayakumaran "Analysis of CryptoNote Transaction Graphs"
 
-use crate::{Error, Result};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// Result of applying a heuristic
@@ -92,7 +90,7 @@ impl TemporalHeuristic {
         let (predicted_index, max_normalized) = scores
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(i, &s)| (i, s))
             .unwrap_or((0, 0.0));
 
@@ -228,7 +226,7 @@ impl DecoySelectionHeuristic {
         let (predicted_index, max_score) = anomaly_scores
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(i, &s)| (i, s))
             .unwrap_or((0, 0.0));
 
@@ -415,7 +413,7 @@ impl CombinedHeuristic {
         let (predicted_index, max_score) = combined_scores
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(i, &s)| (i, s))
             .unwrap_or((0, 0.0));
 

@@ -3,7 +3,7 @@
 //! Supports multiple blockchains with proper cryptographic implementations.
 //! Monero support requires the `monero` feature flag for real Ed25519 derivation.
 
-use crate::{derivation::DerivedKey, Error, Result};
+use crate::{derivation::DerivedKey, Result};
 
 #[cfg(feature = "monero")]
 use crate::monero::{derive_monero_keys, generate_address, MoneroNetwork};

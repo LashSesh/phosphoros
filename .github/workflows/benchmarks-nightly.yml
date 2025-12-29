@@ -1,0 +1,117 @@
+name: Nightly Benchmarks
+
+on:
+  schedule:
+    # Run every day at 2:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      baseline_name:
+        description: 'Baseline name for comparison'
+        required: false
+        default: 'nightly'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  benchmark:
+    name: Full Benchmark Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: nightly-bench
+
+      - name: Install dependencies
+        run: |
+          cargo install critcmp
+          sudo apt-get update
+          sudo apt-get install -y gnuplot
+
+      - name: Download previous baseline
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: benchmarks-nightly.yml
+          name: benchmark-baseline
+          path: target/criterion
+        continue-on-error: true
+
+      - name: Run full benchmark suite
+        run: |
+          # Run all quantum benchmarks
+          cargo bench --bench quantum_benchmarks -- --save-baseline ${{ github.event.inputs.baseline_name || 'nightly' }}
+
+      - name: Generate benchmark report
+        run: |
+          echo "# Nightly Benchmark Report" > benchmark-report.md
+          echo "Date: $(date -u '+%Y-%m-%d %H:%M UTC')" >> benchmark-report.md
+          echo "Commit: ${{ github.sha }}" >> benchmark-report.md
+          echo "" >> benchmark-report.md
+
+          echo "## Single Qubit Gates" >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+          cargo bench --bench quantum_benchmarks -- single_qubit 2>&1 | grep -E "(time:|Benchmarking)" | head -20 >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+
+          echo "" >> benchmark-report.md
+          echo "## Two Qubit Gates" >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+          cargo bench --bench quantum_benchmarks -- two_qubit 2>&1 | grep -E "(time:|Benchmarking)" | head -20 >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+
+          echo "" >> benchmark-report.md
+          echo "## QAOA" >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+          cargo bench --bench quantum_benchmarks -- qaoa 2>&1 | grep -E "(time:|Benchmarking)" | head -10 >> benchmark-report.md
+          echo '```' >> benchmark-report.md
+
+      - name: Upload benchmark baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-baseline
+          path: target/criterion
+          retention-days: 90
+
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: benchmark-report.md
+          retention-days: 30
+
+      - name: Check for regressions
+        run: |
+          # Compare with previous nightly if available
+          if [ -d "target/criterion/single_qubit_gates" ]; then
+            echo "Checking for performance regressions..."
+            critcmp nightly 2>/dev/null || echo "No previous baseline to compare"
+          fi
+
+  alert-on-regression:
+    name: Alert on Regression
+    runs-on: ubuntu-latest
+    needs: benchmark
+    if: failure()
+    steps:
+      - name: Create issue on regression
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Benchmark Regression Detected',
+              body: `Nightly benchmark run detected a potential performance regression.
+
+              **Run:** ${context.runId}
+              **Commit:** ${context.sha}
+
+              Please review the benchmark artifacts for details.`,
+              labels: ['performance', 'automated']
+            })

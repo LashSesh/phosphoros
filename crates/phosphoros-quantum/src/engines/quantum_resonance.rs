@@ -3,7 +3,7 @@
 //! A quantum-enhanced implementation of resonance evaluation that uses
 //! variational quantum circuits to compute the (ψ, ρ, ω) resonance triplet.
 
-use crate::backend::{QuantumBackend, QuantumCircuit, QuantumGate, QuantumResult, BackendError};
+use crate::backend::{QuantumBackend, QuantumCircuit, QuantumResult, BackendError};
 use crate::backend::simulator::LocalSimulator;
 use super::{QuantumEngineConfig, AnsatzType};
 use std::f64::consts::PI;
@@ -26,8 +26,9 @@ pub struct QuantumResonanceEngine<B: QuantumBackend> {
     time: f64,
 }
 
-/// Cached resonance evaluation data
+/// Cached resonance evaluation data (for future cache invalidation)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ResonanceCache {
     perception: [f64; 5],
     intention: [f64; 5],

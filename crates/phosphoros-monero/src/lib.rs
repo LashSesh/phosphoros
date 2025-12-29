@@ -28,14 +28,16 @@ pub mod rpc;
 pub mod ring_analysis;
 pub mod heuristics;
 pub mod quantum;
+pub mod graph_analysis;
 
 mod error;
 
 pub use error::{Error, Result};
 pub use rpc::{MoneroRpcClient, MoneroRpcConfig};
-pub use ring_analysis::{RingAnalyzer, RingAnalysisResult};
+pub use ring_analysis::{RingAnalyzer, RingAnalysisResult, RingMemberInfo};
 pub use heuristics::{TemporalHeuristic, DecoySelectionHeuristic, HeuristicResult};
 pub use quantum::{QuantumRingAnalyzer, QuantumEnhancedResult};
+pub use graph_analysis::{TransactionGraph, TxNode, TxEdge, NodeType, EdgeType, AnomalyReport};
 
 // Re-export key types from phosphoros-bip39
 pub use phosphoros_bip39::monero::{

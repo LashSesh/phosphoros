@@ -13,7 +13,6 @@ use crate::{Error, Result};
 #[cfg(feature = "monero")]
 use curve25519_dalek::{
     constants::ED25519_BASEPOINT_TABLE,
-    edwards::EdwardsPoint,
     scalar::Scalar,
 };
 

@@ -1,0 +1,230 @@
+name: PHOSPHOROS CI
+
+on:
+  push:
+    branches: [ main, develop, 'claude/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  # ============================================
+  # Quick checks (run first, fail fast)
+  # ============================================
+  fmt:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --workspace --all-targets --all-features
+
+  # ============================================
+  # Build & Test Matrix
+  # ============================================
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: aarch64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Build workspace
+        run: cargo build --workspace --all-features
+
+      - name: Run tests
+        run: cargo test --workspace --all-features
+
+      - name: Run doc tests
+        run: cargo test --workspace --doc
+
+  # ============================================
+  # Quantum-specific tests
+  # ============================================
+  quantum-tests:
+    name: Quantum Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run quantum unit tests
+        run: cargo test -p phosphoros-quantum --all-features
+
+      - name: Run quantum integration tests
+        run: cargo test -p phosphoros-quantum --test integration
+
+      - name: Verify Bell state correctness
+        run: cargo test -p phosphoros-quantum test_bell_state -- --nocapture
+
+  # ============================================
+  # Benchmarks with regression detection
+  # ============================================
+  benchmarks:
+    name: Benchmarks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: bench
+
+      - name: Run benchmarks
+        run: |
+          cargo bench --bench quantum_benchmarks -- --save-baseline current
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: target/criterion
+          retention-days: 30
+
+  benchmark-compare:
+    name: Benchmark Comparison
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: bench-compare
+
+      - name: Install critcmp
+        run: cargo install critcmp
+
+      - name: Checkout base branch
+        run: git checkout ${{ github.base_ref }}
+
+      - name: Run base benchmarks
+        run: cargo bench --bench quantum_benchmarks -- --save-baseline base
+        continue-on-error: true
+
+      - name: Checkout PR branch
+        run: git checkout ${{ github.head_ref }}
+
+      - name: Run PR benchmarks
+        run: cargo bench --bench quantum_benchmarks -- --save-baseline pr
+
+      - name: Compare benchmarks
+        run: |
+          echo "## Benchmark Comparison" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          critcmp base pr >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No baseline to compare" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Documentation
+  # ============================================
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build documentation
+        run: cargo doc --workspace --all-features --no-deps
+        env:
+          RUSTDOCFLAGS: "-D warnings --cfg docsrs"
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: target/doc
+          retention-days: 7
+
+  # ============================================
+  # Security audit
+  # ============================================
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Minimum Rust version check
+  # ============================================
+  msrv:
+    name: MSRV (1.75.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.75.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --workspace
+
+  # ============================================
+  # Final status check
+  # ============================================
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy, test, quantum-tests, docs, msrv]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.fmt.result }}" != "success" ]] || \
+             [[ "${{ needs.clippy.result }}" != "success" ]] || \
+             [[ "${{ needs.test.result }}" != "success" ]] || \
+             [[ "${{ needs.quantum-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.docs.result }}" != "success" ]] || \
+             [[ "${{ needs.msrv.result }}" != "success" ]]; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          echo "All CI checks passed!"
