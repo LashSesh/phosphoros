@@ -16,6 +16,14 @@ serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# OpenAPI documentation
+utoipa = { version = "4", features = ["uuid", "chrono"] }
+utoipa-swagger-ui = { version = "6", features = ["axum"] }
+
+# Prometheus metrics
+metrics = "0.24"
+metrics-exporter-prometheus = "0.16"
+
 [features]
 default = []
 

@@ -1,0 +1,39 @@
+# Build artifacts
+target/
+*.pdb
+
+# Git
+.git/
+.gitignore
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Documentation (not needed in build)
+*.md
+!README.md
+!LAW_ENFORCEMENT_GUIDE.md
+
+# Test files
+*.test
+**/*_test.rs
+
+# Local development
+.env
+.env.local
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# External directories not needed for gateway
+qso-extracted/
+
+# Cached data
+*.cache
+*.tmp

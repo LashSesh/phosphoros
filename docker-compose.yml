@@ -1,0 +1,52 @@
+# PHOSPHOROS Docker Compose Configuration
+# Use: docker-compose up -d
+
+version: '3.8'
+
+services:
+  # Main API Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+      - PHOSPHOROS_HOST=0.0.0.0
+      - PHOSPHOROS_PORT=8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - phosphoros
+
+  # Optional: Development mode with hot reload
+  gateway-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8081:8080"
+    volumes:
+      - .:/app
+      - cargo-cache:/root/.cargo
+    environment:
+      - RUST_LOG=debug
+    profiles:
+      - dev
+    networks:
+      - phosphoros
+
+networks:
+  phosphoros:
+    driver: bridge
+
+volumes:
+  cargo-cache:

@@ -16,6 +16,7 @@ use uuid::Uuid;
 use crate::engine::SatelliteEngine;
 use crate::models::{AnalysisReport, AnalysisRequest, SnapshotIngest};
 
+/// Shared state for API handlers.
 #[derive(Clone)]
 pub struct ApiState {
     engine: Arc<SatelliteEngine>,
