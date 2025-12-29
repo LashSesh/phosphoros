@@ -57,11 +57,11 @@ impl TemporalHeuristic {
     ///
     /// # Arguments
     /// * `ring_ages` - Ages of ring members in blocks (at time of transaction)
-    /// * `tx_block_height` - Block height of the transaction being analyzed
+    /// * `tx_block_height` - Block height of the transaction being analyzed (reserved for future use)
     ///
     /// # Returns
     /// Analysis result with predicted real input
-    pub fn analyze(&self, ring_ages: &[u64], tx_block_height: u64) -> HeuristicResult {
+    pub fn analyze(&self, ring_ages: &[u64], _tx_block_height: u64) -> HeuristicResult {
         if ring_ages.is_empty() {
             return HeuristicResult {
                 heuristic_name: "Temporal Analysis".to_string(),

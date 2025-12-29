@@ -6,17 +6,13 @@
 //!
 //! Reference: https://github.com/monero-project/monero/blob/master/src/crypto/
 
-#![cfg(feature = "monero")]
-
 use crate::{Error, Result};
 
-#[cfg(feature = "monero")]
 use curve25519_dalek::{
     constants::ED25519_BASEPOINT_TABLE,
     scalar::Scalar,
 };
 
-#[cfg(feature = "monero")]
 use sha3::{Digest, Keccak256};
 
 /// Monero network type

@@ -11,8 +11,11 @@ pub use pattern::PatternHook;
 /// Hook set combining multiple early-score mechanisms
 #[derive(Debug, Clone)]
 pub struct HookSet {
+    /// Checksum validation hook
     pub checksum: Option<ChecksumHook>,
+    /// Partial words matching hook
     pub partial_words: Option<PartialWordsHook>,
+    /// Pattern matching hook
     pub pattern: Option<PatternHook>,
 }
 

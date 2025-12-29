@@ -28,9 +28,17 @@ pub enum GateReason {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Evaluation {
     /// State was gated (blocked) - no output
-    Gated { reason: GateReason },
+    Gated {
+        /// The reason for gating
+        reason: GateReason,
+    },
     /// State passed - produced output vector and score
-    Output { vector: [f64; 5], score: f64 },
+    Output {
+        /// The 5D output vector
+        vector: [f64; 5],
+        /// The resonance score (0.0 - 1.0)
+        score: f64,
+    },
 }
 
 impl Evaluation {

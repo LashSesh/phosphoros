@@ -11,8 +11,10 @@ pub use performance::{PerformanceTriplet, CalibrationState, CalibrationSuggestio
 
 /// SCS Calibration regimes
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Default)]
 pub enum CalibrationRegime {
     /// Standard conservative optimization
+    #[default]
     Standard,
     /// Aggressive exploration for escaping local optima
     Aggressive,
@@ -22,8 +24,3 @@ pub enum CalibrationRegime {
     Homeostasis,
 }
 
-impl Default for CalibrationRegime {
-    fn default() -> Self {
-        Self::Standard
-    }
-}

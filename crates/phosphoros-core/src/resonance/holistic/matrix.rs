@@ -13,24 +13,42 @@ use std::f64::consts::PI;
 /// Complete state of the Holistic Matrix
 #[derive(Debug, Clone)]
 pub struct MatrixState {
+    /// Current simulation time
     pub time: f64,
+    /// Current coherence value from Kosmokrator
     pub kosmokrator_coherence: f64,
+    /// Total dynamics from Chronokrator
     pub chronokrator_dtotal: f64,
+    /// Whether Monolith action was triggered
     pub monolith_triggered: bool,
+    /// Torus spatial phase coordinate
     pub torus_spatial: f64,
+    /// Torus temporal phase coordinate
     pub torus_temporal: f64,
+    /// Count of successful outputs
     pub output_count: usize,
 }
 
 /// O.P.H.A.N. (Orbital Projection Hyperstructure Asymmetric Node)
+///
+/// Each Ophan represents an orbital projection node with spectral parameters.
 #[derive(Debug, Clone)]
-struct Ophan {
-    pub id: usize,
-    pub psi: f64,
-    pub rho: f64,
-    pub omega: f64,
-    pub phase: f64,
-    pub amplitude: f64,
+pub(crate) struct Ophan {
+    /// Node identifier (used for phase calculation)
+    #[allow(dead_code)]
+    id: usize,
+    /// ψ component (coherence)
+    psi: f64,
+    /// ρ component (density)
+    rho: f64,
+    /// ω component (frequency)
+    omega: f64,
+    /// Phase angle in radians
+    #[allow(dead_code)]
+    phase: f64,
+    /// Signal amplitude
+    #[allow(dead_code)]
+    amplitude: f64,
 }
 
 impl Ophan {
@@ -52,11 +70,18 @@ impl Ophan {
 }
 
 /// Central Konus (convergence cone)
+///
+/// The Konus represents the central convergence point of the O.P.H.A.N. array.
 #[derive(Debug, Clone)]
-struct Konus {
-    pub phase: f64,
-    pub frequency: f64,
-    pub convergence_field: [f64; 5],
+pub(crate) struct Konus {
+    /// Current phase angle
+    #[allow(dead_code)]
+    phase: f64,
+    /// Oscillation frequency
+    #[allow(dead_code)]
+    frequency: f64,
+    /// 5D convergence field computed from Ophanim
+    convergence_field: [f64; 5],
 }
 
 impl Konus {
@@ -78,10 +103,16 @@ impl Konus {
 }
 
 /// O.P.H.A.N. Array - 4 Ophanim + Konus
+///
+/// The Orbital Projection Hyperstructure Asymmetric Node array consists of
+/// 4 Ophanim positioned at 90° intervals plus a central Konus.
 #[derive(Debug, Clone)]
-struct OphanArray {
+pub(crate) struct OphanArray {
+    /// The 4 orbital projection nodes
     pub ophanim: Vec<Ophan>,
+    /// Central convergence cone
     pub konus: Konus,
+    /// Learning rate for signal updates
     pub learning_rate: f64,
 }
 
@@ -121,10 +152,16 @@ impl OphanArray {
 }
 
 /// Pfauenthron - Integration of O.P.H.A.N., Mandorla, and Monolith
+///
+/// The "Peacock Throne" integrates the orbital projection array with
+/// the Mandorla perception-intention field and the Monolith action trigger.
 #[derive(Debug, Clone)]
-struct Pfauenthron {
+pub(crate) struct Pfauenthron {
+    /// O.P.H.A.N. orbital projection array
     pub ophan_array: OphanArray,
+    /// Mandorla perception-intention field
     pub mandorla: MandorlaField,
+    /// Monolith action singularity
     pub monolith: Monolith,
 }
 
@@ -178,12 +215,19 @@ impl Pfauenthron {
 /// - Torus topology (S¹ × S¹ phase space)
 #[derive(Debug, Clone)]
 pub struct HolisticMatrix {
+    /// Kosmokrator exclusion engine (Proof-of-Resonance)
     pub kosmokrator: Kosmokrator,
+    /// Chronokrator temporal dynamics engine
     pub chronokrator: Chronokrator,
-    pub pfauenthron: Pfauenthron,
+    /// Pfauenthron integration layer (O.P.H.A.N. + Mandorla + Monolith)
+    pub(crate) pfauenthron: Pfauenthron,
+    /// Torus phase space topology
     pub torus: TorusTopology,
+    /// Current simulation time
     pub time: f64,
+    /// History of output vectors
     pub output_history: Vec<Option<[f64; 5]>>,
+    /// Cached state for efficient queries
     cached_state: MatrixState,
 }
 

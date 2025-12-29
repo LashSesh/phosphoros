@@ -9,7 +9,6 @@
 //!
 //! Enable with the `quantum` feature flag for quantum-enhanced analysis.
 
-use crate::error::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
