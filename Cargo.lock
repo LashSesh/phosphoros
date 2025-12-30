@@ -4086,28 +4086,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ouroboros_dna"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bip39",
- "chrono",
- "clap",
- "ethers-core",
- "ethers-providers",
- "ethers-signers",
- "hex",
- "petgraph",
- "rand 0.8.5",
- "rand_distr",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
 name = "owned_ttf_parser"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4359,7 +4337,25 @@ dependencies = [
 
 [[package]]
 name = "phosphoros-cli"
-version = "0.1.0"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "bip39",
+ "chrono",
+ "clap",
+ "ethers-core",
+ "ethers-providers",
+ "ethers-signers",
+ "hex",
+ "petgraph",
+ "rand 0.8.5",
+ "rand_distr",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 1.0.69",
+ "tokio",
+]
 
 [[package]]
 name = "phosphoros-core"
