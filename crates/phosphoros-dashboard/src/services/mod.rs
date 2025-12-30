@@ -13,10 +13,6 @@ pub mod scraper;
 pub mod analyzer;
 pub mod cluster;
 
-pub use scraper::ScraperService;
-pub use analyzer::AnalyzerService;
-pub use cluster::ClusterService;
-
 /// Service manager for autonomous background tasks
 #[derive(Debug, Clone)]
 pub struct ServiceManager {

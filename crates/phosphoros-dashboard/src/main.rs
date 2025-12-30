@@ -6,9 +6,12 @@
 #![warn(
     missing_docs,
     missing_debug_implementations,
-    rust_2018_idioms,
-    unreachable_pub
+    rust_2018_idioms
 )]
+// Note: unreachable_pub is not useful for binary crates
+// dead_code warnings are suppressed as message types and panel states
+// are prepared for future UI expansion
+#![allow(dead_code)]
 
 mod app;
 mod config;
@@ -23,7 +26,6 @@ mod tasks;
 mod export;
 
 use app::PhosphorosApp;
-use iced::Settings;
 use tracing_subscriber::EnvFilter;
 
 fn main() -> iced::Result {
