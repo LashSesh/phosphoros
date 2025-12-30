@@ -6,7 +6,7 @@ use crate::messages::*;
 use crate::panels::{PanelId, ClusterInfo, StealthMode};
 use crate::state::{AppState, LogEntry, LogLevel};
 use crate::theme::PhosphorosTheme;
-use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
+use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration, InfoGeneticIntegration};
 use crate::tasks::{TaskManager, TaskMessage};
 use crate::export::{ExportService, ExportFormat, SystemStats};
 use chrono::Utc;
@@ -27,6 +27,8 @@ pub(crate) struct PhosphorosApp {
     resonance_integration: Option<ResonanceIntegration>,
     #[allow(dead_code)]
     analysis_integration: Option<AnalysisIntegration>,
+    // InfoGenetic integration for DNA analysis
+    infogenetic_integration: Option<InfoGeneticIntegration>,
     // Task manager for async operations
     task_manager: Option<TaskManager>,
     // Background task handles
@@ -39,6 +41,10 @@ impl PhosphorosApp {
         let state = AppState::default();
         let theme = PhosphorosTheme::new(config.theme.dark_mode);
 
+        // Initialize InfoGenetic integration with Infogenom network
+        let mut infogenetic = InfoGeneticIntegration::new();
+        infogenetic.init_infogenom("dashboard", 8);
+
         let mut app = Self {
             state,
             config,
@@ -46,6 +52,7 @@ impl PhosphorosApp {
             notification_counter: 0,
             resonance_integration: Some(ResonanceIntegration::new()),
             analysis_integration: Some(AnalysisIntegration::new()),
+            infogenetic_integration: Some(infogenetic),
             task_manager: Some(TaskManager::new()),
             background_tasks_spawned: false,
         };
@@ -1838,8 +1845,132 @@ impl PhosphorosApp {
                 self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Query type changed to {:?}", query_type));
             }
             PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::Search) => {
-                self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Searching: {}", self.state.panels.infogenetic.query));
-                // TODO: Implement search logic
+                let query = self.state.panels.infogenetic.query.clone();
+                self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Searching: {}", query));
+
+                // Perform search based on query type
+                match self.state.panels.infogenetic.query_type {
+                    crate::panels::QueryType::Address => {
+                        // Filter existing results by address
+                        let filtered: Vec<crate::panels::InfogeneticEntry> = self.state.service_manager.data_pool.read()
+                            .entities.values()
+                            .filter(|e| e.address.to_lowercase().contains(&query.to_lowercase()))
+                            .take(100)
+                            .map(|e| {
+                                let (psi, rho, omega) = if e.features.len() >= 3 {
+                                    (e.features[0], e.features[1], e.features[2])
+                                } else {
+                                    (0.0, 0.0, 0.0)
+                                };
+                                crate::panels::InfogeneticEntry {
+                                    id: e.id.to_string(),
+                                    address: e.address.clone(),
+                                    signature: (psi, rho, omega),
+                                    resonance: psi * rho * omega,
+                                    cluster_id: None,
+                                    chain: "Unknown".to_string(),
+                                    discovered_at: e.timestamp,
+                                    metadata: std::collections::HashMap::new(),
+                                }
+                            })
+                            .collect();
+                        self.state.panels.infogenetic.results = filtered;
+                        self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Found {} address matches", self.state.panels.infogenetic.results.len()));
+                    }
+                    crate::panels::QueryType::SpectralSignature => {
+                        // Parse signature range query (format: "psi:0.5-0.8,rho:0.3-0.6")
+                        if let Some(ref mut integration) = self.infogenetic_integration {
+                            // Analyze query as seed if it's not a range query
+                            if let Ok(result) = integration.analyze_seed(&query) {
+                                // Create entry from analysis result
+                                let entry = crate::panels::InfogeneticEntry {
+                                    id: format!("analyzed_{}", chrono::Utc::now().timestamp()),
+                                    address: query.clone(),
+                                    signature: (result.signature.psi, result.signature.rho, result.signature.omega),
+                                    resonance: result.resonance,
+                                    cluster_id: None,
+                                    chain: "Analyzed".to_string(),
+                                    discovered_at: chrono::Utc::now(),
+                                    metadata: std::collections::HashMap::new(),
+                                };
+                                self.state.panels.infogenetic.results = vec![entry];
+                                self.add_log(LogLevel::Info, "InfogeneticBrowser",
+                                    &format!("Analyzed: sig=({:.3},{:.3},{:.3}) resonance={:.4}",
+                                        result.signature.psi, result.signature.rho, result.signature.omega, result.resonance));
+                            }
+                        }
+                    }
+                    crate::panels::QueryType::Cluster => {
+                        // Search by cluster ID
+                        let entries: Vec<crate::panels::InfogeneticEntry> = {
+                            let cluster_data = self.state.service_manager.data_pool.read();
+                            if let Some(cluster) = cluster_data.clusters.get(&query) {
+                                cluster.members.iter()
+                                    .filter_map(|member_id| cluster_data.entities.get(member_id))
+                                    .take(100)
+                                    .map(|e| {
+                                        let (psi, rho, omega) = if e.features.len() >= 3 {
+                                            (e.features[0], e.features[1], e.features[2])
+                                        } else {
+                                            (0.0, 0.0, 0.0)
+                                        };
+                                        crate::panels::InfogeneticEntry {
+                                            id: e.id.to_string(),
+                                            address: e.address.clone(),
+                                            signature: (psi, rho, omega),
+                                            resonance: psi * rho * omega,
+                                            cluster_id: Some(query.clone()),
+                                            chain: "Unknown".to_string(),
+                                            discovered_at: e.timestamp,
+                                            metadata: std::collections::HashMap::new(),
+                                        }
+                                    })
+                                    .collect()
+                            } else {
+                                Vec::new()
+                            }
+                        };
+                        let count = entries.len();
+                        self.state.panels.infogenetic.results = entries;
+                        self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Found {} cluster members", count));
+                    }
+                    crate::panels::QueryType::FullText => {
+                        // Full text search across all fields
+                        let query_lower = query.to_lowercase();
+                        let filtered: Vec<crate::panels::InfogeneticEntry> = self.state.service_manager.data_pool.read()
+                            .entities.values()
+                            .filter(|e| {
+                                e.address.to_lowercase().contains(&query_lower) ||
+                                e.id.to_string().contains(&query_lower)
+                            })
+                            .take(100)
+                            .map(|e| {
+                                let (psi, rho, omega) = if e.features.len() >= 3 {
+                                    (e.features[0], e.features[1], e.features[2])
+                                } else {
+                                    (0.0, 0.0, 0.0)
+                                };
+                                crate::panels::InfogeneticEntry {
+                                    id: e.id.to_string(),
+                                    address: e.address.clone(),
+                                    signature: (psi, rho, omega),
+                                    resonance: psi * rho * omega,
+                                    cluster_id: None,
+                                    chain: "Unknown".to_string(),
+                                    discovered_at: e.timestamp,
+                                    metadata: std::collections::HashMap::new(),
+                                }
+                            })
+                            .collect();
+                        self.state.panels.infogenetic.results = filtered;
+                        self.add_log(LogLevel::Info, "InfogeneticBrowser", &format!("Found {} full-text matches", self.state.panels.infogenetic.results.len()));
+                    }
+                    crate::panels::QueryType::Advanced => {
+                        self.add_log(LogLevel::Info, "InfogeneticBrowser", "Advanced query not yet implemented");
+                    }
+                }
+                self.state.panels.infogenetic.total_results = self.state.panels.infogenetic.results.len();
+                self.state.panels.infogenetic.page = 0;
             }
             PanelMessage::InfogeneticBrowser(InfogeneticBrowserMessage::GoToPage(page)) => {
                 self.state.panels.infogenetic.page = page;
@@ -1916,6 +2047,14 @@ impl std::fmt::Debug for AnalysisIntegration {
 impl std::fmt::Debug for TaskManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TaskManager").finish()
+    }
+}
+
+impl std::fmt::Debug for InfoGeneticIntegration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("InfoGeneticIntegration")
+            .field("cache_size", &self.cache_size())
+            .finish()
     }
 }
 
