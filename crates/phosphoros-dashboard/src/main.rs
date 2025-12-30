@@ -19,6 +19,7 @@ mod messages;
 mod panels;
 mod services;
 mod state;
+mod suite5d;
 mod theme;
 mod widgets;
 mod integration;
