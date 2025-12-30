@@ -4400,6 +4400,7 @@ name = "phosphoros-gateway"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "clap",
  "metrics",
  "metrics-exporter-prometheus",
  "phosphoros-core",
