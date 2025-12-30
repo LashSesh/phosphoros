@@ -2,7 +2,7 @@
 //!
 //! Provides real resonance analysis and 5D spectral operations.
 
-use phosphoros_core::{HolisticMatrix, ResonanceEngine, Point5D, SpectralSignature};
+use phosphoros_core::{HolisticMatrix, ResonanceEngine};
 use thiserror::Error;
 
 /// Resonance integration error

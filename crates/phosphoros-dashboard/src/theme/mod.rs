@@ -1,7 +1,6 @@
 //! Dark theme configuration following blueprint specifications
 
-use iced::widget::container;
-use iced::{application, color, Border, Color, Theme};
+use iced::Theme;
 
 /// PHOSPHOROS custom theme
 #[derive(Debug)]
@@ -130,7 +129,7 @@ pub mod colors {
 pub mod container_styles {
     use super::colors;
     use iced::widget::container;
-    use iced::{Border, Color, Shadow, Theme, Vector};
+    use iced::{Border, Color, Shadow, Vector};
 
     /// Premium panel container style
     pub fn panel() -> container::Style {

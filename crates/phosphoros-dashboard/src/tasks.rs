@@ -10,7 +10,6 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::services::{ServiceManager, EntityData, AnomalyData, ClusterData};
-use crate::integration::{ResonanceIntegration, AnalysisIntegration};
 
 /// Task message types
 #[derive(Debug, Clone)]

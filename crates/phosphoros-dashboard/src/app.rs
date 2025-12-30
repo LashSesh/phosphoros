@@ -3,8 +3,8 @@
 
 use crate::config::Config;
 use crate::messages::*;
-use crate::panels::{PanelId, ClusterInfo, StealthMode, ApiType};
-use crate::state::{AppState, LogEntry, LogLevel, Notification, NotificationKind};
+use crate::panels::{PanelId, ClusterInfo, StealthMode};
+use crate::state::{AppState, LogEntry, LogLevel};
 use crate::theme::PhosphorosTheme;
 use crate::integration::{WalletIntegration, ResonanceIntegration, AnalysisIntegration};
 use crate::tasks::{TaskManager, TaskMessage};
@@ -17,13 +17,15 @@ use std::sync::Arc;
 
 /// Main application
 #[derive(Debug)]
-pub struct PhosphorosApp {
+pub(crate) struct PhosphorosApp {
     state: AppState,
     config: Config,
     theme: PhosphorosTheme,
+    #[allow(dead_code)]
     notification_counter: usize,
     // Integration components (not Debug, so we store them separately)
     resonance_integration: Option<ResonanceIntegration>,
+    #[allow(dead_code)]
     analysis_integration: Option<AnalysisIntegration>,
     // Task manager for async operations
     task_manager: Option<TaskManager>,
@@ -182,7 +184,7 @@ impl PhosphorosApp {
         }
     }
 
-    pub fn view(&self) -> Element<Message> {
+    pub fn view(&self) -> Element<'_, Message> {
         let sidebar = self.sidebar_view();
         let main_content = self.main_view();
 
@@ -208,7 +210,7 @@ impl PhosphorosApp {
         self.theme.theme()
     }
 
-    fn sidebar_view(&self) -> Element<Message> {
+    fn sidebar_view(&self) -> Element<'_, Message> {
         use crate::theme::colors;
         use iced::Color;
         
@@ -338,7 +340,7 @@ impl PhosphorosApp {
             .into()
     }
 
-    fn main_view(&self) -> Element<Message> {
+    fn main_view(&self) -> Element<'_, Message> {
         let content = match self.state.active_panel {
             PanelId::Home => self.home_view(),
             PanelId::SeedManagement => self.seed_view(),
@@ -361,7 +363,7 @@ impl PhosphorosApp {
             .into()
     }
 
-    fn home_view(&self) -> Element<Message> {
+    fn home_view(&self) -> Element<'_, Message> {
         use crate::widgets::{section_header, badge, BadgeType, primary_button, secondary_button};
 
         // Premium header with subtitle - Law Enforcement Focus
@@ -581,9 +583,9 @@ impl PhosphorosApp {
         ]).into()
     }
 
-    fn seed_view(&self) -> Element<Message> {
-        use crate::widgets::{section_header, badge, BadgeType, primary_button, secondary_button};
-        
+    fn seed_view(&self) -> Element<'_, Message> {
+        use crate::widgets::{section_header, primary_button, secondary_button};
+
         let title = column![
             text("Seed & Wallet Management").size(36),
             vertical_space().height(4),
@@ -662,7 +664,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn resonance_view(&self) -> Element<Message> {
+    fn resonance_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::Resonance.name()).size(28);
 
         let status = if self.state.panels.resonance.running {
@@ -696,7 +698,7 @@ impl PhosphorosApp {
         ].into()
     }
 
-    fn cluster_view(&self) -> Element<Message> {
+    fn cluster_view(&self) -> Element<'_, Message> {
         use crate::widgets::{section_header, badge, BadgeType, secondary_button};
         
         let title = column![
@@ -811,7 +813,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn log_view(&self) -> Element<Message> {
+    fn log_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::SystemLog.name()).size(28);
 
         let filter = text_input(
@@ -849,7 +851,7 @@ impl PhosphorosApp {
         content.into()
     }
 
-    fn stealth_view(&self) -> Element<Message> {
+    fn stealth_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::Stealth.name()).size(28);
         
         let stealth_state = &self.state.panels.stealth;
@@ -969,7 +971,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn settings_view(&self) -> Element<Message> {
+    fn settings_view(&self) -> Element<'_, Message> {
         use crate::widgets::{section_header, primary_button};
         
         let title = column![
@@ -1056,7 +1058,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn search_space_view(&self) -> Element<Message> {
+    fn search_space_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::SearchSpaceExplorer.name()).size(28);
         
         let state = &self.state.panels.search_space;
@@ -1182,7 +1184,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn network_explorer_view(&self) -> Element<Message> {
+    fn network_explorer_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::NetworkExplorer.name()).size(28);
         
         let state = &self.state.panels.network;
@@ -1285,7 +1287,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn infogenetic_browser_view(&self) -> Element<Message> {
+    fn infogenetic_browser_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::InfogeneticBrowser.name()).size(28);
         
         let state = &self.state.panels.infogenetic;
@@ -1324,7 +1326,7 @@ impl PhosphorosApp {
         )).size(14);
         
         let mut results_list = column![].spacing(8);
-        for (idx, entry) in state.results.iter().enumerate() {
+        for entry in state.results.iter() {
             results_list = results_list.push(
                 crate::widgets::card(
                     column![
@@ -1377,7 +1379,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn anomaly_investigation_view(&self) -> Element<Message> {
+    fn anomaly_investigation_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::AnomalyInvestigation.name()).size(28);
         
         let state = &self.state.panels.anomaly;
@@ -1471,7 +1473,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
-    fn forensic_workflows_view(&self) -> Element<Message> {
+    fn forensic_workflows_view(&self) -> Element<'_, Message> {
         let title = text(PanelId::ForensicWorkflows.name()).size(28);
         
         let state = &self.state.panels.forensic;
@@ -1551,6 +1553,7 @@ impl PhosphorosApp {
         scrollable(content).into()
     }
 
+    #[allow(dead_code)]
     fn stat_card<'a>(&self, label: &'a str, value: &'a str) -> Element<'a, Message> {
         crate::widgets::card(
             column![

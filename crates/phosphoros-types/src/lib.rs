@@ -23,4 +23,4 @@ mod spectral;
 
 pub use triplet::PerformanceTriplet;
 pub use geometry::{MetatronNode, MetatronGeometry, Point5D};
-pub use spectral::SpectralSignature;
+pub use spectral::{SpectralSignature, SpectralSignatureBuilder};
