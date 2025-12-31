@@ -1,4 +1,19 @@
 //! Premium custom widgets for PHOSPHOROS dashboard
+//!
+//! This module provides custom visualization widgets including:
+//! - Card, panel, and status components
+//! - DNA helix 3D visualization
+//! - Gabriel Cell network visualization
+//! - Metric displays and badges
+
+pub mod dna_helix;
+pub mod gabriel_network;
+
+pub use dna_helix::{DnaHelixData, DnaHelixState, dna_helix_view};
+pub use gabriel_network::{
+    GabrielNetworkData, GabrielNetworkState, GabrielCellViz,
+    NetworkLayout, NetworkStatistics, gabriel_network_view,
+};
 
 use crate::theme::{colors, container_styles};
 use iced::widget::{button, column, container, text, horizontal_space, vertical_space, Button};
