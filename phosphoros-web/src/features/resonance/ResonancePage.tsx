@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Activity, Play, Pause, Settings2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Activity, Play, Pause, Settings2, RotateCcw } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,20 @@ interface TimeSeriesPoint {
   resonance: number
 }
 
+interface Operators {
+  wt: number
+  sw: number
+  dk: number
+  pi: number
+}
+
+const DEFAULT_OPERATORS: Operators = {
+  wt: 1.0,
+  sw: 0.5,
+  dk: 0.3,
+  pi: 0.1,
+}
+
 export function ResonancePage() {
   const [isRunning, setIsRunning] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -25,6 +39,8 @@ export function ResonancePage() {
     omega: 0.78,
   })
   const [history, setHistory] = useState<TimeSeriesPoint[]>([])
+  const [operators, setOperators] = useState<Operators>(DEFAULT_OPERATORS)
+  const [pendingOperators, setPendingOperators] = useState<Operators>(DEFAULT_OPERATORS)
 
   // Generate initial history
   useEffect(() => {
@@ -45,16 +61,25 @@ export function ResonancePage() {
     setHistory(initialHistory)
   }, [])
 
-  // Simulate real-time updates when running
+  // Simulate real-time updates when running, influenced by operators
   useEffect(() => {
     if (!isRunning) return
 
     const interval = setInterval(() => {
-      // Update spectral signature with slight variations
+      // Update spectral signature with operator-influenced variations
+      // WT (Wave Transform) affects psi amplitude
+      // SW (Spectral Weight) affects rho stability
+      // DK (Double-Kick) adds periodic spikes
+      // PI (Phase Integral) affects omega smoothness
+      const wtEffect = operators.wt * 0.05
+      const swEffect = operators.sw * 0.03
+      const dkSpike = Math.random() > (1 - operators.dk * 0.3) ? 0.1 : 0
+      const piSmooth = operators.pi * 0.02
+
       setSpectralSignature(prev => ({
-        psi: Math.min(1, Math.max(0, prev.psi + (Math.random() - 0.5) * 0.05)),
-        rho: Math.min(1, Math.max(0, prev.rho + (Math.random() - 0.5) * 0.03)),
-        omega: Math.min(1, Math.max(0, prev.omega + (Math.random() - 0.5) * 0.04)),
+        psi: Math.min(1, Math.max(0, prev.psi + (Math.random() - 0.5) * wtEffect + dkSpike)),
+        rho: Math.min(1, Math.max(0, prev.rho + (Math.random() - 0.5) * swEffect)),
+        omega: Math.min(1, Math.max(0, prev.omega + (Math.random() - 0.5) * (0.04 - piSmooth))),
       }))
 
       // Add to history
@@ -81,7 +106,7 @@ export function ResonancePage() {
     }, 500)
 
     return () => clearInterval(interval)
-  }, [isRunning, spectralSignature])
+  }, [isRunning, spectralSignature, operators])
 
   const resonance = spectralSignature.psi * spectralSignature.rho * spectralSignature.omega
 
@@ -91,6 +116,26 @@ export function ResonancePage() {
     }
     setIsRunning(!isRunning)
   }
+
+  // Apply pending operators
+  const handleApplyOperators = useCallback(() => {
+    setOperators(pendingOperators)
+  }, [pendingOperators])
+
+  // Reset operators to defaults
+  const handleResetOperators = useCallback(() => {
+    setPendingOperators(DEFAULT_OPERATORS)
+    setOperators(DEFAULT_OPERATORS)
+  }, [])
+
+  // Update pending operator value
+  const updatePendingOperator = useCallback((key: keyof Operators, value: string) => {
+    const numValue = parseFloat(value) || 0
+    setPendingOperators(prev => ({
+      ...prev,
+      [key]: Math.min(2, Math.max(0, numValue)),
+    }))
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -230,34 +275,74 @@ export function ResonancePage() {
               Operators
             </CardTitle>
             <CardDescription>
-              Topological operators
+              Topological operators (affect spectral dynamics)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">WT (Wave)</label>
-                <Input type="number" defaultValue="1.0" step="0.1" className="h-8" />
+                <Input
+                  type="number"
+                  value={pendingOperators.wt}
+                  onChange={(e) => updatePendingOperator('wt', e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="2"
+                  className="h-8"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">SW (Spectral)</label>
-                <Input type="number" defaultValue="0.5" step="0.1" className="h-8" />
+                <Input
+                  type="number"
+                  value={pendingOperators.sw}
+                  onChange={(e) => updatePendingOperator('sw', e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="2"
+                  className="h-8"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">DK (Double-Kick)</label>
-                <Input type="number" defaultValue="0.3" step="0.1" className="h-8" />
+                <Input
+                  type="number"
+                  value={pendingOperators.dk}
+                  onChange={(e) => updatePendingOperator('dk', e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="2"
+                  className="h-8"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">PI (Phase)</label>
-                <Input type="number" defaultValue="0.1" step="0.1" className="h-8" />
+                <Input
+                  type="number"
+                  value={pendingOperators.pi}
+                  onChange={(e) => updatePendingOperator('pi', e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="2"
+                  className="h-8"
+                />
               </div>
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button variant="outline" size="sm" className="flex-1" onClick={handleResetOperators}>
+                <RotateCcw className="mr-2 h-3 w-3" />
                 Reset
               </Button>
-              <Button size="sm" className="flex-1">Apply</Button>
+              <Button size="sm" className="flex-1" onClick={handleApplyOperators}>
+                Apply
+              </Button>
+            </div>
+
+            {/* Show active operators */}
+            <div className="text-xs text-muted-foreground pt-2 border-t">
+              <p className="font-medium mb-1">Active: WT={operators.wt} SW={operators.sw} DK={operators.dk} PI={operators.pi}</p>
             </div>
           </CardContent>
         </Card>

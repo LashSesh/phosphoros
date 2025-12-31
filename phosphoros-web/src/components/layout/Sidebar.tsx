@@ -10,6 +10,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Dna,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,7 @@ import { useAppStore } from '@/stores/app'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Wallet & Seeds', href: '/wallet', icon: Key },
+  { name: 'Infogenetik', href: '/infogenetik', icon: Dna },
   { name: 'Resonance', href: '/resonance', icon: Activity },
   { name: 'Topology', href: '/topology', icon: Network },
   { name: 'Explorer', href: '/explorer', icon: Search },

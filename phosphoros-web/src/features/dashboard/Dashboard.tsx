@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Key,
   Zap,
@@ -8,6 +9,7 @@ import {
   Play,
   Download,
   Plus,
+  Loader2,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,8 +21,11 @@ import { useServicesStore } from '@/stores/services'
 import { cn } from '@/lib/utils'
 
 export function Dashboard() {
+  const navigate = useNavigate()
   const metrics = useMetricsStore()
   const { scraper, analyzer, cluster } = useServicesStore()
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   // Simulate some initial activity for demo
   useEffect(() => {
@@ -41,6 +46,74 @@ export function Dashboard() {
     }
   }, [])
 
+  // Export report as JSON
+  const handleExportReport = useCallback(async () => {
+    setIsExporting(true)
+    try {
+      const report = {
+        exportedAt: new Date().toISOString(),
+        metrics: {
+          seeds: metrics.seeds,
+          clusters: metrics.clusters,
+          entities: metrics.entities,
+          anomalies: metrics.anomalies,
+          analyses: metrics.analyses,
+          hotspots: metrics.hotspots,
+        },
+        services: {
+          scraper: scraper,
+          analyzer: analyzer,
+          cluster: cluster,
+        },
+        recentActivity: metrics.recentActivity.slice(0, 20),
+      }
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `phosphoros-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      metrics.addActivity({ type: 'analysis', message: 'Report exported successfully' })
+    } finally {
+      setIsExporting(false)
+    }
+  }, [metrics, scraper, analyzer, cluster])
+
+  // Run analysis simulation
+  const handleRunAnalysis = useCallback(async () => {
+    setIsAnalyzing(true)
+    metrics.addActivity({ type: 'analysis', message: 'Starting forensic analysis...' })
+
+    // Simulate analysis progress
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    metrics.setMetrics({ analyses: metrics.analyses + 1 })
+    metrics.addActivity({ type: 'entity', message: 'Scanned 1,247 transactions' })
+
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    const newClusters = Math.floor(Math.random() * 3) + 1
+    metrics.setMetrics({ clusters: metrics.clusters + newClusters })
+    metrics.addActivity({ type: 'cluster', message: `Identified ${newClusters} new clusters` })
+
+    await new Promise(resolve => setTimeout(resolve, 800))
+    const anomalyChance = Math.random()
+    if (anomalyChance > 0.6) {
+      metrics.setMetrics({ anomalies: metrics.anomalies + 1 })
+      metrics.addActivity({ type: 'anomaly', message: 'Suspicious pattern detected in cluster' })
+    }
+
+    metrics.addActivity({ type: 'analysis', message: 'Analysis complete' })
+    setIsAnalyzing(false)
+  }, [metrics])
+
+  // Quick action handlers
+  const handleImportMnemonic = () => navigate('/wallet')
+  const handleStartAnalysis = () => navigate('/resonance')
+  const handleViewClusters = () => navigate('/topology')
+  const handleExportData = () => handleExportReport()
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -52,12 +125,20 @@ export function Dashboard() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleExportReport} disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
             Export Report
           </Button>
-          <Button size="sm">
-            <Play className="mr-2 h-4 w-4" />
+          <Button size="sm" onClick={handleRunAnalysis} disabled={isAnalyzing}>
+            {isAnalyzing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-4 w-4" />
+            )}
             Run Analysis
           </Button>
         </div>
@@ -149,20 +230,41 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              onClick={handleImportMnemonic}
+            >
               <Plus className="h-6 w-6" />
               <span>Import Mnemonic</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              onClick={handleStartAnalysis}
+            >
               <Activity className="h-6 w-6" />
               <span>Start Analysis</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              onClick={handleViewClusters}
+            >
               <Zap className="h-6 w-6" />
               <span>View Clusters</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4">
-              <Download className="h-6 w-6" />
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              onClick={handleExportData}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Download className="h-6 w-6" />
+              )}
               <span>Export Data</span>
             </Button>
           </div>

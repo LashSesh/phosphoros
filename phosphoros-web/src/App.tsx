@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { Dashboard } from '@/features/dashboard/Dashboard'
 import { WalletPage } from '@/features/wallet/WalletPage'
+import { InfogenetikPage } from '@/features/infogenetik/InfogenetikPage'
 import { ResonancePage } from '@/features/resonance/ResonancePage'
 import { TopologyPage } from '@/features/topology/TopologyPage'
 import { ExplorerPage } from '@/features/investigation/ExplorerPage'
@@ -33,6 +34,7 @@ function App() {
       <Route element={<AppShell />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/infogenetik" element={<InfogenetikPage />} />
         <Route path="/resonance" element={<ResonancePage />} />
         <Route path="/topology" element={<TopologyPage />} />
         <Route path="/explorer" element={<ExplorerPage />} />
