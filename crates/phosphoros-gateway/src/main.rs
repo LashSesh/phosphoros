@@ -42,12 +42,14 @@ async fn main() {
     let resonance_state = phosphoros_gateway::ResonanceState::default();
     let wallet_state = phosphoros_gateway::WalletState::default();
     let cluster_state = phosphoros_gateway::ClusterState::default();
+    let websocket_state = phosphoros_gateway::WebSocketState::default();
 
     tracing::info!("Initializing PHOSPHOROS Gateway subsystems:");
     tracing::info!("  - Satellite Forensic Analysis Engine");
     tracing::info!("  - Resonance Analysis (5D Geometry)");
     tracing::info!("  - Wallet Management (BIP-39 Multichain)");
     tracing::info!("  - Cluster Analysis (KNN/DBSCAN)");
+    tracing::info!("  - WebSocket Real-time Updates");
 
     // Build the router
     let app = if args.metrics {
@@ -58,6 +60,7 @@ async fn main() {
             resonance_state,
             wallet_state,
             cluster_state,
+            websocket_state,
             metrics_state,
         )
     } else {
@@ -66,6 +69,7 @@ async fn main() {
             resonance_state,
             wallet_state,
             cluster_state,
+            websocket_state,
         )
     };
 

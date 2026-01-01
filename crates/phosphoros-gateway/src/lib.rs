@@ -27,12 +27,14 @@ pub mod cluster;
 pub mod metrics;
 pub mod resonance;
 pub mod wallet;
+pub mod websocket;
 
 pub use cluster::ClusterState;
 pub use metrics::{MetricsState, record_analysis_completed, record_snapshot_ingested};
 pub use phosphoros_satellite;
 pub use resonance::ResonanceState;
 pub use wallet::WalletState;
+pub use websocket::WebSocketState;
 
 /// OpenAPI documentation for the PHOSPHOROS Gateway.
 ///
@@ -126,17 +128,19 @@ pub struct HealthResponse {
 /// Builds the complete PHOSPHOROS gateway router.
 ///
 /// This includes all satellite endpoints, resonance analysis, wallet management,
-/// cluster analysis, health checks, OpenAPI documentation, and Prometheus metrics.
+/// cluster analysis, WebSocket support, health checks, OpenAPI documentation, and Prometheus metrics.
 pub fn build_gateway(
     satellite_engine: Arc<phosphoros_satellite::SatelliteEngine>,
     resonance_state: ResonanceState,
     wallet_state: WalletState,
     cluster_state: ClusterState,
+    websocket_state: WebSocketState,
 ) -> Router {
     let satellite_router = phosphoros_satellite::build_router(satellite_engine);
     let resonance_router = resonance::build_router(resonance_state);
     let wallet_router = wallet::build_router(wallet_state);
     let cluster_router = cluster::build_router(cluster_state);
+    let websocket_router = websocket::build_router(websocket_state);
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
@@ -146,6 +150,7 @@ pub fn build_gateway(
         .nest("/api/v1/resonance", resonance_router)
         .nest("/api/v1/wallet", wallet_router)
         .nest("/api/v1/cluster", cluster_router)
+        .merge(websocket_router) // WebSocket at /ws
 }
 
 /// Builds the gateway router with Prometheus metrics enabled.
@@ -156,12 +161,14 @@ pub fn build_gateway_with_metrics(
     resonance_state: ResonanceState,
     wallet_state: WalletState,
     cluster_state: ClusterState,
+    websocket_state: WebSocketState,
     metrics_state: MetricsState,
 ) -> Router {
     let satellite_router = phosphoros_satellite::build_router(satellite_engine);
     let resonance_router = resonance::build_router(resonance_state);
     let wallet_router = wallet::build_router(wallet_state);
     let cluster_router = cluster::build_router(cluster_state);
+    let websocket_router = websocket::build_router(websocket_state);
 
     // Create a separate router for metrics with its own state
     let metrics_router = Router::new()
@@ -177,6 +184,7 @@ pub fn build_gateway_with_metrics(
         .nest("/api/v1/resonance", resonance_router)
         .nest("/api/v1/wallet", wallet_router)
         .nest("/api/v1/cluster", cluster_router)
+        .merge(websocket_router) // WebSocket at /ws
 }
 
 /// Gateway root endpoint with service information.
@@ -218,6 +226,9 @@ async fn root() -> Json<GatewayInfo> {
     endpoints.insert("/api/v1/cluster/:snapshot_id".to_string(), "Get clusters for snapshot".to_string());
     endpoints.insert("/api/v1/cluster/:snapshot_id/:cluster_id/members".to_string(), "Get cluster members".to_string());
 
+    // WebSocket endpoint
+    endpoints.insert("/ws".to_string(), "WebSocket for real-time updates".to_string());
+
     Json(GatewayInfo {
         service: "PHOSPHOROS Gateway".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
@@ -251,7 +262,8 @@ mod tests {
         let resonance = ResonanceState::default();
         let wallet = WalletState::default();
         let cluster = ClusterState::default();
-        let _router = build_gateway(engine, resonance, wallet, cluster);
+        let websocket = WebSocketState::default();
+        let _router = build_gateway(engine, resonance, wallet, cluster, websocket);
     }
 
     #[test]
