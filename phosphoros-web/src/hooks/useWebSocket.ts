@@ -2,24 +2,67 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useServicesStore } from '@/stores/services'
 import { useMetricsStore } from '@/stores/metrics'
 
-type MessageType =
-  | 'entity:discovered'
-  | 'cluster:formed'
-  | 'anomaly:detected'
-  | 'analysis:progress'
-  | 'service:status'
-  | 'metrics:update'
+// ============================================================================
+// Gateway Event Types (matching Rust backend)
+// ============================================================================
 
-interface WSMessage {
-  type: MessageType
-  payload: unknown
-  timestamp: string
-}
+export type GatewayEvent =
+  | {
+      type: 'Log'
+      timestamp: string
+      level: string
+      message: string
+      source?: string
+    }
+  | {
+      type: 'AnalysisProgress'
+      id: string
+      progress: number
+      step: string
+    }
+  | {
+      type: 'AnalysisComplete'
+      id: string
+      success: boolean
+      error?: string
+    }
+  | {
+      type: 'ServiceStatus'
+      service: string
+      status: string
+      message?: string
+    }
+  | {
+      type: 'ResonanceEvaluated'
+      timestamp: string
+      score?: number
+      gated: boolean
+      label?: string
+    }
+  | {
+      type: 'WalletDerived'
+      timestamp: string
+      blockchain: string
+      count: number
+    }
+  | {
+      type: 'ClusterComputed'
+      timestamp: string
+      snapshot_id: string
+      num_clusters: number
+    }
+  | {
+      type: 'Notification'
+      level: string
+      title: string
+      message: string
+    }
 
 interface UseWebSocketOptions {
   url?: string
   reconnectInterval?: number
   maxRetries?: number
+  onEvent?: (event: GatewayEvent) => void
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
@@ -27,6 +70,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     url = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`,
     reconnectInterval = 3000,
     maxRetries = 5,
+    onEvent,
   } = options
 
   const wsRef = useRef<WebSocket | null>(null)
@@ -36,58 +80,112 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { setWebsocketStatus, updateService } = useServicesStore()
   const { setMetrics, addActivity } = useMetricsStore()
 
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const message: WSMessage = JSON.parse(event.data)
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const gatewayEvent: GatewayEvent = JSON.parse(event.data)
 
-      switch (message.type) {
-        case 'entity:discovered':
-          addActivity({
-            type: 'entity',
-            message: `Discovered entity ${(message.payload as any).address?.slice(0, 10)}...`,
-          })
-          setMetrics({ entities: (message.payload as any).totalEntities })
-          break
+        // Call custom event handler if provided
+        onEvent?.(gatewayEvent)
 
-        case 'cluster:formed':
-          addActivity({
-            type: 'cluster',
-            message: `Formed cluster with ${(message.payload as any).memberCount} members`,
-          })
-          setMetrics({ clusters: (message.payload as any).totalClusters })
-          break
+        // Handle event based on type
+        switch (gatewayEvent.type) {
+          case 'Log':
+            // Add log to activity feed
+            addActivity({
+              type: 'log',
+              message: `[${gatewayEvent.level.toUpperCase()}] ${gatewayEvent.message}`,
+            })
+            break
 
-        case 'anomaly:detected':
-          addActivity({
-            type: 'anomaly',
-            message: `${(message.payload as any).severity} anomaly: ${(message.payload as any).description}`,
-          })
-          setMetrics({ anomalies: (message.payload as any).totalAnomalies })
-          break
+          case 'AnalysisProgress':
+            // Update analysis progress in metrics
+            addActivity({
+              type: 'analysis',
+              message: `${gatewayEvent.step}: ${gatewayEvent.progress}%`,
+            })
+            setMetrics({
+              analysisProgress: gatewayEvent.progress,
+            })
+            break
 
-        case 'analysis:progress':
-          addActivity({
-            type: 'analysis',
-            message: `Analysis ${(message.payload as any).progress}% complete`,
-          })
-          break
+          case 'AnalysisComplete':
+            addActivity({
+              type: gatewayEvent.success ? 'success' : 'error',
+              message: gatewayEvent.success
+                ? `Analysis ${gatewayEvent.id} completed`
+                : `Analysis ${gatewayEvent.id} failed: ${gatewayEvent.error}`,
+            })
+            setMetrics({ analysisProgress: undefined })
+            break
 
-        case 'service:status':
-          const { service, status, processed } = message.payload as any
-          updateService(service, { status, processed })
-          break
+          case 'ServiceStatus':
+            // Update service status in store
+            updateService(gatewayEvent.service, {
+              status: gatewayEvent.status as 'running' | 'stopped' | 'error',
+              processed: 0, // Backend should provide this
+            })
+            addActivity({
+              type: 'service',
+              message: `${gatewayEvent.service}: ${gatewayEvent.status}${
+                gatewayEvent.message ? ` - ${gatewayEvent.message}` : ''
+              }`,
+            })
+            break
 
-        case 'metrics:update':
-          setMetrics(message.payload as any)
-          break
+          case 'ResonanceEvaluated':
+            // Add resonance evaluation to activity
+            const resonanceMsg = gatewayEvent.gated
+              ? `Resonance gated${gatewayEvent.label ? ` (${gatewayEvent.label})` : ''}`
+              : `Resonance: ${gatewayEvent.score?.toFixed(4)}${
+                  gatewayEvent.label ? ` (${gatewayEvent.label})` : ''
+                }`
+            addActivity({
+              type: 'resonance',
+              message: resonanceMsg,
+            })
+            break
 
-        default:
-          console.log('Unknown message type:', message.type)
+          case 'WalletDerived':
+            // Add wallet derivation to activity
+            addActivity({
+              type: 'wallet',
+              message: `Derived ${gatewayEvent.count} ${gatewayEvent.blockchain} address${
+                gatewayEvent.count > 1 ? 'es' : ''
+              }`,
+            })
+            break
+
+          case 'ClusterComputed':
+            // Add cluster computation to activity
+            addActivity({
+              type: 'cluster',
+              message: `Computed ${gatewayEvent.num_clusters} cluster${
+                gatewayEvent.num_clusters !== 1 ? 's' : ''
+              } for ${gatewayEvent.snapshot_id}`,
+            })
+            setMetrics({ clusters: gatewayEvent.num_clusters })
+            break
+
+          case 'Notification':
+            // Show notification in activity feed
+            addActivity({
+              type: gatewayEvent.level === 'error' ? 'error' :
+                   gatewayEvent.level === 'warning' ? 'warning' :
+                   gatewayEvent.level === 'success' ? 'success' : 'info',
+              message: `${gatewayEvent.title}: ${gatewayEvent.message}`,
+            })
+            break
+
+          default:
+            console.log('Unknown gateway event type:', gatewayEvent)
+        }
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error)
       }
-    } catch (error) {
-      console.error('Failed to parse WebSocket message:', error)
-    }
-  }, [addActivity, setMetrics, updateService])
+    },
+    [addActivity, setMetrics, updateService, onEvent]
+  )
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
@@ -99,7 +197,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log('WebSocket connected')
+        console.log('WebSocket connected to PHOSPHOROS Gateway')
         setWebsocketStatus('connected')
         retriesRef.current = 0
       }
@@ -111,10 +209,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       }
 
       ws.onclose = () => {
-        console.log('WebSocket disconnected')
+        console.log('WebSocket disconnected from PHOSPHOROS Gateway')
         setWebsocketStatus('disconnected')
 
-        // Attempt reconnection
+        // Attempt reconnection with exponential backoff
         if (retriesRef.current < maxRetries) {
           retriesRef.current += 1
           const delay = reconnectInterval * Math.pow(2, retriesRef.current - 1)
@@ -122,7 +220,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
           reconnectTimeoutRef.current = setTimeout(connect, delay)
         } else {
-          console.log('Max retries reached, giving up')
+          console.log('Max WebSocket retries reached, giving up')
         }
       }
     } catch (error) {
@@ -142,9 +240,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     setWebsocketStatus('disconnected')
   }, [setWebsocketStatus])
 
-  const send = useCallback((type: string, payload: unknown) => {
+  const send = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type, payload }))
+      wsRef.current.send(JSON.stringify(data))
+    } else {
+      console.warn('WebSocket not connected, cannot send message')
     }
   }, [])
 
@@ -153,5 +253,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     return () => disconnect()
   }, [connect, disconnect])
 
-  return { connect, disconnect, send }
+  return {
+    connect,
+    disconnect,
+    send,
+    isConnected: wsRef.current?.readyState === WebSocket.OPEN,
+  }
 }
