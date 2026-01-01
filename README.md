@@ -2,239 +2,417 @@
 
 <div align="center">
 
-**Infogenetisches Blockchain-Forensik-System**
+**Geometric-Cybernetic Blockchain Forensics Platform**
 
-*Basierend auf der Axiomatischen 5D-Spiral-Topologie von Sebastian Klemm*
+*5D Information Space Analysis Engine with Quantum-Enhanced Capabilities*
 
 [![Rust](https://img.shields.io/badge/Rust-1.75+-f74c00?logo=rust)](https://www.rust-lang.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT%2FApache--2.0-blue.svg)](LICENSE)
 
 </div>
 
 ---
 
-## Konzept
+## Overview
 
-PHOSPHOROS implementiert ein **geometrisch-kybernetisches Framework** zur Blockchain-Analyse. Das System modelliert Transaktionen und Wallet-Zustände als Punkte in einem fünfdimensionalen Zustandsraum, wobei strukturierte Trajektorien in Form von Spiralpfaden erscheinen.
+PHOSPHOROS is an advanced blockchain forensics platform that models transactions and wallet states as points in a five-dimensional information space. The system employs a unique geometric-cybernetic approach where structured trajectories appear as spiral paths, enabling novel analytical capabilities for cryptocurrency investigation.
 
-### Theoretische Grundlage
+### Key Capabilities
 
-Das Framework basiert auf der **Axiomatischen 5D-Spiral-Topologie** (Klemm, 2025):
+- **5D Geometric Analysis**: Entity representation in five-dimensional vector space with Metatron 13-node sacred geometry embedding
+- **Quantum-Enhanced Search**: Grover, QAOA, VQE algorithms for accelerated pattern matching and optimization
+- **Multi-Chain Forensics**: Bitcoin, Ethereum, Cosmos SDK, and specialized Monero ring signature analysis
+- **Stealth Networking**: API mimicry, steganographic payloads, and covert communication protocols
+- **Dual Dashboards**: Native desktop GUI (Rust/iced) and modern web interface (React 18)
+
+---
+
+## Architecture
 
 ```
-S = (X, Γ, π_spatial, π_internal, Ψ, W, Φ)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              PHOSPHOROS                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│  PRESENTATION LAYER                                                      │
+│  ├── phosphoros-dashboard     Desktop GUI (iced 0.13 - Living Lab)      │
+│  ├── phosphoros-web           React 18 + TypeScript Web Dashboard       │
+│  └── phosphoros-cli           TRITON Command-Line Interface             │
+├─────────────────────────────────────────────────────────────────────────┤
+│  API LAYER                                                               │
+│  └── phosphoros-gateway       Axum REST API + OpenAPI + Prometheus      │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ANALYSIS LAYER                                                          │
+│  ├── phosphoros-satellite     Blockchain Forensic Analysis Engine       │
+│  ├── phosphoros-quantum       Quantum Algorithm Implementations         │
+│  ├── phosphoros-monero        Ring Signature & Stealth Address Analysis │
+│  └── cryptogenetik-core       Topological Search Optimization           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  CORE LAYER                                                              │
+│  ├── phosphoros-core          5D Geometry & Resonance Engine            │
+│  ├── phosphoros-bip39         Multi-Chain HD Wallet Derivation          │
+│  ├── phosphoros-stealthnet    Privacy Protocol & Covert Networking      │
+│  ├── phosphoros-types         Shared Type Definitions                   │
+│  └── phosphoros-kryptogenetik Legacy 5D Scalar Projection System        │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Symbol | Beschreibung |
-|--------|--------------|
-| **X** | 5D-Zustandsraum (R³ × R²) |
-| **Γ** | Menge der Spiralpfade γ : I → X |
-| **π_spatial** | Projektion auf räumliche Koordinaten (x, y, z) |
-| **π_internal** | Projektion auf interne Koordinaten (x₄, x₅) |
-| **Ψ** | Resonanzfelder {ψ, ρ, ω} |
-| **W** | Aktionsfunktional auf Sequenzen |
-| **Φ** | Dynamikoperator (kybernetisches Feedback) |
+---
 
-### Resonanz-Triplett (ψ, ρ, ω)
+## Core Concepts
 
-Die fundamentale Signatur für alle Analysen:
+### 5D Information Space
+
+Entities are represented as points in a five-dimensional vector space `R³ × R²`:
+
+```rust
+use phosphoros_core::Point5D;
+
+let entity = Point5D::new(
+    x,   // Spatial coordinate 1
+    y,   // Spatial coordinate 2
+    z,   // Spatial coordinate 3
+    u,   // Internal coordinate 1 (behavioral)
+    v    // Internal coordinate 2 (temporal)
+);
+```
+
+### Spectral Signature (ψ, ρ, ω)
+
+The fundamental triplet characterizing entity resonance:
+
+| Component | Symbol | Description |
+|-----------|--------|-------------|
+| Coherence | ψ (Psi) | Phase synchronization measure |
+| Stability | ρ (Rho) | Structural density metric |
+| Efficiency | ω (Omega) | Oscillation rate indicator |
+
+**Invariant Resonance**: `D = ψ · ρ · ω`
 
 ```rust
 use phosphoros_core::SpectralSignature;
 
-let sig = SpectralSignature::new(0.85, 0.92, 0.78);
-let resonance = sig.resonance();  // D = ψ · ρ · ω
+let signature = SpectralSignature::new(0.85, 0.92, 0.78);
+let resonance = signature.resonance(); // D = ψ·ρ·ω
 ```
 
-| Komponente | Symbol | Bedeutung |
-|------------|--------|-----------|
-| Kohärenz | ψ (Psi) | Phasensynchronisation |
-| Stabilität | ρ (Rho) | Strukturelle Dichte |
-| Effizienz | ω (Omega) | Oszillationsrate |
+### Metatron Sacred Geometry
+
+A 13-node canonical topology for embedding entities in 5D space:
+
+```rust
+use phosphoros_core::MetatronGeometry;
+
+let geometry = MetatronGeometry::new();
+let embedded = geometry.embed(&entity_features);
+```
+
+### Holistic Resonance Matrix
+
+Multi-stage evaluation engine with gating criteria:
+
+| Stage | Function |
+|-------|----------|
+| **Kosmokrator** | Proof-of-Resonance gating (phase coherence filtering) |
+| **Chronokrator** | Temporal dynamics with expansion tracking |
+| **Mandorla** | Perception-intention intersection (P⃗ · I⃗) |
+| **Monolith** | Action singularity trigger (geometric criterion) |
+| **Torus** | S¹ × S¹ phase space for state tracking |
 
 ---
 
-## Architektur
+## Supported Blockchains
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         PHOSPHOROS                              │
-├─────────────────────────────────────────────────────────────────┤
-│  PRÄSENTATION                                                   │
-│  ├── phosphoros-dashboard    Iced Desktop GUI (Living Lab)     │
-│  ├── phosphoros-web          React 18 Web Dashboard            │
-│  └── phosphoros-cli          Terminal Interface + Visualizer   │
-├─────────────────────────────────────────────────────────────────┤
-│  API                                                            │
-│  └── phosphoros-gateway      REST + OpenAPI + Prometheus       │
-├─────────────────────────────────────────────────────────────────┤
-│  ANALYSE                                                        │
-│  ├── phosphoros-satellite    Forensische Analyse-Engine        │
-│  ├── phosphoros-quantum      Quanten-Algorithmen (QAOA, VQE)   │
-│  ├── phosphoros-monero       Ring-Signatur-Analyse             │
-│  └── cryptogenetik-core      Quanten-beschleunigte Suche       │
-├─────────────────────────────────────────────────────────────────┤
-│  KERN                                                           │
-│  ├── phosphoros-core         5D-Geometrie & Resonanz-Engine    │
-│  ├── phosphoros-bip39        Multi-Chain HD-Wallet-Derivation  │
-│  ├── phosphoros-stealthnet   Privacy-Protokoll-Analyse         │
-│  ├── phosphoros-types        Gemeinsame Typdefinitionen        │
-│  └── phosphoros-kryptogenetik InfoGenetik-Integration          │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Chain | Address Types | Features | Status |
+|-------|---------------|----------|--------|
+| **Bitcoin** | P2PKH, P2SH, P2WPKH, P2WSH, P2TR (Taproot) | Bech32 encoding, BIP32/44/84/86 | Production |
+| **Ethereum/EVM** | EIP-55 Checksummed | k256 ECDSA, Keccak-256 | Production |
+| **Cosmos SDK** | Bech32 (atom, osmo, juno, etc.) | k256 + bech32 | Production |
+| **Monero** | Ed25519 Stealth Addresses | Ring signature forensics, Key image tracking | Production |
+| **Substrate** | SS58 | Ed25519/Sr25519 | Placeholder |
+| **Solana** | Base58 | Ed25519 | Placeholder |
+| **Cardano** | Bech32 | Ed25519 | Placeholder |
 
 ---
 
-## Unterstützte Blockchains
+## Quantum Algorithms
 
-| Chain | Adresstypen | Status |
-|-------|-------------|--------|
-| **Bitcoin** | P2PKH, P2SH-P2WPKH, P2WPKH, P2TR (Taproot) | Produktiv |
-| **Ethereum** | EIP-55 Checksummed | Produktiv |
-| **Cosmos SDK** | Bech32 (atom, osmo, juno, etc.) | Produktiv |
-| **Monero** | Ed25519 Stealth Addresses | Produktiv |
+PHOSPHOROS integrates simulated quantum algorithms for enhanced analysis:
+
+| Algorithm | Application | Implementation |
+|-----------|-------------|----------------|
+| **Grover Search** | Quadratic speedup for pattern matching | Oracle-based with optimal iterations |
+| **QAOA** | Ring signature analysis, combinatorial optimization | Variational parameter optimization |
+| **VQE** | Eigenvalue computation for graph analysis | Ansatz-based hybrid approach |
+| **Quantum Walk** | Probabilistic exploration heuristics | Continuous/discrete time variants |
+| **SCS Bridge** | Automatic parameter tuning | Seraphic Calibration System |
+
+```rust
+use phosphoros_quantum::{GroverSearch, LocalSimulator};
+
+let backend = LocalSimulator::new(num_qubits);
+let grover = GroverSearch::new(search_space_size);
+let result = grover.execute(&backend, oracle, optimal_iterations)?;
+```
 
 ---
 
 ## Installation
 
-### Voraussetzungen
+### Prerequisites
 
-- Rust 1.75+ mit Cargo
-- Node.js 18+ (für Web-Dashboard)
-- Docker (optional)
+- **Rust**: 1.75+ with Cargo
+- **Node.js**: 18+ (for web dashboard)
+- **Docker**: Optional, for containerized deployment
 
-### Build
+### Build from Source
 
 ```bash
+# Clone repository
 git clone https://github.com/LashSesh/phosphoros.git
 cd phosphoros
 
-# Workspace kompilieren
+# Build entire workspace (release mode)
 cargo build --workspace --release
 
-# Tests ausführen
-cargo test --workspace
+# Run tests
+cargo test --workspace --all-features
+
+# Generate documentation
+cargo doc --workspace --open
 ```
 
-### API-Gateway starten
+### Feature Flags
+
+Enable specific functionality with Cargo features:
+
+```bash
+# BIP39 with Bitcoin and Ethereum support
+cargo build -p phosphoros-bip39 --features btc,evm
+
+# Quantum algorithms
+cargo build -p phosphoros-quantum --features full
+
+# Parallel processing
+cargo build -p phosphoros-core --features parallel,advanced-linalg
+```
+
+---
+
+## Running the Platform
+
+### API Gateway
 
 ```bash
 cargo run -p phosphoros-gateway --release
 ```
 
-**Endpunkte:**
-- `http://localhost:8080/` - Service-Info
-- `http://localhost:8080/swagger-ui/` - API-Dokumentation
-- `http://localhost:8080/metrics` - Prometheus Metriken
-- `http://localhost:8080/health` - Health Check
+**Endpoints:**
+| Endpoint | Description |
+|----------|-------------|
+| `http://localhost:8080/` | Service information |
+| `http://localhost:8080/health` | Health check |
+| `http://localhost:8080/metrics` | Prometheus metrics |
+| `http://localhost:8080/swagger-ui/` | Interactive API documentation |
+| `http://localhost:8080/api-docs/openapi.json` | OpenAPI specification |
 
-### Desktop-Dashboard (Living Lab)
+### Desktop Dashboard (Living Lab)
 
 ```bash
 cargo run -p phosphoros-dashboard --release
 ```
 
-### Web-Dashboard
+**12-Panel System:**
+- Home (Live Overview)
+- Seed & Wallet Management
+- Resonance & Spectrography
+- Cluster Explorer
+- Search Space Explorer
+- Network Topology
+- Infogenetic Browser
+- Anomaly Investigation
+- Forensic Workflows
+- Stealth/Privacy Controls
+- System Log
+- Settings & Tasks
+
+### Web Dashboard
 
 ```bash
 cd phosphoros-web
 npm install
-npm run dev  # http://localhost:5173
+npm run dev
 ```
 
----
+Access at `http://localhost:5173`
 
-## Quanten-Algorithmen
+**Pages:**
+- Dashboard: Metrics overview and activity feed
+- Wallet: Seed/mnemonic management
+- Resonance: Spectral analysis visualization
+- Topology: Network force graph
+- Investigation: Explorer, Anomalies, Forensics
+- Infogenetik: Infogenetic analysis
+- Settings: Configuration
 
-PHOSPHOROS integriert simulierte Quanten-Algorithmen für erweiterte Analyse:
-
-| Algorithmus | Anwendung |
-|-------------|-----------|
-| **Grover** | Beschleunigte Suche in Adressräumen |
-| **QAOA** | Kombinatorische Optimierung |
-| **VQE** | Variational Quantum Eigensolver |
-| **Quantum Walk** | Graph-Traversierung |
-| **SCS** | Spectral Clustering Search |
-
-```rust
-use phosphoros_quantum::GroverSearch;
-
-let grover = GroverSearch::new(search_space);
-let result = grover.execute(oracle, iterations)?;
-```
-
----
-
-## 5D-Spiralpfade
-
-Das System unterscheidet verschiedene Klassen von Spiralpfaden:
-
-### Archimedische Spirale
-
-```
-r(t) = a + bt       (konstanter radialer Abstand)
-φ(t) = t
-h(t) = ct
-```
-
-### Logarithmische Spirale
-
-```
-r(t) = a·e^(bt)     (exponentielles Wachstum)
-φ(t) = t
-h(t) = ct
-```
-
-### Verallgemeinerte 5D-Spirale
-
-```rust
-use phosphoros_core::{Point5D, SpiralPath};
-
-let spiral = SpiralPath::generalized(|t| {
-    Point5D::new(
-        R(t) * t.cos(),
-        R(t) * t.sin(),
-        H(t),
-        U(t),
-        V(t)
-    )
-});
-```
-
----
-
-## Kryptogenetik-Module
-
-### DK-Lock Optimizer
-
-Deterministisches Schlüssel-Locking für Seed-Rekonstruktion.
-
-### Wormdorf-Trichter
-
-Konvergenz-basierte Suchoptimierung im 5D-Raum.
-
-### Pi-Canonical
-
-Kanonische Darstellung für π-basierte Berechnungen.
-
-### Triton Pipeline
-
-GPU-beschleunigte Verarbeitung für Batch-Operationen.
-
----
-
-## Entwicklung
-
-### Tests
+### TRITON CLI
 
 ```bash
-# Alle Tests
-cargo test --workspace
+cargo run -p phosphoros-cli --release -- --mode auto --cycles 40
+```
 
-# Spezifisches Crate mit Features
-cargo test -p phosphoros-bip39 --features btc,evm,cosmos
+**Options:**
+- `--name`: Instance name (default: "TRITON")
+- `--mode`: Operation mode - auto/memory/hybrid (default: auto)
+- `--cycles`: Auto operation cycles (default: 40)
+- `--wordlist`: Wordlist file path (default: data/wordlist.txt)
+
+---
+
+## Docker Deployment
+
+### Using Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Services:
+# - Gateway: http://localhost:8080
+# - Web Dashboard: http://localhost:3000
+```
+
+### Manual Docker Build
+
+```bash
+# Build image
+docker build -t phosphoros:latest .
+
+# Run gateway
+docker run -p 8080:8080 phosphoros:latest
+```
+
+---
+
+## API Reference
+
+### Satellite Forensics API
+
+```
+GET  /satellite/health              # Health check
+GET  /satellite/v1/snapshots        # List ingested snapshots
+POST /satellite/v1/snapshots        # Ingest new snapshot
+POST /satellite/v1/analyze/:id      # Run analysis on snapshot
+GET  /satellite/v1/reports/latest   # Get latest analysis report
+```
+
+### Analysis Pipeline
+
+1. **Feature Matrix Construction**: Entity observations → feature vectors
+2. **Distance Computation**: L2 distance matrix calculation
+3. **KNN Graph**: K-nearest-neighbor graph construction
+4. **Hotspot Detection**: High-density cluster identification
+5. **Anomaly Scoring**: Z-score based outlier detection
+6. **Topological Analysis**: Graph properties, articulation points, Betti numbers
+7. **Entropy Analysis**: Feature distribution metrics
+
+---
+
+## Stealth Networking
+
+PHOSPHOROS includes sophisticated stealth capabilities for authorized forensic operations:
+
+### API Mimicry
+
+Disguise traffic as legitimate API calls:
+- OpenAI API format
+- Slack API format
+- Telegram Bot API format
+- Discord API format
+- Generic REST patterns
+
+### Steganographic Encoding
+
+- Zero-width character encoding
+- Header-based invisible payloads
+- Parameter-embedded data
+- Body steganography
+
+### Proxy Management
+
+- SOCKS5/HTTP proxy rotation
+- Request randomization (temporal, semantic, structural)
+- Payload shaping for traffic normalization
+
+**Note**: These capabilities are for authorized use only (forensics, research, security audits, compliance-approved operations).
+
+---
+
+## Monero Forensics
+
+Specialized analysis for privacy-focused cryptocurrencies:
+
+### Ring Signature Analysis
+
+```rust
+use phosphoros_monero::{RingAnalyzer, TemporalHeuristic, DecoySelectionHeuristic};
+
+let analyzer = RingAnalyzer::new(rpc_client);
+let likely_real = analyzer.analyze_ring(&ring_members)?;
+```
+
+### Capabilities
+
+- **Ring Member Analysis**: Heuristic-based real input identification
+- **Temporal Patterns**: Timing-based ring member analysis
+- **Decoy Selection**: Decoy pattern detection
+- **Key Image Tracking**: Spent output detection
+- **Transaction Graph**: Graph construction with anomaly reporting
+- **Quantum-Enhanced**: QAOA-based ring analysis (optional)
+
+---
+
+## Cryptogenetik Search
+
+Topological optimization for search space exploration:
+
+### Operators
+
+| Operator | Code | Function |
+|----------|------|----------|
+| Wormdorf Trichter | WT | Search space contraction along curvature |
+| SW Threshold | SW | Adaptive threshold gating |
+| DK Lock | DK | Lock/constraint mechanism |
+| PI Canonical | PI | Canonical projection operator |
+
+### TRITON Pipeline
+
+```rust
+use cryptogenetik_core::{TritonPipeline, OperatorSet};
+
+let pipeline = TritonPipeline::new()
+    .with_operators(OperatorSet::default())
+    .with_score_hooks(vec![checksum_hook, partial_word_hook]);
+
+let result = pipeline.run(search_space)?;
+```
+
+---
+
+## Development
+
+### Testing
+
+```bash
+# All tests
+cargo test --workspace --all-features
+
+# Specific crate
+cargo test -p phosphoros-quantum --all-features
+
+# With output
+cargo test --workspace -- --nocapture
 ```
 
 ### Benchmarks
@@ -244,36 +422,144 @@ cargo bench -p phosphoros-core
 cargo bench -p phosphoros-kryptogenetik
 ```
 
-### Code-Qualität
+### Code Quality
 
 ```bash
-cargo clippy --workspace -- -D warnings
+# Formatting
 cargo fmt --all -- --check
+
+# Linting
+cargo clippy --workspace -- -D warnings
+```
+
+### Web Development
+
+```bash
+cd phosphoros-web
+
+# Development server
+npm run dev
+
+# Production build
+npm run build
+
+# Type checking
+npm run lint
 ```
 
 ---
 
-## Referenz
+## Technology Stack
 
-**Theoretische Grundlage:**
+### Backend (Rust)
 
-> Klemm, Sebastian. *Axiomatic 5D Spiral Topology: A Geometric-Cybernetic Framework.* November 2025.
+| Category | Technologies |
+|----------|--------------|
+| **Async Runtime** | tokio 1.x |
+| **Web Framework** | Axum 0.7 |
+| **GUI Framework** | iced 0.13 |
+| **Serialization** | serde, serde_json, serde_yaml |
+| **Cryptography** | sha2, sha3, blake3, k256, curve25519-dalek |
+| **Mathematics** | nalgebra, ndarray, petgraph |
+| **HTTP Client** | reqwest (with SOCKS5) |
+| **Metrics** | Prometheus exporter |
+| **API Docs** | utoipa (OpenAPI 3.0) |
+
+### Frontend (TypeScript/React)
+
+| Category | Technologies |
+|----------|--------------|
+| **Framework** | React 18.3 |
+| **Build Tool** | Vite 5.4 |
+| **State** | Zustand 5.0 |
+| **Data Fetching** | React Query 5.x |
+| **Styling** | TailwindCSS 3.4 |
+| **UI Components** | Radix UI (ShadcnUI) |
+| **Visualization** | D3.js 7.9, ECharts 5.5 |
+| **Routing** | React Router DOM 6.28 |
 
 ---
 
-## Sicherheitshinweis
+## Configuration
 
-Dieses System dient ausschließlich der forensischen Analyse und Forschung.
+### Environment Variables
 
-- Nicht für die Verwaltung echter Kryptowährungen verwenden
-- Generierte Schlüssel nicht für produktive Wallets nutzen
-- Quanten-Algorithmen laufen auf klassischer Simulation
+```bash
+# Rust Services
+RUST_LOG=info                        # Logging level
+PHOSPHOROS_HOST=0.0.0.0              # Bind address
+PHOSPHOROS_PORT=8080                 # Gateway port
+
+# Web Frontend
+VITE_API_URL=http://localhost:8080   # Backend API URL
+```
+
+### Satellite Configuration
+
+```yaml
+analysis:
+  knn_k: 10                          # K-nearest neighbors
+  entropy_bins: 50                   # Entropy histogram bins
+  resonance_threshold: 0.7           # Minimum resonance score
+  max_snapshots: 1000                # Maximum stored snapshots
+```
 
 ---
 
-## Lizenz
+## Project Structure
 
-Dual-lizenziert unter [MIT](LICENSE-MIT) oder [Apache 2.0](LICENSE-APACHE).
+```
+phosphoros/
+├── crates/
+│   ├── cryptogenetik-core/          # Search optimization
+│   ├── phosphoros-bip39/            # Multi-chain wallet
+│   ├── phosphoros-cli/              # TRITON CLI
+│   ├── phosphoros-core/             # 5D geometry engine
+│   ├── phosphoros-dashboard/        # Desktop GUI
+│   ├── phosphoros-gateway/          # REST API
+│   ├── phosphoros-monero/           # Monero forensics
+│   ├── phosphoros-quantum/          # Quantum algorithms
+│   ├── phosphoros-satellite/        # Forensic analysis
+│   ├── phosphoros-stealthnet/       # Stealth networking
+│   └── phosphoros-types/            # Shared types
+├── phosphoros-kryptogenetik/        # Legacy system
+├── phosphoros-web/                  # React web app
+├── docs/                            # Documentation
+├── docker-compose.yml               # Container orchestration
+├── Dockerfile                       # Multi-stage build
+└── Cargo.toml                       # Workspace configuration
+```
+
+---
+
+## Documentation
+
+Additional documentation available in `/docs`:
+
+- **architecture.md**: Detailed system design and implementation blueprint
+- **api.md**: Complete REST API reference
+- **quantum.md**: Quantum algorithm documentation
+- **stealth-networking.md**: Stealth capabilities overview
+- **law-enforcement.md**: Investigator usage guide
+- **explorer-guide.md**: Interactive explorer documentation
+
+---
+
+## Security Notice
+
+This system is designed for **forensic analysis and authorized research only**.
+
+- Do not use for managing real cryptocurrency holdings
+- Generated keys should not be used for production wallets
+- Quantum algorithms run on classical simulation
+- Stealth capabilities require proper authorization
+- Comply with applicable laws and regulations
+
+---
+
+## License
+
+Dual-licensed under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE).
 
 ---
 
@@ -281,6 +567,8 @@ Dual-lizenziert unter [MIT](LICENSE-MIT) oder [Apache 2.0](LICENSE-APACHE).
 
 **PHOSPHOROS**
 
-*Geometrisch-Kybernetische Blockchain-Forensik*
+*5D Geometric-Cybernetic Blockchain Forensics*
+
+[Documentation](docs/) · [API Reference](http://localhost:8080/swagger-ui/) · [Report Issue](https://github.com/LashSesh/phosphoros/issues)
 
 </div>
