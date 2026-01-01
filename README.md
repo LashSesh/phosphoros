@@ -381,10 +381,10 @@ Topological optimization for search space exploration:
 
 | Operator | Code | Function |
 |----------|------|----------|
-| Wormdorf Trichter | WT | Search space contraction along curvature |
-| SW Threshold | SW | Adaptive threshold gating |
-| DK Lock | DK | Lock/constraint mechanism |
-| PI Canonical | PI | Canonical projection operator |
+| WT | Wormhole-Funnel | Gabriel | Search space contraction along curvature |
+| SW | Threshold Sweep | Uriel | Adaptive threshold gating |
+| DK | Double Kick | Michael | Lock/constraint mechanism |
+| PI | Path Invariance | Raphael | Canonical projection operator |
 
 ### TRITON Pipeline
 
