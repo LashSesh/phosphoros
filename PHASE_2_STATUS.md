@@ -81,58 +81,36 @@ type GatewayEvent =
 
 ## 📝 Next Steps: Component Integration
 
-### 1. Resonance Page Enhancement 🎯 NEXT
+### 1. Resonance Page Enhancement ✅ DONE
 **File:** `phosphoros-web/src/features/resonance/ResonancePage.tsx`
 
-**Current State:** Mock simulation with fake data
-**Target State:** Real API integration
-
-**Planned Changes:**
-```typescript
-// Replace simulation with real API calls
-const { mutate: analyzeResonance } = useAnalyzeResonance()
-const { mutate: computeSpectral } = useComputeSpectral()
-const { data: history } = useResonanceHistory()
-
-// Real-time updates via WebSocket
-useWebSocket({
-  onEvent: (event) => {
-    if (event.type === 'ResonanceEvaluated') {
-      // Update UI with real results
-    }
-  }
-})
-```
-
-**Tasks:**
-- [ ] Replace mock state with API calls
-- [ ] Integrate WebSocket for live updates
-- [ ] Add error handling & loading states
-- [ ] Show resonance history from backend
-- [ ] Add "Evaluate" button with real 5D matrix input
+**Completed Features:**
+- ✅ Real API calls (`useAnalyzeResonance`, `useComputeSpectral`, `useResonanceHistory`)
+- ✅ WebSocket integration for live `ResonanceEvaluated` events
+- ✅ Error handling & loading states
+- ✅ Resonance history from backend
+- ✅ "Evaluate Resonance" button with 5D matrix input
+- ✅ Last evaluation result display (Output vs Gated)
 
 ---
 
-### 2. Wallet Page Enhancement
+### 2. Wallet Page Enhancement ✅ DONE
 **File:** `phosphoros-web/src/features/wallet/WalletPage.tsx`
 
-**Current State:** Basic UI structure
-**Target State:** Full BIP-39 functionality
+**Completed Features:**
+- ✅ Mnemonic import form with validation (12/24 words)
+- ✅ Multi-blockchain address derivation (7 chains: Bitcoin, Ethereum, Polkadot, Kusama, Cosmos, Solana, Cardano)
+- ✅ Interactive blockchain selection with checkboxes
+- ✅ Configurable address range (start/end index)
+- ✅ Wallet list from backend with `useWalletList()`
+- ✅ Delete wallet functionality with `useRemoveWallet()`
+- ✅ WebSocket notifications for `WalletDerived` events
+- ✅ Two-button workflow: "Import Only" + "Derive Addresses"
+- ✅ Loading states and error handling for all operations
 
-**Planned Changes:**
-```typescript
-const { mutate: importMnemonic } = useImportMnemonic()
-const { mutate: deriveAddresses } = useDeriveAddresses()
-const { data: wallets } = useWalletList()
-const { mutate: removeWallet } = useRemoveWallet()
-```
-
-**Tasks:**
-- [ ] Mnemonic import form with validation
-- [ ] Multi-blockchain address derivation (7 chains)
-- [ ] Wallet list with addresses display
-- [ ] Delete wallet functionality
-- [ ] WebSocket notifications for derivation progress
+**New UI Components:**
+- ✅ `phosphoros-web/src/components/ui/label.tsx`
+- ✅ `phosphoros-web/src/components/ui/checkbox.tsx`
 
 ---
 
@@ -166,19 +144,20 @@ const { data: members } = useClusterMembers(snapshotId, clusterId)
 
 ### Phase 2: Web Frontend
 ```
-████████░░░░░░░░░░░░░░░░░░░░░░░  30% IN PROGRESS
+████████████████████░░░░░░░░░░░  60% IN PROGRESS
 ```
 
 **Completed:**
 - ✅ API Client (useApi.ts) - 15 hooks
 - ✅ WebSocket Hook (useWebSocket.ts) - 8 event types
+- ✅ Resonance Page integration (574 lines)
+- ✅ Wallet Page enhancement (457 lines)
+- ✅ UI Components (label.tsx, checkbox.tsx)
 
 **In Progress:**
-- 🚧 Resonance Page integration
+- 🚧 Cluster Page creation
 
 **Pending:**
-- ⏳ Wallet Page enhancement
-- ⏳ Cluster Page creation
 - ⏳ Testing & validation
 - ⏳ Final commit & deployment
 
@@ -186,15 +165,18 @@ const { data: members } = useClusterMembers(snapshotId, clusterId)
 
 ## 🎯 Immediate Next Action
 
-**Enhance Resonance Page** with real Gateway API integration:
+**Create Cluster Page** with Gateway API integration:
 
-1. Add "Compute Spectral" button → calls `useComputeSpectral()`
-2. Add "Evaluate Resonance" form → calls `useAnalyzeResonance()`
-3. Replace mock history → use `useResonanceHistory()`
-4. Add WebSocket listener → live resonance events
-5. Show evaluation results (Output vs Gated)
+1. Create `ClusterPage.tsx` component structure
+2. Add entity input interface (manual entry or CSV upload)
+3. Add algorithm selection (KNN, DBSCAN, Hierarchical)
+4. Add parameter configuration (k, threshold)
+5. Integrate cluster computation via `useComputeClusters()`
+6. Display cluster results with visualization
+7. Add cluster member exploration
+8. WebSocket listener for `ClusterComputed` events
 
-**Estimated Time:** 30-45 minutes
+**Estimated Time:** 45-60 minutes
 
 ---
 
@@ -262,6 +244,6 @@ docker-compose up -d
 
 ---
 
-**Last Updated:** 2026-01-01 (Phase 2 - Day 1)
-**Status:** API client complete, component integration in progress
-**Next Milestone:** Resonance Page with real API integration
+**Last Updated:** 2026-01-01 (Phase 2 - 60% Complete)
+**Status:** API client ✅, Resonance Page ✅, Wallet Page ✅
+**Next Milestone:** Cluster Page creation
