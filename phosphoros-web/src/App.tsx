@@ -5,6 +5,7 @@ import { Dashboard } from '@/features/dashboard/Dashboard'
 import { WalletPage } from '@/features/wallet/WalletPage'
 import { InfogenetikPage } from '@/features/infogenetik/InfogenetikPage'
 import { ResonancePage } from '@/features/resonance/ResonancePage'
+import { ClusterPage } from '@/features/cluster/ClusterPage'
 import { TopologyPage } from '@/features/topology/TopologyPage'
 import { ExplorerPage } from '@/features/investigation/ExplorerPage'
 import { AnomaliesPage } from '@/features/investigation/AnomaliesPage'
@@ -36,6 +37,7 @@ function App() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/infogenetik" element={<InfogenetikPage />} />
         <Route path="/resonance" element={<ResonancePage />} />
+        <Route path="/cluster" element={<ClusterPage />} />
         <Route path="/topology" element={<TopologyPage />} />
         <Route path="/explorer" element={<ExplorerPage />} />
         <Route path="/anomalies" element={<AnomaliesPage />} />
