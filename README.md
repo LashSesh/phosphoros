@@ -25,7 +25,9 @@ PHOSPHOROS is an advanced blockchain forensics platform that models transactions
 - **Quantum-Enhanced Search**: Grover, QAOA, VQE algorithms for accelerated pattern matching and optimization
 - **Multi-Chain Forensics**: Bitcoin, Ethereum, Cosmos SDK, and specialized Monero ring signature analysis
 - **Stealth Networking**: API mimicry, steganographic payloads, and covert communication protocols
-- **Dual Dashboards**: Native desktop GUI (Rust/iced) and modern web interface (React 18)
+- **Unified Web Interface**: Modern React 18 dashboard with full Gateway API integration (desktop GUI deprecated)
+
+> **📢 Consolidation Update (2026-01-01):** PHOSPHOROS has migrated to a **unified web-only architecture**. The desktop GUI (`phosphoros-dashboard`) is deprecated in favor of the comprehensive web interface. See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
 
 ---
 
@@ -36,12 +38,21 @@ PHOSPHOROS is an advanced blockchain forensics platform that models transactions
 │                              PHOSPHOROS                                  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  PRESENTATION LAYER                                                      │
-│  ├── phosphoros-dashboard     Desktop GUI (iced 0.13 - Living Lab)      │
-│  ├── phosphoros-web           React 18 + TypeScript Web Dashboard       │
-│  └── phosphoros-cli           TRITON Command-Line Interface             │
+│  ├── phosphoros-web           React 18 + TypeScript (PRIMARY)           │
+│  │   ├── Resonance Page       5D Spectral Analysis                      │
+│  │   ├── Wallet Page          BIP-39 Multichain Derivation              │
+│  │   ├── Cluster Page         KNN/DBSCAN/Hierarchical Clustering        │
+│  │   └── WebSocket Client     Real-time Gateway Events                  │
+│  ├── phosphoros-cli           TRITON Command-Line Interface             │
+│  └── phosphoros-dashboard     Desktop GUI (DEPRECATED)                  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  API LAYER                                                               │
-│  └── phosphoros-gateway       Axum REST API + OpenAPI + Prometheus      │
+│  └── phosphoros-gateway       Axum REST + WebSocket + OpenAPI           │
+│      ├── Satellite API        Blockchain Forensics (11 endpoints)       │
+│      ├── Resonance API        5D Spectral Analysis (4 endpoints)        │
+│      ├── Wallet API           BIP-39 Derivation (4 endpoints)           │
+│      ├── Cluster API          Entity Clustering (4 endpoints)           │
+│      └── WebSocket Server     Real-time Events (8 types)                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  ANALYSIS LAYER                                                          │
 │  ├── phosphoros-satellite     Blockchain Forensic Analysis Engine       │
@@ -272,6 +283,8 @@ cargo run -p phosphoros-cli --release -- --mode auto --cycles 40
 
 ## Docker Deployment
 
+> **📖 Full deployment guide:** See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive instructions, troubleshooting, and production hardening.
+
 ### Using Docker Compose
 
 ```bash
@@ -279,8 +292,10 @@ cargo run -p phosphoros-cli --release -- --mode auto --cycles 40
 docker-compose up -d
 
 # Services:
-# - Gateway: http://localhost:8080
+# - Gateway API: http://localhost:8080
 # - Web Dashboard: http://localhost:3000
+# - Swagger UI: http://localhost:8080/swagger-ui/
+# - WebSocket: ws://localhost:3000/ws
 ```
 
 ### Manual Docker Build

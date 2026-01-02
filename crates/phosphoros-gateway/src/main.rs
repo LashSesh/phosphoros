@@ -37,16 +37,40 @@ async fn main() {
 
     let args = Args::parse();
 
-    // Create the satellite engine
+    // Create subsystem states
     let satellite_engine = Arc::new(phosphoros_satellite::SatelliteEngine::default());
+    let resonance_state = phosphoros_gateway::ResonanceState::default();
+    let wallet_state = phosphoros_gateway::WalletState::default();
+    let cluster_state = phosphoros_gateway::ClusterState::default();
+    let websocket_state = phosphoros_gateway::WebSocketState::default();
+
+    tracing::info!("Initializing PHOSPHOROS Gateway subsystems:");
+    tracing::info!("  - Satellite Forensic Analysis Engine");
+    tracing::info!("  - Resonance Analysis (5D Geometry)");
+    tracing::info!("  - Wallet Management (BIP-39 Multichain)");
+    tracing::info!("  - Cluster Analysis (KNN/DBSCAN)");
+    tracing::info!("  - WebSocket Real-time Updates");
 
     // Build the router
     let app = if args.metrics {
         let metrics_state = phosphoros_gateway::MetricsState::new();
         tracing::info!("Prometheus metrics enabled at /metrics");
-        phosphoros_gateway::build_gateway_with_metrics(satellite_engine, metrics_state)
+        phosphoros_gateway::build_gateway_with_metrics(
+            satellite_engine,
+            resonance_state,
+            wallet_state,
+            cluster_state,
+            websocket_state,
+            metrics_state,
+        )
     } else {
-        phosphoros_gateway::build_gateway(satellite_engine)
+        phosphoros_gateway::build_gateway(
+            satellite_engine,
+            resonance_state,
+            wallet_state,
+            cluster_state,
+            websocket_state,
+        )
     };
 
     // Parse address

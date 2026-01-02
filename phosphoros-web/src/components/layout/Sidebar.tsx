@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Dna,
+  Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Wallet & Seeds', href: '/wallet', icon: Key },
   { name: 'Infogenetik', href: '/infogenetik', icon: Dna },
   { name: 'Resonance', href: '/resonance', icon: Activity },
+  { name: 'Cluster', href: '/cluster', icon: Users },
   { name: 'Topology', href: '/topology', icon: Network },
   { name: 'Explorer', href: '/explorer', icon: Search },
   { name: 'Anomalies', href: '/anomalies', icon: AlertTriangle },
