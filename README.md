@@ -18,7 +18,7 @@
 
 ---
 
-## What is PHOSPHOROS?
+## Was ist PHOSPHOROS?
 
 PHOSPHOROS ist eine fortschrittliche **Blockchain-Forensik-Plattform**, die Transaktionen und Wallet-Zustände als Punkte in einem **fünfdimensionalen Informationsraum** modelliert. Das System nutzt einen einzigartigen geometrisch-kybernetischen Ansatz, bei dem strukturierte Trajektorien als spiralförmige Pfade erscheinen und neuartige analytische Fähigkeiten für Kryptowährungs-Untersuchungen ermöglichen.
 
